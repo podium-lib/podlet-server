@@ -12,6 +12,7 @@ const { version } = JSON.parse(readFileSync(new URL("./package.json", import.met
 const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
 
 const msgBox = boxen(greeting, { padding: 0.5 });
+console.clear();
 console.log(msgBox);
 
 yargs(process.argv.slice(2))
