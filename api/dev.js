@@ -34,7 +34,6 @@ export async function dev({ config, cwd = process.cwd() }) {
   const SCRIPTS_FILEPATH = await resolver.resolve("./scripts");
   const LAZY_FILEPATH = await resolver.resolve("./lazy");
   const BUILD_FILEPATH = await resolver.resolve("./build");
-  const SERVER_FILEPATH = await resolver.buildAndResolve("./server");
 
   const entryPoints = [];
   if (CONTENT_FILEPATH.exists) {
@@ -100,7 +99,7 @@ export async function dev({ config, cwd = process.cwd() }) {
   const started = await start({
     logger: LOGGER,
     // @ts-ignore
-    app: (app, opts, done) => {
+    app: async (app, opts, done) => {
       // if no content file yet defined, redirect to manifest file
       if (!CONTENT_FILEPATH.exists) {
         app.get("/", (request, reply) => {
@@ -109,13 +108,16 @@ export async function dev({ config, cwd = process.cwd() }) {
       }
 
       // if content file is defined, and content url doesn't resolve to /, redirect to content route
-      if (joinURLPathSegments(config.get("app.base"), config.get("podlet.content")) !== "/" && CONTENT_FILEPATH.exists) {
+      if (
+        joinURLPathSegments(config.get("app.base"), config.get("podlet.content")) !== "/" &&
+        CONTENT_FILEPATH.exists
+      ) {
         app.get("/", (request, reply) => {
           reply.redirect(join(config.get("app.base"), config.get("podlet.content")));
         });
       }
 
-      app.register(fastifyPodletPlugin, {
+      await app.register(fastifyPodletPlugin, {
         prefix: config.get("app.base") || "/",
         pathname: config.get("podlet.pathname"),
         manifest: config.get("podlet.manifest"),
@@ -143,6 +145,7 @@ export async function dev({ config, cwd = process.cwd() }) {
 
       // register user provided plugin using sandbox to enable reloading
       // Load user server.js file if provided.
+      const SERVER_FILEPATH = await resolver.buildAndResolve("./server");
       if (SERVER_FILEPATH.exists) {
         app.register(sandbox, {
           path: SERVER_FILEPATH.path,
@@ -157,7 +160,7 @@ export async function dev({ config, cwd = process.cwd() }) {
   });
 
   // Chokidar provides super fast native file system watching
-  // of server files. Either server.js or any js files inside a server folder
+  // of server files. Either server.js/ts or any js/ts files inside a folder named server
   const serverWatcher = chokidar.watch(["server.*", "server/**/*"], {
     persistent: true,
     followSymlinks: false,
