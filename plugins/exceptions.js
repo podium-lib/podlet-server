@@ -425,15 +425,21 @@ class ProcessExceptionHandlers {
   }
 }
 
+let handlersAdded = false;
+
 export default fp(async function exceptions(fastify, { grace }) {
-  const procExp = new ProcessExceptionHandlers(fastify.log);
-  procExp.closeOnExit(fastify, { grace: grace });
+  if (!handlersAdded) {
+    const procExp = new ProcessExceptionHandlers(fastify.log);
+    procExp.closeOnExit(fastify, { grace: grace });
 
-  // @ts-ignore
-  if (!fastify.metricStreams) {
-    fastify.decorate("metricStreams", []);
+    handlersAdded = true;
+
+    // @ts-ignore
+    if (!fastify.metricStreams) {
+      fastify.decorate("metricStreams", []);
+    }
+
+    // @ts-ignore
+    fastify.metricStreams.push(procExp.metrics);
   }
-
-  // @ts-ignore
-  fastify.metricStreams.push(procExp.metrics);
 });
