@@ -13,6 +13,8 @@ import resolve from "../lib/resolve.js";
  */
 export async function build({ config, cwd = process.cwd() }) {
   try {
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
+    // @ts-ignore
     const NAME = /** @type {string} */ (/** @type {unknown} */ (config.get("app.name")));
     // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
     // @ts-ignore
