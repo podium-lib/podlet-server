@@ -51,6 +51,19 @@ And visit `http://localhost:8080` in your browser.
 
 You should see the text "This is a demo" in hot pink. This was both rendered server side and also hydrated client side out of the box.
 
+## Guides
+
+See the usage guides for walkthrough of various features of the server
+
+* [Getting Started](./GUIDE_GETTING_STARTED.md)
+* [Configuration](./GUIDE_CONFIG.md)
+* [Customising the server](./GUIDE_SERVER.md)
+* [Validating routes](./GUIDE_VALIDATION.md)
+* [Using localization](./GUIDE_LOCALIZATION.md)
+* [Additional scripts and lazy loading](./GUIDE_SCRIPTS_AND_LAZY_LOADING.md)
+* [Customising the build pipeline](./GUIDE_BUILD.md)
+
+
 ## Folder Structure and File Naming
 
 A podlet server app requires that certain folders and file names conventions are observed in order to work properly.
