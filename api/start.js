@@ -7,7 +7,16 @@ import PathResolver from "../lib/path.js";
  * @typedef {import("fastify").FastifyInstance & { podlet: import("@podium/podlet").default }} FastifyInstance
  */
 
+/**
+ * Start up a production server for a Podium Podlet server app.
+ * @param {object} options - The options for the development environment.
+ * @param {import("convict").Config} options.config - The Podlet configuration.
+ * @param {string} [options.cwd=process.cwd()] - The current working directory.
+ * @returns {Promise<void>}
+ */
 export async function start({ config, cwd = process.cwd() }) {
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
+  // @ts-ignore
   const resolver = new PathResolver({ cwd, development: config.get("app.development") });
   const BUILD_FILEPATH = await resolver.resolve("./build");
   const SERVER_FILEPATH = await resolver.resolve("./server");
