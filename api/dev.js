@@ -14,11 +14,25 @@ import boxen from "boxen";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
+/**
+ * Concatenate URL path segments.
+ * @param {...string} segments - URL path segments to concatenate.
+ * @returns {string} - The concatenated URL.
+ */
 const joinURLPathSegments = (...segments) => {
   return segments.join("/").replace(/[\/]+/g, "/");
 };
 
+/**
+ * Set up a development environment for a Podium Podlet server.
+ * @param {object} options - The options for the development environment.
+ * @param {import("convict").Config} options.config - The Podlet configuration.
+ * @param {string} [options.cwd=process.cwd()] - The current working directory.
+ * @returns {Promise<void>}
+ */
 export async function dev({ config, cwd = process.cwd() }) {
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
+  // @ts-ignore
   config.set("assets.development", true);
 
   console.log(chalk.magenta("\nStarting Podium podlet server [development mode]...\n"));
@@ -36,6 +50,8 @@ export async function dev({ config, cwd = process.cwd() }) {
     },
   });
 
+  // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
+  // @ts-ignore
   const resolver = new PathResolver({ cwd, development: config.get("app.development") });
 
   const OUTDIR = join(cwd, "dist");
@@ -132,12 +148,12 @@ export async function dev({ config, cwd = process.cwd() }) {
     };
   }
   // let things settle before adding event handlers
-  setTimeout(() => {
+  clientWatcher.on("ready", () => {
     // rebuild the client side bundle whenever a client side related file changes
     clientWatcher.on("change", clientFileChange("changed"));
     clientWatcher.on("add", clientFileChange("added"));
     clientWatcher.on("unlink", clientFileChange("deleted"));
-  }, 1000);
+  });
 
   clientWatcher.on("error", (err) => {
     console.error("Uh Oh! Something went wrong with client side file watching. Got error", err);
@@ -246,11 +262,11 @@ export async function dev({ config, cwd = process.cwd() }) {
   }
 
   // restart the server whenever a server related file changes, is added or is deleted
-  setTimeout(() => {
+  serverWatcher.on("ready", () => {
     serverWatcher.on("change", serverFileChange("changed"));
     serverWatcher.on("add", serverFileChange("added"));
     serverWatcher.on("unlink", serverFileChange("deleted"));
-  }, 1000);
+  });
 
   serverWatcher.on("error", (err) => {
     console.error("Uh Oh! Something went wrong with server side file watching. Got error", err);
@@ -261,6 +277,9 @@ export async function dev({ config, cwd = process.cwd() }) {
     await started.listen();
   } catch (err) {
     console.log(err);
+    await clientWatcher.close();
+    await serverWatcher.close();
     buildContext.dispose();
+    process.exit(1);
   }
 }
