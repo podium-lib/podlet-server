@@ -21,7 +21,7 @@ const joinURLPathSegments = (...segments) => {
 export async function dev({ config, cwd = process.cwd() }) {
   config.set("assets.development", true);
 
-  console.log(chalk.magenta("\nStarting Podium podlet server [development mode]...\n"))
+  console.log(chalk.magenta("\nStarting Podium podlet server [development mode]...\n"));
   const spinner = ora({
     spinner: "point",
   });
@@ -75,20 +75,30 @@ export async function dev({ config, cwd = process.cwd() }) {
     }
   }
 
+  async function createBuildContext() {
+    const ctx = await context({
+      entryPoints,
+      entryNames: "[name]",
+      bundle: true,
+      format: "esm",
+      outdir: CLIENT_OUTDIR,
+      minify: true,
+      target: ["es2017"],
+      legalComments: `none`,
+      sourcemap: true,
+      plugins,
+    });
+
+    // Esbuild built in server which provides an SSE endpoint the client can subscribe to
+    // in order to know when to reload the page. Client subscribes with:
+    // new EventSource('http://localhost:6935/esbuild').addEventListener('change', () => { location.reload() });
+    await ctx.serve({ port: 6935 });
+    return ctx;
+  }
+
   // create an esbuild context object for the client side build so that we
   // can optimally rebundle whenever files change
-  const buildContext = await context({
-    entryPoints,
-    entryNames: "[name]",
-    bundle: true,
-    format: "esm",
-    outdir: CLIENT_OUTDIR,
-    minify: true,
-    target: ["es2017"],
-    legalComments: `none`,
-    sourcemap: true,
-    plugins,
-  });
+  let buildContext = await createBuildContext();
 
   spinner.succeed(chalk.cyan("bundles built"));
 
@@ -102,22 +112,36 @@ export async function dev({ config, cwd = process.cwd() }) {
     }
   );
 
-  // rebuild the client side bundle whenever a client side related file changes
-  clientWatcher.on("change", async (filename) => {
-    console.clear();
-    const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
-    const msgBox = boxen(greeting, { padding: 0.5 });
-    console.log(msgBox);
-    spinner.succeed(chalk.cyan(`change detected in ${filename}`));
-    await buildContext.rebuild();
-    spinner.succeed(chalk.cyan("bundles rebuilt"));
-    console.log(chalk.green("\ndisplaying log output:\n"));
-  });
+  function clientFileChange(type) {
+    return async (filename) => {
+      console.clear();
+      const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
+      const msgBox = boxen(greeting, { padding: 0.5 });
+      console.log(msgBox);
+      spinner.succeed(chalk.cyan(`file ${type}: ${filename}`));
+      try {
+        await buildContext.rebuild();
+      } catch (err) {
+        // esbuild agressive cachine causes it to fail when files unrelated to the build are deleted
+        // to handle this, we displose of the current context and create a new one.
+        await buildContext.dispose();
+        buildContext = await createBuildContext();
+      }
+      spinner.succeed(chalk.cyan("bundles rebuilt"));
+      console.log(chalk.green("\ndisplaying log output:\n"));
+    };
+  }
+  // let things settle before adding event handlers
+  setTimeout(() => {
+    // rebuild the client side bundle whenever a client side related file changes
+    clientWatcher.on("change", clientFileChange("changed"));
+    clientWatcher.on("add", clientFileChange("added"));
+    clientWatcher.on("unlink", clientFileChange("deleted"));
+  }, 1000);
 
-  // Esbuild built in server which provides an SSE endpoint the client can subscribe to
-  // in order to know when to reload the page. Client subscribes with:
-  // new EventSource('http://localhost:6935/esbuild').addEventListener('change', () => { location.reload() });
-  await buildContext.serve({ port: 6935 });
+  clientWatcher.on("error", (err) => {
+    console.error("Uh Oh! Something went wrong with client side file watching. Got error", err);
+  });
 
   spinner.succeed(chalk.cyan("live reload server started"));
   // Create and start a development server
@@ -163,9 +187,9 @@ export async function dev({ config, cwd = process.cwd() }) {
         mode: config.get("app.mode"),
       });
 
-      app.addHook("onError", (request, reply, error, done) => {
-        buildContext.dispose();
-        done();
+      app.addHook("onError", async (request, reply, error) => {
+        console.log("fastify onError hook: disposing of build context", error);
+        await buildContext.dispose();
       });
 
       // register user provided plugin using sandbox to enable reloading
@@ -193,30 +217,43 @@ export async function dev({ config, cwd = process.cwd() }) {
     followSymlinks: false,
     cwd,
   });
-  serverWatcher.on("error", () => {
-    buildContext.dispose();
+  serverWatcher.on("error", async (err) => {
+    console.log("server watcher error: disposing of build context", err);
+    await buildContext.dispose();
   });
 
   console.log(chalk.green("\ndisplaying log output:\n"));
 
-  // restart the server whenever a server related file changes
-  serverWatcher.on("change", async (filename) => {
-    console.clear();
-    const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
-    const msgBox = boxen(greeting, { padding: 0.5 });
-    console.log(msgBox);
-    spinner.succeed(chalk.cyan(`change detected in ${filename}`));
-    // TODO::
-    // check a hash of the server.js/ts file and ensure changedFilename has actually changed
-    // this might be slower than just always restarting though... measure.
-    try {
-      await started.restart();
-    } catch (err) {
-      console.log(err);
-      buildContext.dispose();
-    }
-    spinner.succeed(chalk.cyan("server restarted"));
-    console.log(chalk.green("\ndisplaying log output:\n"));
+  function serverFileChange(type) {
+    return async (filename) => {
+      console.clear();
+      const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
+      const msgBox = boxen(greeting, { padding: 0.5 });
+      console.log(msgBox);
+      spinner.succeed(chalk.cyan(`file ${type}: ${filename}`));
+      // TODO::
+      // check a hash of the server.js/ts file and ensure changedFilename has actually changed
+      // this might be slower than just always restarting though... measure.
+      try {
+        await started.restart();
+      } catch (err) {
+        console.log(err);
+        buildContext.dispose();
+      }
+      spinner.succeed(chalk.cyan("server restarted"));
+      console.log(chalk.green("\ndisplaying log output:\n"));
+    };
+  }
+
+  // restart the server whenever a server related file changes, is added or is deleted
+  setTimeout(() => {
+    serverWatcher.on("change", serverFileChange("changed"));
+    serverWatcher.on("add", serverFileChange("added"));
+    serverWatcher.on("unlink", serverFileChange("deleted"));
+  }, 1000);
+
+  serverWatcher.on("error", (err) => {
+    console.error("Uh Oh! Something went wrong with server side file watching. Got error", err);
   });
 
   // start the server for the first time
