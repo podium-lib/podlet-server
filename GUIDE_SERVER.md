@@ -1,4 +1,4 @@
-# Advanced Usage Guide: Customizing the Server with server.js
+# Advanced Guide: Customizing the Server with server.js
 
 This guide assumes you have already completed the beginner's guide and are familiar with the basics of setting up and running a Podium podlet server. In this guide, we will explore customizing the server using the `server.js` file, working with the `setContentState` and `setFallbackState` hooks, throwing errors, and adding API routes.
 

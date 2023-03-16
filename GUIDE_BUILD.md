@@ -1,4 +1,4 @@
-# Advanced Usage Guide: Customizing the Build Pipeline with Esbuild Plugins
+# Advanced Guide: Customizing the Build Pipeline with Esbuild Plugins
 
 This guide assumes you have already completed the beginner's guide and are familiar with the basics of setting up and running a Podium podlet server. In this advanced guide, we will cover how to customize the build pipeline using Esbuild plugins.
 

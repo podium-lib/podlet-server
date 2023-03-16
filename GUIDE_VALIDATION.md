@@ -1,4 +1,4 @@
-# Advanced Usage Guide: Route Validation
+# Advanced Guide: Route Validation
 
 This guide assumes you have already completed the beginner's guide and are familiar with the basics of setting up and running a Podium podlet server. In this advanced guide, we will cover how to add route validation to your Podium podlet application using JSON Schema and the AJV library.
 

@@ -1,4 +1,4 @@
-# Advanced Guide to Configuring a Podium Podlet Server
+# Advanced Guide: Configuring a Podium Podlet Server
 
 This advanced guide will walk you through configuring your Podium podlet server using the config system. This guide assumes you have completed the beginner's guide and are familiar with the basics of creating a Podium podlet server.
 
