@@ -85,18 +85,18 @@ mkdir config/hosts/finn.no
 Inside each host folder, create environment-specific configuration files as needed. For example, for a localhost host with local
 
 ```bash
-touch config/hosts/localhost/local.config.json
+touch config/hosts/localhost/config.local.json
 ```
 And for the finn.com host:
 
 ```
-touch config/hosts/finn.no/dev.config.json
-touch config/hosts/finn.no/prod.config.json
+touch config/hosts/finn.no/config.dev.json
+touch config/hosts/finn.no/config.prod.json
 ```
 In each config file, override configuration values for the specific host and environment. For example, you can change the app.port for the local environment of the localhost host:
 
 ```json5
-// config/hosts/localhost/local.config.json
+// config/hosts/localhost/config.local.json
 {
   "app": {
     "port": 3000
@@ -191,9 +191,9 @@ These are: HOST, ENV and VERSION. For Finn running in the current Fiaas, these w
 For example:
 ```
 HOST=finn.no ENV=dev VERSION=asd12df12gd3fg123 npm start
-# Uses configuration values specified in config/hosts/finn.no/dev.config.json.
+# Uses configuration values specified in config/hosts/finn.no/config.dev.json.
 HOST=finn.no ENV=prod VERSION=asd12df12gd3fg123 npm start
-# Uses configuration values specified in config/hosts/finn.no/prod.config.json.
+# Uses configuration values specified in config/hosts/finn.no/config.prod.json.
 ```
 
 Thats it for config, please give us any feedback you have!
