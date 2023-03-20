@@ -91,7 +91,7 @@ Alternatively, an app might features such as config, localisation, additional se
     common.json
     hosts/
       localhost/
-        local.config.json
+        config.local.json
   /schemas
     /content.js
     /fallback.js
@@ -389,7 +389,7 @@ Sensible defaults are provided but almost everything can be overridden or extend
 Configuration lives in a folder which must be named `config`. In this folder you can:
 
 - Globally override configuration values in a `config/common.json` file.
-- Override configuration for specific hosts and environments in folders named using the pattern `config/hosts/<host name>/<env>.config.json`.
+- Override configuration for specific hosts and environments in folders named using the pattern `config/hosts/<host name>/config.<env>.json`.
 - Add additional config values for use throughout your app via a `schema` defined in `config/schema.js`
 
 See the subsections below for additional information.
@@ -423,18 +423,18 @@ For example:
 /config
     /hosts
         /localhost
-            /local.config.json
-            /staging.config.json
-            /test.config.json
-            /production.config.json
+            /config.local.json
+            /config.staging.json
+            /config.test.json
+            /config.production.json
         /www.finn.no
-            /local.config.json
-            /staging.config.json
-            /test.config.json
-            /production.config.json
+            /config.local.json
+            /config.staging.json
+            /config.test.json
+            /config.production.json
 ```
 
-Only create those files you need, you might not need any and in any case it probably doesn't make much sense to create some, /config/hosts/localhost/production.config.json for example.
+Only create those files you need, you might not need any and in any case it probably doesn't make much sense to create some, /config/hosts/localhost/config.production.json for example.
 
 ### Schemas
 

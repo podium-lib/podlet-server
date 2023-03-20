@@ -46,21 +46,21 @@ mkdir config/hosts/www.example.com
 Inside each host folder, create environment-specific configuration files. For example, for a localhost host with local, staging, and production environments:
 
 ```bash
-touch config/hosts/localhost/local.config.json
-touch config/hosts/localhost/staging.config.json
-touch config/hosts/localhost/production.config.json
+touch config/hosts/localhost/config.local.json
+touch config/hosts/localhost/config.staging.json
+touch config/hosts/localhost/config.production.json
 ```
 And for the www.example.com host:
 
 ```
-touch config/hosts/www.example.com/local.config.json
-touch config/hosts/www.example.com/staging.config.json
-touch config/hosts/www.example.com/production.config.json
+touch config/hosts/www.example.com/config.local.json
+touch config/hosts/www.example.com/config.staging.json
+touch config/hosts/www.example.com/config.production.json
 ```
 In each config file, override configuration values for the specific host and environment. For example, you can change the app.port for the local environment of the localhost host:
 
 ```json5
-// config/hosts/localhost/local.config.json
+// config/hosts/localhost/config.local.json
 {
   "app": {
     "port": 8081
@@ -104,6 +104,6 @@ Set the HOST and ENV environment variables when starting your app to specify the
 ```
 HOST=www.example.com ENV=staging npm run start
 ```
-This will use the configuration values specified in config/hosts/www.example.com/staging.config.json.
+This will use the configuration values specified in config/hosts/www.example.com/config.staging.json.
 
 Now, you have successfully configured your Podium podlet server using the config system. You can further customize and extend your podlet server using the various features and configurations available in the Podium podlet server package.
