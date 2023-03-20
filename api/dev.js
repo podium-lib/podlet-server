@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import chokidar from "chokidar";
 import { context } from "esbuild";
@@ -90,6 +90,9 @@ export async function dev({ config, cwd = process.cwd() }) {
       // noop
     }
   }
+
+  // create dist folder if necessary
+  mkdirSync(join(cwd, 'dist'), { recursive: true });
 
   async function createBuildContext() {
     const ctx = await context({
