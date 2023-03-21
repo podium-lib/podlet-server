@@ -72,7 +72,7 @@ export async function start({ config, cwd = process.cwd() }) {
   }
 
   try {
-    await app.listen({ port: config.get("app.port") });
+    await app.listen({ host: "0.0.0.0", port: config.get("app.port") });
   } catch (err) {
     console.log(err);
   }
