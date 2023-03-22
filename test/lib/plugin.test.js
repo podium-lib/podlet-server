@@ -49,7 +49,7 @@ test("simple app with content route", async (t) => {
   t.equal(content.status, 200, "content file should be sucessfully served");
   t.match(markup, "<!--lit-part", "should contain lit comment tags");
   t.match(markup, "<test-app-content", "should contain the correct html tag");
-  t.match(markup, `<template shadowroot="open">`, "should contain evidence of shadow dom");
+  t.match(markup, `<template shadowroot="open"`, "should contain evidence of shadow dom");
   t.match(markup, `<div>hello world</div>`, "should contain component rendered markup");
   t.match(markup, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
   await app.close();
@@ -70,7 +70,7 @@ test("simple app with fallback route", async (t) => {
   t.equal(fallback.status, 200, "fallback file should be sucessfully served");
   t.match(markup, "<!--lit-part", "should contain lit comment tags");
   t.match(markup, "<test-app-fallback", "should contain the correct html tag");
-  t.match(markup, `<template shadowroot="open">`, "should contain evidence of shadow dom");
+  t.match(markup, `<template shadowroot="open"`, "should contain evidence of shadow dom");
   t.match(markup, `<div>hello world</div>`, "should contain component rendered markup");
   t.match(markup, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
   await app.close();
