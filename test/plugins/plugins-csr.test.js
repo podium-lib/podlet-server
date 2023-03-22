@@ -43,7 +43,7 @@ test("server rendering of a lit element with hydration support", async (t) => {
   await app.importElement(join(tmp, "element.js"));
   const result = app.csr("element", `<custom-element><custom-element>`);
   t.notMatch(result, "<!--lit-part", "should contain lit comment tags");
-  t.notMatch(result, `<template shadowroot="open">`, "should contain evidence of shadow dom");
+  t.notMatch(result, `<template shadowroot="open"`, "should contain evidence of shadow dom");
   t.notMatch(result, `<div>hello world</div>`, "should contain component rendered markup");
   t.notMatch(result, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
   t.match(result, "<custom-element>", "should contain the correct html tag");

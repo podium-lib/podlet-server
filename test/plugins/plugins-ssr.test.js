@@ -44,7 +44,7 @@ test("server rendering of a lit element", async (t) => {
   const result = app.ssr(`<custom-element><custom-element>`);
   t.match(result, "<!--lit-part", "should contain lit comment tags");
   t.match(result, "<custom-element>", "should contain the correct html tag");
-  t.match(result, `<template shadowroot="open">`, "should contain evidence of shadow dom");
+  t.match(result, `<template shadowroot="open"`, "should contain evidence of shadow dom");
   t.match(result, `<div>hello world</div>`, "should contain component rendered markup");
   t.match(result, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
 });

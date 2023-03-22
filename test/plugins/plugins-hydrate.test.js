@@ -44,7 +44,7 @@ test("server rendering of a lit element with hydration support", async (t) => {
   const result = app.hydrate("element", `<custom-element><custom-element>`);
   t.match(result, "<!--lit-part", "should contain lit comment tags");
   t.match(result, "<custom-element>", "should contain the correct html tag");
-  t.match(result, `<template shadowroot="open">`, "should contain evidence of shadow dom");
+  t.match(result, `<template shadowroot="open"`, "should contain evidence of shadow dom");
   t.match(result, `<div>hello world</div>`, "should contain component rendered markup");
   t.match(result, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
   t.match(result, `import El from '/static/client/element.js';`, "should contain client side element import");
