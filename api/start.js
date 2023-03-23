@@ -12,7 +12,7 @@ import PathResolver from "../lib/path.js";
  * @param {object} options - The options for the development environment.
  * @param {import("convict").Config} options.config - The Podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
- * @returns {Promise<void>}
+ * @returns {Promise<{address: string, close: function}>}
  */
 export async function start({ config, cwd = process.cwd() }) {
   // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
@@ -35,9 +35,17 @@ export async function start({ config, cwd = process.cwd() }) {
   }
 
   const app = /** @type {FastifyInstance}*/ (
-    /**@type {unknown}*/ (fastify({ logger: true, ignoreTrailingSlash: true }))
+    /**@type {unknown}*/ (
+      fastify({
+        logger: {
+          level: config.get("app.logLevel").toLowerCase(),
+        },
+        ignoreTrailingSlash: true,
+      })
+    )
   );
   app.register(fastifyPodletPlugin, {
+    cwd,
     prefix: config.get("app.base") || "/",
     pathname: config.get("podlet.pathname"),
     manifest: config.get("podlet.manifest"),
@@ -72,8 +80,10 @@ export async function start({ config, cwd = process.cwd() }) {
   }
 
   try {
-    await app.listen({ host: "0.0.0.0", port: config.get("app.port") });
+    const address = await app.listen({ host: "0.0.0.0", port: config.get("app.port") });
+    return { address, close: app.close.bind(app) };
   } catch (err) {
-    console.log(err);
+    app.log.error(`Unable to start application on port ${config.get("app.port")}`);
+    throw err;
   }
 }
