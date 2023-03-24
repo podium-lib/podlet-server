@@ -1,7 +1,11 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, basename } from "node:path";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
+import rollupPluginTerser from "@rollup/plugin-terser";
+import { rollup } from "rollup";
+import rollupPluginResolve from "@rollup/plugin-node-resolve";
+import rollupPluginCommonjs from "@rollup/plugin-commonjs";
 
 /**
  * Builds the project using esbuild.
@@ -26,6 +30,7 @@ export async function build({ config, cwd = process.cwd() }) {
     const BUILD_FILEPATH = await resolve(join(cwd, "build.js"));
     const CONTENT_ENTRYPOINT = join(OUTDIR, ".build", "content.js");
     const FALLBACK_ENTRYPOINT = join(OUTDIR, ".build", "fallback.js");
+    const ESBUILD_OUTDIR = join(OUTDIR, ".build", "esbuild");
     const SCRIPTS_FILEPATH = await resolve(join(cwd, "scripts.js"));
     const LAZY_FILEPATH = await resolve(join(cwd, "lazy.js"));
 
@@ -73,18 +78,47 @@ export async function build({ config, cwd = process.cwd() }) {
       }
     }
 
+    // Run code through esbuild first to apply plugins but don't bundle or minify
     await esbuild.build({
       entryNames: "[name]",
       plugins,
       entryPoints,
-      bundle: true,
+      bundle: false,
       format: "esm",
-      outdir: CLIENT_OUTDIR,
-      minify: true,
-      target: ["es2017"],
-      legalComments: `none`,
-      sourcemap: true,
+      outdir: ESBUILD_OUTDIR,
+      minify: false,
     });
+
+    // Run output of esbuild through rollup to take advantage of treeshaking etc.
+    async function buildRollupConfig(options) {
+      const rollupConfig = [];
+      for (const filepath of options) {
+        rollupConfig.push({
+          inlineDynamicImports: true,
+          input: `${ESBUILD_OUTDIR}/${basename(filepath)}`,
+          output: {
+            file: `${CLIENT_OUTDIR}/${basename(filepath)}`,
+            format: "es",
+          },
+          plugins: [
+            rollupPluginResolve(),
+            rollupPluginCommonjs({ include: /node_modules/ }),
+            rollupPluginTerser({ format: { comments: false } }),
+          ],
+        });
+      }
+      return rollupConfig;
+    }
+
+    for (const options of await buildRollupConfig(entryPoints)) {
+      const bundle = await rollup({
+        input: options.input,
+        plugins: options.plugins,
+      });
+      // appease TS being difficult by casting the format string to type ModuleFormat.
+      const format = /** @type {import("rollup").ModuleFormat} */ (options.output.format);
+      await bundle.write({ ...options.output, format });
+    }
   } catch (error) {
     console.error("An error occurred during the build process:", error);
   }
