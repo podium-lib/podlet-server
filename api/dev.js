@@ -231,7 +231,7 @@ export async function dev({ config, cwd = process.cwd() }) {
 
   // Chokidar provides super fast native file system watching
   // of server files. Either server.js/ts or any js/ts files inside a folder named server
-  const serverWatcher = chokidar.watch(["server.*", "server/**/*"], {
+  const serverWatcher = chokidar.watch(["server.[js][ts]g", "server/**/*"], {
     persistent: true,
     followSymlinks: false,
     cwd,
