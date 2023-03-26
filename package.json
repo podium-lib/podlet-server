@@ -22,7 +22,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git@github.com:podium-lib/labs.git"
+    "url": "git@github.com:podium-lib/podlet-server.git"
   },
   "homepage": "https://podium-lib.io/",
   "description": "Server for building page fragment with web components in a micro frontend architecture.",
