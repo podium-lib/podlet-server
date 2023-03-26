@@ -1,4 +1,4 @@
-# Fastify Podlet Server [beta]
+# Podlet Server [beta]
 
 This package can be used to bootstrap an opinionated Podium podlet server that provides:
 

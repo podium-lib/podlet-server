@@ -24,7 +24,8 @@
     "type": "git",
     "url": "git@github.com:podium-lib/labs.git"
   },
-  "description": "",
+  "homepage": "https://podium-lib.io/",
+  "description": "Server for building page fragment with web components in a micro frontend architecture.",
   "dependencies": {
     "@fastify/compress": "6.2.0",
     "@fastify/restartable": "1.4.0",
@@ -62,6 +63,9 @@
     "access": "public"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "6.0.1",
+    "@semantic-release/git": "10.0.1",
+    "semantic-release": "19.0.5",
     "tap": "^16.3.4"
   }
 }
