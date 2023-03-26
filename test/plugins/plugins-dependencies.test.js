@@ -73,7 +73,8 @@ test("non-existent dependency results in a 404 error", async (t) => {
     response,
     {
       statusCode: 404,
-      message: "Unable to resolve file path for does-not-exist. Is this dependency installed?",
+      message: "Not Found",
+      error: "Not Found",
     },
     "should respond with error object"
   );
