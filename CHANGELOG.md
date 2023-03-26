@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/podium-lib/podlet-server/compare/v1.0.0...v1.1.0) (2023-03-26)
+
+
+### Features
+
+* set grace to 0 in dev, default to 5000 and allow override ([e51bc2c](https://github.com/podium-lib/podlet-server/commit/e51bc2c03e6dac0e3297537a8bcc8d7bf215a327))
+
 # 1.0.0 (2023-03-26)
 
 
