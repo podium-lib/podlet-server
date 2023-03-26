@@ -19,7 +19,7 @@ module.exports = {
     ],
     preset: 'angular',
     branches: [
-        { name: 'master' },
+        { name: 'main' },
         { name: 'next', prerelease: true },
     ],
 };
