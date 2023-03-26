@@ -222,3 +222,30 @@ test("When domain/env specific config is defined, values within override config/
   process.env.ENV = env;
   process.env.HOST = host;
 });
+
+test("app.grace when running in development", async (t) => {
+  const env = process.env.ENV;
+  process.env.ENV = "local";
+  await mkdir(join(tmp, "config"));
+  const config = await configuration({ cwd: tmp });
+  t.equal(config.get("app.grace"), 0, "app.grace should equal 0");
+  // reset env
+  process.env.ENV = env;
+});
+
+test("app.grace when not running in development", async (t) => {
+  const env = process.env.ENV;
+  process.env.ENV = "prod";
+  await mkdir(join(tmp, "config"));
+  const config = await configuration({ cwd: tmp });
+  t.equal(config.get("app.grace"), 5000, "app.grace should equal 5000");
+  // reset env
+  process.env.ENV = env;
+});
+
+test("app.grace when overridden", async (t) => {
+  await mkdir(join(tmp, "config"));
+  await writeFile(join(tmp, "config", "common.json"), JSON.stringify({ app: { grace: 2500 } }));
+  const config = await configuration({ cwd: tmp });
+  t.equal(config.get("app.grace"), 2500, "app.grace should equal 2500");
+});
