@@ -92,7 +92,7 @@ export async function dev({ config, cwd = process.cwd() }) {
   }
 
   // create dist folder if necessary
-  mkdirSync(join(cwd, 'dist'), { recursive: true });
+  mkdirSync(join(cwd, "dist"), { recursive: true });
 
   async function createBuildContext() {
     const ctx = await context({
@@ -123,7 +123,22 @@ export async function dev({ config, cwd = process.cwd() }) {
 
   // Chokidar provides super fast native file system watching
   const clientWatcher = chokidar.watch(
-    ["content.*", "fallback.*", "scripts.*", "lazy.*", "client/**/*", "lib/**/*", "src/**/*"],
+    [
+      "content.js",
+      "content.ts",
+      "fallback.js",
+      "fallback.ts",
+      "scripts.js",
+      "scripts.ts",
+      "lazy.js",
+      "lazy.ts",
+      "client/**/*.js",
+      "client/**/*.ts",
+      "lib/**/*.js",
+      "lib/**/*.ts",
+      "src/**/*.js",
+      "src/**/*.ts",
+    ],
     {
       persistent: true,
       followSymlinks: false,
@@ -223,6 +238,7 @@ export async function dev({ config, cwd = process.cwd() }) {
 
       done();
     },
+    // @ts-ignore
     port: config.get("app.port"),
     ignoreTrailingSlash: true,
   });
@@ -231,11 +247,28 @@ export async function dev({ config, cwd = process.cwd() }) {
 
   // Chokidar provides super fast native file system watching
   // of server files. Either server.js/ts or any js/ts files inside a folder named server
-  const serverWatcher = chokidar.watch(["server.[js][ts]g", "server/**/*"], {
-    persistent: true,
-    followSymlinks: false,
-    cwd,
-  });
+  const serverWatcher = chokidar.watch(
+    [
+      "build.js",
+      "build.ts",
+      "document.js",
+      "document.ts",
+      "server.js",
+      "server.ts",
+      "server/**/*.js",
+      "server/**/*.ts",
+      "config/**/*.json",
+      "config/schema.js",
+      "config/schema.ts",
+      "schemas/**/*.json",
+      "locale/**/*.json",
+    ],
+    {
+      persistent: true,
+      followSymlinks: false,
+      cwd,
+    }
+  );
   serverWatcher.on("error", async (err) => {
     console.log("server watcher error: disposing of build context", err);
     await buildContext.dispose();
@@ -266,9 +299,12 @@ export async function dev({ config, cwd = process.cwd() }) {
 
   // restart the server whenever a server related file changes, is added or is deleted
   serverWatcher.on("ready", () => {
-    serverWatcher.on("change", serverFileChange("changed"));
-    serverWatcher.on("add", serverFileChange("added"));
-    serverWatcher.on("unlink", serverFileChange("deleted"));
+    // wait 1 second for the build/app start to settle
+    setTimeout(() => {
+      serverWatcher.on("change", serverFileChange("changed"));
+      serverWatcher.on("add", serverFileChange("added"));
+      serverWatcher.on("unlink", serverFileChange("deleted"));
+    }, 1000);
   });
 
   serverWatcher.on("error", (err) => {
