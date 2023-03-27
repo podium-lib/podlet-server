@@ -17,7 +17,7 @@ This package can be used to bootstrap an opinionated Podium podlet server that p
 Install the following 2 packages:
 
 ```
-npm install @podium/podlet-server @podium/experimental-podium-element
+npm install @podium/podlet-server @podium/element
 ```
 
 Create a file called `content.js` in your project root that provides a Lit custom element as the default export.
@@ -26,7 +26,7 @@ later in this guide.
 
 ```js
 import { html, css } from "lit";
-import { PodiumElement } from "@podium/experimental-podium-element";
+import { PodiumElement } from "@podium/element";
 
 export default class Content extends PodiumElement {
   static styles = css`
