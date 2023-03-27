@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/podium-lib/podlet-server/compare/v1.1.0...v1.1.1) (2023-03-26)
+
+
+### Bug Fixes
+
+* Use http-errors on internal errors ([eaf7428](https://github.com/podium-lib/podlet-server/commit/eaf742886394277c9c6f7e5553a11a329cfe6a29))
+
 # [1.1.0](https://github.com/podium-lib/podlet-server/compare/v1.0.0...v1.1.0) (2023-03-26)
 
 
