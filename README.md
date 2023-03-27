@@ -85,6 +85,7 @@ Alternatively, an app might features such as config, localisation, additional se
   build.js
   scripts.js
   lazy.js
+  document.js
   package.json
   /config
     schema.js
@@ -127,6 +128,28 @@ additional scripting to the SSR'd content.
 
 This file can be used to lazy load additional client side scripts after the window load event has fired. This is useful for adding tracking scripts or other
 scripts that aren't needed on initial page load. Using this can help to get your initial bundle weight down and get pixels on the screen faster.
+
+#### **document.js [optional]**
+
+This file can be used to add a Podium document template
+
+```javascript
+// document.js
+export default (incoming, fragment, head) => `
+<!doctype html>
+<html lang="${incoming.context.locale}">
+    <head>
+        <meta charset="${incoming.view.encoding}">
+        <title>${incoming.view.title}</title>
+        ${head}
+    </head>
+    <body>
+        ${fragment}
+    </body>
+</html>`;
+```
+
+See [the Podium docs](https://podium-lib.io/docs/api/document) for more information.
 
 #### **server.js [optional]**
 

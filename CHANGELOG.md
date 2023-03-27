@@ -1,3 +1,22 @@
+# [1.2.0](https://github.com/podium-lib/podlet-server/compare/v1.1.1...v1.2.0) (2023-03-27)
+
+
+### Bug Fixes
+
+* Add logging ([a02fc8c](https://github.com/podium-lib/podlet-server/commit/a02fc8c4eaf6f144180750bba297b05247cecb75))
+
+
+### Features
+
+* add document.js to support Podium document template ([0191c38](https://github.com/podium-lib/podlet-server/commit/0191c38938eac21d23ce1c9a70b204aa118c1719))
+
+## [1.1.1](https://github.com/podium-lib/podlet-server/compare/v1.1.0...v1.1.1) (2023-03-26)
+
+
+### Bug Fixes
+
+* Use http-errors on internal errors ([eaf7428](https://github.com/podium-lib/podlet-server/commit/eaf742886394277c9c6f7e5553a11a329cfe6a29))
+
 # [1.1.0](https://github.com/podium-lib/podlet-server/compare/v1.0.0...v1.1.0) (2023-03-26)
 
 
