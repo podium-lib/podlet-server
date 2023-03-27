@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/podium-lib/podlet-server/compare/v1.2.0...v1.2.1) (2023-03-27)
+
+
+### Bug Fixes
+
+* Add log statements ([8ae728f](https://github.com/podium-lib/podlet-server/commit/8ae728ff7c75978190c88d228e4511497535d626))
+
 # [1.2.0](https://github.com/podium-lib/podlet-server/compare/v1.1.1...v1.2.0) (2023-03-27)
 
 
