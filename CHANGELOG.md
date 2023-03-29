@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/podium-lib/podlet-server/compare/v1.2.1...v1.3.0) (2023-03-29)
+
+
+### Bug Fixes
+
+* refine file watching in dev ([436d8df](https://github.com/podium-lib/podlet-server/commit/436d8dfc6dd7241ef8dfe2fc2ef1d42b9435ca69))
+
+
+### Features
+
+* refactor logging in dev mode to improve usablity ([2c40b22](https://github.com/podium-lib/podlet-server/commit/2c40b227f9d117eff35eb9b80f09b17d8d95f57c))
+
 ## [1.2.1](https://github.com/podium-lib/podlet-server/compare/v1.2.0...v1.2.1) (2023-03-27)
 
 
