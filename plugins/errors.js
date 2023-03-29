@@ -2,7 +2,7 @@ import httpError from "http-errors";
 import fp from "fastify-plugin";
 
 export default fp(async function errors(fastify) {
-  fastify.setErrorHandler((error, _, reply) => {
+  fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error);
     let err;
 

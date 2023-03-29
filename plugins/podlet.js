@@ -24,7 +24,7 @@ export default fp(async function podlet(
   const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
   const podiumVersion = new SemVer(packageJson.dependencies["@podium/podlet"].replace("^", "").replace("~", ""));
 
-  fastify.get(podlet.manifest(), async (_, reply) => {
+  fastify.get(podlet.manifest(), async (request, reply) => {
     // enable timing metrics for this route
     // @ts-ignore
     reply.context.config.timing = true;
@@ -54,7 +54,7 @@ export default fp(async function podlet(
 
   if (development) {
     // wrap the markup in a podlet render call to get templating when in dev mode
-    fastify.addHook("onSend", (_, reply, /** @type {string} */ payload, done) => {
+    fastify.addHook("onSend", (request, reply, /** @type {string} */ payload, done) => {
       let newPayload = payload;
       const contentType = reply.getHeader("content-type") || "";
       if (typeof contentType === "string") {
