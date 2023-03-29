@@ -4,7 +4,7 @@ export default fp(async function scriptsPlugin(fastify, { enabled, base }) {
   // inject live reload when in dev mode
   if (enabled) {
     fastify.log.debug("custom client side scripting enabled");
-    fastify.addHook("onSend", (request, reply, /** @type {string} */ payload, done) => {
+    fastify.addHook("onSend", (_, reply, /** @type {string} */ payload, done) => {
       let newPayload = payload;
       const contentType = reply.getHeader("content-type") || "";
       if (typeof contentType === "string") {

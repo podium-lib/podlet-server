@@ -3,11 +3,11 @@ import fp from "fastify-plugin";
 export default fp(async function lazyScriptPlugin(fastify, { enabled, base }) {
   // inject live reload when in dev mode
   if (enabled) {
-    fastify.addHook("onSend", (request, reply, /** @type {string} */ payload, done) => {
+    fastify.addHook("onSend", (_, reply, /** @type {string} */ payload, done) => {
       let newPayload = payload;
       const contentType = reply.getHeader("content-type") || "";
       if (typeof contentType === "string") {
-        // only inject live reload if the content type is html
+        // only inject lazy if the content type is html
         if (contentType.includes("html")) {
           // if there is a document, inject before closing body
           // @ts-ignore
