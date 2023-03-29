@@ -7,7 +7,7 @@ export default fp(async function lazyScriptPlugin(fastify, { enabled, base }) {
       let newPayload = payload;
       const contentType = reply.getHeader("content-type") || "";
       if (typeof contentType === "string") {
-        // only inject live reload if the content type is html
+        // only inject lazy if the content type is html
         if (contentType.includes("html")) {
           // if there is a document, inject before closing body
           // @ts-ignore

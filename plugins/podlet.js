@@ -24,7 +24,7 @@ export default fp(async function podlet(
   const packageJson = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
   const podiumVersion = new SemVer(packageJson.dependencies["@podium/podlet"].replace("^", "").replace("~", ""));
 
-  fastify.get(podlet.manifest(), async (req, reply) => {
+  fastify.get(podlet.manifest(), async (request, reply) => {
     // enable timing metrics for this route
     // @ts-ignore
     reply.context.config.timing = true;

@@ -34,5 +34,3 @@ export default fp(async function errors(fastify) {
 
   fastify.decorate("errors", httpError);
 });
-
-

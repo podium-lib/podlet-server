@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { readFile } from "node:fs/promises";
 import esbuild from "esbuild";
 import fp from "fastify-plugin";
-import httpError from 'http-errors';
+import httpError from "http-errors";
 
 const require = createRequire(import.meta.url);
 const tmp = join(tmpdir(), crypto.randomUUID());
@@ -31,7 +31,7 @@ export default fp(async function dependencies(fastify, { enabled = false, cwd = 
           // resolve the full path to the dependency using node's dep resolving mechanism
           filepath = require.resolve(depname, { paths: [cwd] });
         } catch (err) {
-          fastify.log.debug('Serving 404 - Not Found - Unable to resolve file path for ${depname}.');
+          fastify.log.debug(`Serving 404 - Not Found - Unable to resolve file path for ${depname}.`);
           throw new httpError.NotFound();
         }
 
@@ -49,7 +49,7 @@ export default fp(async function dependencies(fastify, { enabled = false, cwd = 
             sourcemap: "inline",
           });
         } catch (err) {
-          fastify.log.debug('Serving 500 - Internal Server error - Unable to bundle file ${filepath}.');
+          fastify.log.debug(`Serving 500 - Internal Server error - Unable to bundle file ${filepath}.`);
           throw new httpError.InternalServerError();
         }
 
@@ -58,7 +58,7 @@ export default fp(async function dependencies(fastify, { enabled = false, cwd = 
           // read the file contents back into mem
           contents = await readFile(outfile, { encoding: "utf8" });
         } catch (err) {
-          fastify.log.debug('Serving 500 - Internal Server error - Unable to read file at ${outfile}.');
+          fastify.log.debug(`Serving 500 - Internal Server error - Unable to read file at ${outfile}.`);
           throw new httpError.InternalServerError();
         }
 
