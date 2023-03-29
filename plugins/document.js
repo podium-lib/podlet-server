@@ -1,4 +1,5 @@
 import fp from "fastify-plugin";
+import chalk from "chalk";
 import PathResolver from "../lib/path.js";
 
 /**
@@ -19,8 +20,9 @@ export default fp(async function documentPlugin(
     try {
       const document = await resolver.import("./document");
       podlet.view(document.default);
+      fastify.log.debug(`📄 ${chalk.magenta("document template")}: loaded file ${documentFile.path.replace(cwd, "")}`);
     } catch (err) {
-      fastify.log.debug(`document.js file located but could not be loaded. Error: ${err.message}`);
+      fastify.log.fatal(err, `document.js file located but could not be loaded.`);
     }
   }
 });
