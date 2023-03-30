@@ -11,10 +11,11 @@ import PathResolver from "../lib/path.js";
  * Start up a production server for a Podium Podlet server app.
  * @param {object} options - The options for the development environment.
  * @param {import("convict").Config} options.config - The Podlet configuration.
+ * @param {import("../lib/load-extensions").Extensions} options.extensions - The Podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<{address: string, close: function}>}
  */
-export async function start({ config, cwd = process.cwd() }) {
+export async function start({ config, extensions, cwd = process.cwd() }) {
   // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
   // @ts-ignore
   const resolver = new PathResolver({ cwd, development: config.get("app.development") });

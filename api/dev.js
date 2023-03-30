@@ -26,10 +26,11 @@ const joinURLPathSegments = (...segments) => {
  * Set up a development environment for a Podium Podlet server.
  * @param {object} options - The options for the development environment.
  * @param {import("convict").Config} options.config - The Podlet configuration.
+ * @param {import("../lib/load-extensions").Extensions} options.extensions - The Podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
-export async function dev({ config, cwd = process.cwd() }) {
+export async function dev({ config, extensions, cwd = process.cwd() }) {
   // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
   // @ts-ignore
   config.set("assets.development", true);

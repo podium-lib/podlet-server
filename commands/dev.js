@@ -1,5 +1,6 @@
-import { dev } from "../api/dev.js"
+import { dev } from "../api/dev.js";
 import configuration from "../lib/config.js";
+import loadExtensions from "../lib/load-extensions.js";
 
 export const command = "dev";
 
@@ -14,7 +15,7 @@ export const builder = (yargs) => {
     cwd: {
       describe: `Alter the current working directory. Defaults to the directory where the command is being run.`,
       default: process.cwd(),
-    }
+    },
   });
 
   return yargs.argv;
@@ -22,6 +23,10 @@ export const builder = (yargs) => {
 
 export const handler = async (argv) => {
   const { cwd } = argv;
-  const config = await configuration({ cwd });
-  await dev({ config, cwd });
+  const extensions = await loadExtensions({ cwd });
+  const config = await configuration({
+    additionalSchemas: extensions.configSchemas,
+    cwd,
+  });
+  await dev({ extensions, config, cwd });
 };
