@@ -2,6 +2,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
+import loadExtensions from "../../lib/load-extensions.js";
 import configuration from "../../lib/config.js";
 
 const tmp = join(tmpdir(), "./config.test.js");
@@ -17,6 +18,7 @@ afterEach(async () => {
 
 test("default values", async (t) => {
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   t.equal(config.get("app.name"), "test-podlet", "app.name should equal test-podlet");
   t.equal(config.get("app.env"), "local", "app.env should equal local");
   t.equal(config.get("app.host"), "localhost", "app.host should equal localhost");
@@ -86,6 +88,7 @@ test("When scripts.js is defined, app.scripts should be true", async (t) => {
 test("When scripts.ts is defined, app.scripts should be true", async (t) => {
   await writeFile(join(tmp, "/scripts.js"), "");
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   t.equal(config.get("assets.scripts"), true, "assets.scripts should be true");
 });
 
@@ -155,6 +158,7 @@ test("When domain/env specific config is defined, values within override default
     })
   );
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
   t.equal(config.get("metrics.timing.timeAllRoutes"), true, "metrics.timing.timeAllRoutes should be true");
@@ -214,6 +218,7 @@ test("When domain/env specific config is defined, values within override config/
     })
   );
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
   t.equal(config.get("metrics.timing.timeAllRoutes"), false, "metrics.timing.timeAllRoutes should be false");
@@ -248,4 +253,39 @@ test("app.grace when overridden", async (t) => {
   await writeFile(join(tmp, "config", "common.json"), JSON.stringify({ app: { grace: 2500 } }));
   const config = await configuration({ cwd: tmp });
   t.equal(config.get("app.grace"), 2500, "app.grace should equal 2500");
+});
+
+test("config loading from extensions overrides default config", async (t) => {
+  await writeFile(
+    join(tmp, "package.json"),
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { "test-extension": "1.0.0" } })
+  );
+  await mkdir(join(tmp, "node_modules"));
+  await mkdir(join(tmp, "node_modules", "test-extension"));
+  await mkdir(join(tmp, "node_modules", "test-extension", "config"));
+  await writeFile(
+    join(tmp, "node_modules", "test-extension", "package.json"),
+    JSON.stringify({
+      name: "test-extension",
+      version: "1.0.0",
+      main: "index.js",
+      type: "module",
+      podium: { extension: ["podlet-server"] },
+    })
+  );
+  await writeFile(join(tmp, "node_modules", "test-extension", "index.js"), "export default {};");
+  await writeFile(
+    join(tmp, "node_modules", "test-extension", "config", "schema.js"),
+    'export default {api:{default:"/extension",format:String},assets:{base:{default:"/extension",format:String}},app:{base:{default:"/extension",format:String}}};'
+  );
+  await mkdir(join(tmp, "config"));
+  await writeFile(join(tmp, "config", "schema.js"), 'export default {assets:{base:{default:"/app",format:String}}};');
+
+  const extensions = await loadExtensions({ cwd: tmp });
+  const config = await configuration({ additionalSchemas: extensions.configSchemas, cwd: tmp });
+
+  // @ts-ignore
+  t.equal(config.get("api"), "/extension", "config should be loaded from extension");
+  t.equal(config.get("app.base"), "/extension", "config should be loaded from extension");
+  t.equal(config.get("assets.base"), "/app", "config should be loaded from app");
 });
