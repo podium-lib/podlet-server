@@ -63,6 +63,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
     routes.push({ name: "content", path: config.get("podlet.content") });
   }
   if (config.get("podlet.fallback")) {
+    // @ts-ignore
     routes.push({ name: "fallback", path: config.get("podlet.fallback") });
   }
 
@@ -105,14 +106,23 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       clientFiles.push(join("dist", entryPoint.replace(cwd, "")));
     }
 
-    // support user defined plugins via a build.js file
     plugins = [];
+    if (extensions?.buildPlugins) {
+      for (const buildPlugin of extensions.buildPlugins) {
+        const extensionDefinedPlugins = await buildPlugin.resolvedFile({ config });
+        plugins.push(...extensionDefinedPlugins);
+        LOGGER.debug(
+          `${chalk.green("♻️")}  ${chalk.magenta("bundle plugins")}: loaded file from extension ${buildPlugin.package.name}`
+        );
+      }
+    }
+    // support user defined plugins via a build.js file
     if (BUILD_FILEPATH.exists) {
       try {
         const userDefinedBuild = (await resolver.import(BUILD_FILEPATH)).default;
         const userDefinedPlugins = await userDefinedBuild({ config });
         if (Array.isArray(userDefinedPlugins)) {
-          plugins.unshift(...userDefinedPlugins);
+          plugins.push(...userDefinedPlugins);
         }
       } catch (err) {
         // noop
@@ -234,6 +244,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
         content: config.get("podlet.content"),
         fallback: config.get("podlet.fallback"),
         base: config.get("assets.base"),
+        documents: extensions?.documentTemplates,
         plugins,
         name: config.get("app.name"),
         development: config.get("app.development"),
@@ -253,6 +264,18 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
         LOGGER.error(error, "fastify onError hook: disposing of build context");
         await buildContext.dispose();
       });
+
+      // register extension server plugins with fastify
+      for (const serverPlugin of extensions?.serverPlugins || []) {
+        await app.register(serverPlugin.resolvedFile, {
+          prefix: config.get("app.base"),
+          logger: LOGGER,
+          config,
+          podlet: app.podlet,
+          errors: httpError,
+        });
+        LOGGER.debug(`🖥️  ${chalk.magenta("server")}: loaded file from extension ${serverPlugin.package.name}`);
+      }
 
       // register user provided plugin using sandbox to enable reloading
       // Load user server.js file if provided.

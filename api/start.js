@@ -23,12 +23,18 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
   const SERVER_FILEPATH = await resolver.resolve("./server");
 
   const plugins = [];
+  if (extensions?.buildPlugins) {
+    for (const buildPlugin of extensions.buildPlugins) {
+      const extensionDefinedPlugins = await buildPlugin({ config });
+      plugins.push(...extensionDefinedPlugins);
+    }
+  }
   if (BUILD_FILEPATH.exists) {
     try {
       const userDefinedBuild = (await resolver.import(BUILD_FILEPATH)).default;
       const userDefinedPlugins = await userDefinedBuild({ config });
       if (Array.isArray(userDefinedPlugins)) {
-        plugins.unshift(...userDefinedPlugins);
+        plugins.push(...userDefinedPlugins);
       }
     } catch (err) {
       // noop
@@ -54,6 +60,7 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
     fallback: config.get("podlet.fallback"),
     base: config.get("assets.base"),
     plugins,
+    documents: extensions?.documentTemplates,
     name: config.get("app.name"),
     development: config.get("app.development"),
     version: config.get("podlet.version"),
@@ -68,6 +75,17 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
   });
 
   const { podlet } = app;
+
+  // register extension server plugins with fastify
+  for (const serverPlugin of extensions?.serverPlugins || []) {
+    await app.register(serverPlugin.resolvedFile, {
+      prefix: config.get("app.base"),
+      logger: app.log,
+      config,
+      podlet: app.podlet,
+      errors: httpError,
+    });
+  }
 
   // Load user server.js file if provided.
   if (SERVER_FILEPATH.exists) {

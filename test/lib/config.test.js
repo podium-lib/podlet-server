@@ -282,7 +282,7 @@ test("config loading from extensions overrides default config", async (t) => {
   await writeFile(join(tmp, "config", "schema.js"), 'export default {assets:{base:{default:"/app",format:String}}};');
 
   const extensions = await loadExtensions({ cwd: tmp });
-  const config = await configuration({ additionalSchemas: extensions.configSchemas, cwd: tmp });
+  const config = await configuration({ additionalSchemas: extensions.configSchemas.map(schema => schema.resolvedFile), cwd: tmp });
 
   // @ts-ignore
   t.equal(config.get("api"), "/extension", "config should be loaded from extension");

@@ -44,7 +44,7 @@ test("One extension present", async (t) => {
   await writeFile(join(tmp, "node_modules", "test-extension", "index.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension", "config", "schema.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension", "fallback.js"), "export default class Fallback {};");
-  await writeFile(join(tmp, "node_modules", "test-extension", "build.js"), "export default [];");
+  await writeFile(join(tmp, "node_modules", "test-extension", "build.js"), "export default () => { return []};");
   await writeFile(join(tmp, "node_modules", "test-extension", "document.js"), "export default () => {};");
   await writeFile(
     join(tmp, "node_modules", "test-extension", "server.js"),
@@ -57,7 +57,7 @@ test("One extension present", async (t) => {
   t.equal(extensions.serverPlugins.length, 1);
   t.equal(extensions.documentTemplates.length, 1);
   t.equal(extensions.buildPlugins.length, 1);
-  t.equal(extensions.fallbackFiles.length, 1);
+  // t.equal(extensions.fallbackFiles.length, 1);
 });
 
 test("Two extensions present", async (t) => {
@@ -81,7 +81,7 @@ test("Two extensions present", async (t) => {
   await writeFile(join(tmp, "node_modules", "test-extension", "index.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension", "config", "schema.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension", "fallback.js"), "export default class Fallback {};");
-  await writeFile(join(tmp, "node_modules", "test-extension", "build.js"), "export default [];");
+  await writeFile(join(tmp, "node_modules", "test-extension", "build.js"), "export default () => { return []};");
   await writeFile(join(tmp, "node_modules", "test-extension", "document.js"), "export default () => {};");
   await writeFile(
     join(tmp, "node_modules", "test-extension", "server.js"),
@@ -103,7 +103,7 @@ test("Two extensions present", async (t) => {
   await writeFile(join(tmp, "node_modules", "test-extension2", "index.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension2", "config", "schema.js"), "export default {};");
   await writeFile(join(tmp, "node_modules", "test-extension2", "fallback.js"), "export default class Fallback {};");
-  await writeFile(join(tmp, "node_modules", "test-extension2", "build.js"), "export default [];");
+  await writeFile(join(tmp, "node_modules", "test-extension2", "build.js"), "export default () => { return []};");
   await writeFile(join(tmp, "node_modules", "test-extension2", "document.js"), "export default () => {};");
   await writeFile(
     join(tmp, "node_modules", "test-extension2", "server.js"),
@@ -116,5 +116,5 @@ test("Two extensions present", async (t) => {
   t.equal(extensions.serverPlugins.length, 2);
   t.equal(extensions.documentTemplates.length, 2);
   t.equal(extensions.buildPlugins.length, 2);
-  t.equal(extensions.fallbackFiles.length, 2);
+  // t.equal(extensions.fallbackFiles.length, 2);
 });

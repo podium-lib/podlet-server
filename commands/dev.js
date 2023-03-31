@@ -25,7 +25,7 @@ export const handler = async (argv) => {
   const { cwd } = argv;
   const extensions = await loadExtensions({ cwd });
   const config = await configuration({
-    additionalSchemas: extensions.configSchemas,
+    additionalSchemas: extensions.configSchemas.map(schema => schema.resolvedFile),
     cwd,
   });
   await dev({ extensions, config, cwd });

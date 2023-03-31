@@ -19,6 +19,7 @@ afterEach(async (t) => {
 
 test("Starting with no files in directory", async (t) => {
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
   // @ts-ignore
@@ -62,6 +63,7 @@ test("Starting with content file in directory", async (t) => {
   );
   execSync("npm install", { cwd: tmp });
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
   await build({ config, cwd: tmp });
@@ -149,6 +151,7 @@ test("Fallback route", async (t) => {
   );
   execSync("npm install", { cwd: tmp });
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
   await build({ config, cwd: tmp });
