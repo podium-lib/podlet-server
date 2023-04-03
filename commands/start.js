@@ -1,6 +1,6 @@
 import { start } from "../api/start.js"
 import configuration from "../lib/config.js";
-import loadExtensions from "../lib/load-extensions.js";
+import { Extensions } from "../lib/extensions/extensions.js";
 
 export const command = "start";
 
@@ -23,7 +23,7 @@ export const builder = (yargs) => {
 
 export const handler = async (argv) => {
   const { cwd } = argv;
-  const extensions = await loadExtensions({ cwd });
-  const config = await configuration({ cwd });
+  const extensions = await Extensions.load(cwd);
+  const config = await configuration({ cwd, additionalSchemas: extensions.config() });
   await start({ config, extensions, cwd });
 };

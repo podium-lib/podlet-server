@@ -1,6 +1,6 @@
 import { dev } from "../api/dev.js";
 import configuration from "../lib/config.js";
-import loadExtensions from "../lib/load-extensions.js";
+import { Extensions } from "../lib/extensions/extensions.js";
 
 export const command = "dev";
 
@@ -23,9 +23,9 @@ export const builder = (yargs) => {
 
 export const handler = async (argv) => {
   const { cwd } = argv;
-  const extensions = await loadExtensions({ cwd });
+  const extensions = await Extensions.load(cwd);
   const config = await configuration({
-    additionalSchemas: extensions.configSchemas.map(schema => schema.resolvedFile),
+    additionalSchemas: extensions.config(),
     cwd,
   });
   await dev({ extensions, config, cwd });

@@ -26,7 +26,7 @@ const joinURLPathSegments = (...segments) => {
  * Set up a development environment for a Podium Podlet server.
  * @param {object} options - The options for the development environment.
  * @param {import("convict").Config} options.config - The Podlet configuration.
- * @param {import("../lib/load-extensions").Extensions} [options.extensions] - The Podlet configuration.
+ * @param {import("../lib/extensions/extensions").Extensions} [options.extensions] - The Podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
@@ -107,8 +107,8 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
     }
 
     plugins = [];
-    if (extensions?.buildPlugins) {
-      for (const buildPlugin of extensions.buildPlugins) {
+    if (extensions?.build().length) {
+      for (const buildPlugin of extensions.build()) {
         const extensionDefinedPlugins = await buildPlugin.resolvedFile({ config });
         plugins.push(...extensionDefinedPlugins);
         LOGGER.debug(
