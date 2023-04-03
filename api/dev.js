@@ -107,8 +107,8 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
     }
 
     plugins = [];
-    if (extensions?.build().length) {
-      for (const buildPlugin of extensions.build()) {
+    if (extensions?.build.length) {
+      for (const buildPlugin of extensions.build) {
         const extensionDefinedPlugins = await buildPlugin({ config });
         plugins.push(...extensionDefinedPlugins);
         LOGGER.debug(
@@ -266,7 +266,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       });
 
       // register extension server plugins with fastify
-      for (const serverPlugin of extensions?.server() || []) {
+      for (const serverPlugin of extensions?.server || []) {
         await app.register(serverPlugin, {
           prefix: config.get("app.base"),
           logger: LOGGER,

@@ -23,8 +23,8 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
   const SERVER_FILEPATH = await resolver.resolve("./server");
 
   const plugins = [];
-  if (extensions?.build()) {
-    for (const buildPlugin of extensions.build()) {
+  if (extensions?.build) {
+    for (const buildPlugin of extensions.build) {
       const extensionDefinedPlugins = await buildPlugin({ config });
       plugins.push(...extensionDefinedPlugins);
     }
@@ -77,7 +77,7 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
   const { podlet } = app;
 
   // register extension server plugins with fastify
-  for (const serverPlugin of extensions?.server() || []) {
+  for (const serverPlugin of extensions?.server || []) {
     await app.register(serverPlugin, {
       prefix: config.get("app.base"),
       logger: app.log,

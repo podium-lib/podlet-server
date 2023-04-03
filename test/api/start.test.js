@@ -278,7 +278,7 @@ test("Loading an extension", async (t) => {
   );
 
   const extensions = await Extensions.load(tmp);
-  const config = await configuration({ cwd: tmp, additionalSchemas: extensions.config() });
+  const config = await configuration({ cwd: tmp, additionalSchemas: extensions.config });
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
   await build({ config, cwd: tmp });

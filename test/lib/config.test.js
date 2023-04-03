@@ -2,7 +2,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
-import loadExtensions from "../../lib/load-extensions.js";
+import { Extensions } from "../../lib/extensions/extensions.js";
 import configuration from "../../lib/config.js";
 
 const tmp = join(tmpdir(), "./config.test.js");
@@ -258,7 +258,12 @@ test("app.grace when overridden", async (t) => {
 test("config loading from extensions overrides default config", async (t) => {
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { "test-extension": "1.0.0" } })
+    JSON.stringify({
+      name: "test-app",
+      type: "module",
+      version: "1.0.0",
+      podium: { extensions: { "podlet-server": ["test-extension"] } },
+    })
   );
   await mkdir(join(tmp, "node_modules"));
   await mkdir(join(tmp, "node_modules", "test-extension"));
@@ -270,19 +275,19 @@ test("config loading from extensions overrides default config", async (t) => {
       version: "1.0.0",
       main: "index.js",
       type: "module",
-      podium: { extension: ["podlet-server"] },
     })
   );
-  await writeFile(join(tmp, "node_modules", "test-extension", "index.js"), "export default {};");
   await writeFile(
-    join(tmp, "node_modules", "test-extension", "config", "schema.js"),
-    'export default {api:{default:"/extension",format:String},assets:{base:{default:"/extension",format:String}},app:{base:{default:"/extension",format:String}}};'
+    join(tmp, "node_modules", "test-extension", "index.js"),
+    `
+    export const config = {api:{default:"/extension",format:String},assets:{base:{default:"/extension",format:String}},app:{base:{default:"/extension",format:String}}};
+  `
   );
   await mkdir(join(tmp, "config"));
   await writeFile(join(tmp, "config", "schema.js"), 'export default {assets:{base:{default:"/app",format:String}}};');
 
-  const extensions = await loadExtensions({ cwd: tmp });
-  const config = await configuration({ additionalSchemas: extensions.configSchemas.map(schema => schema.resolvedFile), cwd: tmp });
+  const extensions = await Extensions.load(tmp);
+  const config = await configuration({ additionalSchemas: extensions.config, cwd: tmp });
 
   // @ts-ignore
   t.equal(config.get("api"), "/extension", "config should be loaded from extension");

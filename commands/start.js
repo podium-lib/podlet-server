@@ -24,6 +24,6 @@ export const builder = (yargs) => {
 export const handler = async (argv) => {
   const { cwd } = argv;
   const extensions = await Extensions.load(cwd);
-  const config = await configuration({ cwd, additionalSchemas: extensions.config() });
+  const config = await configuration({ cwd, additionalSchemas: extensions.config });
   await start({ config, extensions, cwd });
 };
