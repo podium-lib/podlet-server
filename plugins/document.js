@@ -3,21 +3,21 @@ import chalk from "chalk";
 import PathResolver from "../lib/path.js";
 
 /**
- * @typedef {{ podlet: import("@podium/podlet").default, cwd: string, development: boolean, documents: any[] }} DocumentPluginOptions
+ * @typedef {{ podlet: import("@podium/podlet").default, cwd: string, development: boolean, extensions?: import("../lib/extensions/extensions").Extensions }} DocumentPluginOptions
  */
 
 export default fp(async function documentPlugin(
   fastify,
   /**@type {DocumentPluginOptions}*/
-  { podlet, cwd, development, documents }
+  { podlet, cwd, development, extensions }
 ) {
   let documentFile;
 
   // last extension in wins
   let extensionName;
-  for (const document of documents || []) {
-    documentFile = document.resolvedFile;
-    extensionName = document.package.name;
+  for (const extension of extensions || []) {
+    documentFile = extension.document;
+    extensionName = extension.meta.name;
   }
   // check if document.js or document.ts are present in cwd
   // if so, first transpile document.ts file (if present) to .js file and then load/read document.js and register it as a podlet view

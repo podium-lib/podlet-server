@@ -109,7 +109,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
     plugins = [];
     if (extensions?.build().length) {
       for (const buildPlugin of extensions.build()) {
-        const extensionDefinedPlugins = await buildPlugin.resolvedFile({ config });
+        const extensionDefinedPlugins = await buildPlugin({ config });
         plugins.push(...extensionDefinedPlugins);
         LOGGER.debug(
           `${chalk.green("♻️")}  ${chalk.magenta("bundle plugins")}: loaded file from extension ${buildPlugin.package.name}`
@@ -244,7 +244,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
         content: config.get("podlet.content"),
         fallback: config.get("podlet.fallback"),
         base: config.get("assets.base"),
-        documents: extensions?.documentTemplates,
+        extensions,
         plugins,
         name: config.get("app.name"),
         development: config.get("app.development"),
@@ -266,8 +266,8 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       });
 
       // register extension server plugins with fastify
-      for (const serverPlugin of extensions?.serverPlugins || []) {
-        await app.register(serverPlugin.resolvedFile, {
+      for (const serverPlugin of extensions?.server() || []) {
+        await app.register(serverPlugin, {
           prefix: config.get("app.base"),
           logger: LOGGER,
           config,

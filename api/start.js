@@ -60,7 +60,7 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
     fallback: config.get("podlet.fallback"),
     base: config.get("assets.base"),
     plugins,
-    documents: extensions?.document(),
+    extensions,
     name: config.get("app.name"),
     development: config.get("app.development"),
     version: config.get("podlet.version"),
@@ -78,7 +78,7 @@ export async function start({ config, extensions, cwd = process.cwd() }) {
 
   // register extension server plugins with fastify
   for (const serverPlugin of extensions?.server() || []) {
-    await app.register(serverPlugin.resolvedFile, {
+    await app.register(serverPlugin, {
       prefix: config.get("app.base"),
       logger: app.log,
       config,

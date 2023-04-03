@@ -6,6 +6,7 @@ import { test, beforeEach, afterEach } from "tap";
 import configuration from "../../lib/config.js";
 import { build } from "../../api/build.js";
 import { start } from "../../api/start.js";
+import { Extensions } from "../../lib/extensions/extensions.js";
 
 const tmp = join(tmpdir(), "./api.test.js");
 
@@ -118,6 +119,7 @@ test("Using validated query parameters in server.js", async (t) => {
   );
   execSync("npm install", { cwd: tmp });
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
 
@@ -190,6 +192,7 @@ test("scripts.js loading", async (t) => {
   );
   execSync("npm install", { cwd: tmp });
   const config = await configuration({ cwd: tmp });
+  // @ts-ignore
   config.set("app.port", 0);
   config.set("app.logLevel", "FATAL");
   config.set("app.mode", "ssrOnly");
@@ -239,6 +242,49 @@ test("lazy.js loading", async (t) => {
   const content = await res.text();
   t.equal(res.status, 200, "App should respond on lazy.js route");
   t.match(content, "This script is lazy-loaded after the window load event.", "lazy.js content should be correct");
+
+  await app.close();
+});
+
+// Test for extension loading
+test("Loading an extension", async (t) => {
+  await mkdir(join(tmp, "node_modules"));
+  await mkdir(join(tmp, "node_modules", "test-extension"));
+  await writeFile(
+    join(tmp, "node_modules", "test-extension", "package.json"),
+    JSON.stringify({
+      name: "test-extension",
+      version: "1.0.0",
+      main: "index.js",
+      type: "module",
+    })
+  );
+  await writeFile(
+    join(tmp, "node_modules", "test-extension", "index.js"),
+    `
+    export const config = {};
+    export const build = () => [Promise.resolve()];
+    export async function server(app) {};
+    export const document = (incoming, template) => \`...test...\`;
+  `
+  );
+  await writeFile(
+    join(tmp, "package.json"),
+    JSON.stringify({
+      name: "test-app",
+      type: "module",
+      podium: { extensions: { "podlet-server": ["test-extension"] } },
+    })
+  );
+
+  const extensions = await Extensions.load(tmp);
+  const config = await configuration({ cwd: tmp, additionalSchemas: extensions.config() });
+  config.set("app.port", 0);
+  config.set("app.logLevel", "FATAL");
+  await build({ config, cwd: tmp });
+  const app = await start({ config, extensions, cwd: tmp });
+
+  t.equal(extensions.extensions.size, 1, "Should load one extension");
 
   await app.close();
 });
