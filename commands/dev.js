@@ -1,6 +1,10 @@
-import { dev } from "../api/dev.js";
 import configuration from "../lib/config.js";
+import { Local } from "../lib/local.js";
+import { Core } from "../lib/core.js";
 import { Extensions } from "../lib/extensions/extensions.js";
+import { start } from "../api/start.js";
+
+import { dev } from "../api/dev.js";
 
 export const command = "dev";
 
@@ -23,10 +27,11 @@ export const builder = (yargs) => {
 
 export const handler = async (argv) => {
   const { cwd } = argv;
+
+  const core = await Core.load();
   const extensions = await Extensions.load(cwd);
-  const config = await configuration({
-    additionalSchemas: extensions.config,
-    cwd,
-  });
-  await dev({ extensions, config, cwd });
+  const local = await Local.load(cwd);
+  const config = await configuration({ cwd, schemas: [...core.config, ...extensions.config, ...local.config] });
+
+  await dev({ core, extensions, local, config, cwd });
 };

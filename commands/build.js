@@ -1,5 +1,8 @@
-import { build } from "../api/build.js";
 import configuration from "../lib/config.js";
+import { Local } from "../lib/local.js";
+import { Core } from "../lib/core.js";
+import { Extensions } from "../lib/extensions/extensions.js";
+import { build } from "../api/build.js";
 
 export const command = "build";
 
@@ -22,6 +25,10 @@ export const builder = (yargs) => {
 
 export const handler = async (argv) => {
   const { cwd } = argv;
-  const config = await configuration({ cwd });
-  await build({ config, cwd });
+  const core = await Core.load();
+  const extensions = await Extensions.load(cwd);
+  const local = await Local.load(cwd);
+  const config = await configuration({ cwd, schemas: [...core.config, ...extensions.config, ...local.config] });
+
+  await build({ core, extensions, local, config, cwd });
 };

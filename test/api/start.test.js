@@ -7,8 +7,21 @@ import configuration from "../../lib/config.js";
 import { build } from "../../api/build.js";
 import { start } from "../../api/start.js";
 import { Extensions } from "../../lib/extensions/extensions.js";
+import { Local } from "../../lib/local.js";
+import { Core } from "../../lib/core.js";
 
 const tmp = join(tmpdir(), "./api.test.js");
+
+async function setupConfig({ path }) {
+  const core = await Core.load();
+  const extensions = await Extensions.load(path);
+  const local = await Local.load(path);
+  const config = await configuration({ cwd: path, schemas: [...core.config, ...extensions.config, ...local.config] });
+  // @ts-ignore
+  config.set("app.port", 0);
+  config.set("app.logLevel", "FATAL");
+  return { core, extensions, local, config };
+}
 
 beforeEach(async (t) => {
   await mkdir(tmp);
@@ -19,16 +32,14 @@ afterEach(async (t) => {
 });
 
 test("Starting with no files in directory", async (t) => {
-  const config = await configuration({ cwd: tmp });
-  // @ts-ignore
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
   // @ts-ignore
   config.set("app.base", "/test-app");
   // @ts-ignore
   config.set("app.name", "test-app");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp }); // @ts-ignore
+
   const res = await fetch(`${app.address}/test-app/manifest.json`);
   t.equal(res.status, 200, "App should respond on manifest route");
   await app.close();
@@ -36,11 +47,9 @@ test("Starting with no files in directory", async (t) => {
 
 test("Starting with package.json file in directory", async (t) => {
   await writeFile(join(tmp, "package.json"), JSON.stringify({ name: "test-app" }));
-  const config = await configuration({ cwd: tmp });
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
   const res = await fetch(`${app.address}/test-app/manifest.json`);
   t.equal(res.status, 200, "App should respond on manifest route");
   await app.close();
@@ -63,12 +72,9 @@ test("Starting with content file in directory", async (t) => {
     `.trim()
   );
   execSync("npm install", { cwd: tmp });
-  const config = await configuration({ cwd: tmp });
-  // @ts-ignore
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
   const res = await fetch(`${app.address}/test-app`);
   const markup = await res.text();
   t.equal(res.status, 200, "App should respond on content route");
@@ -118,13 +124,9 @@ test("Using validated query parameters in server.js", async (t) => {
     `.trim()
   );
   execSync("npm install", { cwd: tmp });
-  const config = await configuration({ cwd: tmp });
-  // @ts-ignore
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
 
   const validRes = await fetch(`${app.address}/test-app?id=1`);
   t.equal(validRes.status, 200, "App should respond on content route with valid query parameter");
@@ -152,12 +154,9 @@ test("Fallback route", async (t) => {
     JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
   );
   execSync("npm install", { cwd: tmp });
-  const config = await configuration({ cwd: tmp });
-  // @ts-ignore
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
 
   const res = await fetch(`${app.address}/test-app/fallback`);
   const markup = await res.text();
@@ -191,13 +190,11 @@ test("scripts.js loading", async (t) => {
     `.trim()
   );
   execSync("npm install", { cwd: tmp });
-  const config = await configuration({ cwd: tmp });
-  // @ts-ignore
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
+
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
   config.set("app.mode", "ssrOnly");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
 
   const res = await fetch(`${app.address}/test-app/static/client/scripts.js`);
   const content = await res.text();
@@ -232,11 +229,9 @@ test("lazy.js loading", async (t) => {
     JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
   );
   execSync("npm install", { cwd: tmp });
-  const config = await configuration({ cwd: tmp });
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
 
   const res = await fetch(`${app.address}/test-app/static/client/lazy.js`);
   const content = await res.text();
@@ -277,12 +272,9 @@ test("Loading an extension", async (t) => {
     })
   );
 
-  const extensions = await Extensions.load(tmp);
-  const config = await configuration({ cwd: tmp, additionalSchemas: extensions.config });
-  config.set("app.port", 0);
-  config.set("app.logLevel", "FATAL");
-  await build({ config, cwd: tmp });
-  const app = await start({ config, extensions, cwd: tmp });
+  const { core, extensions, local, config } = await setupConfig({ path: tmp });
+  await build({ core, extensions, local, config, cwd: tmp });
+  const app = await start({ core, extensions, local, config, cwd: tmp });
 
   t.equal(extensions.extensions.size, 1, "Should load one extension");
 

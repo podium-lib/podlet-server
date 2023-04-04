@@ -2,7 +2,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
+import { State } from "../../lib/state.js";
 import { Extensions } from "../../lib/extensions/extensions.js";
+import { Local } from "../../lib/local.js";
+import { Core } from "../../lib/core.js";
 import configuration from "../../lib/config.js";
 
 const tmp = join(tmpdir(), "./config.test.js");
@@ -17,7 +20,10 @@ afterEach(async () => {
 });
 
 test("default values", async (t) => {
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   // @ts-ignore
   t.equal(config.get("app.name"), "test-podlet", "app.name should equal test-podlet");
   t.equal(config.get("app.env"), "local", "app.env should equal local");
@@ -32,7 +38,10 @@ test("default values", async (t) => {
 test("app.name overrides value in package.json", async (t) => {
   await mkdir(join(tmp, "config"));
   await writeFile(join(tmp, "config", "common.json"), JSON.stringify({ app: { name: "overridden-name" } }));
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.name"), "overridden-name", "app.name should equal overridden-name");
   t.equal(config.get("app.base"), "/overridden-name", "app.base should equal /overridden-name");
 });
@@ -40,7 +49,10 @@ test("app.name overrides value in package.json", async (t) => {
 test("app.name and app.base overrides respected", async (t) => {
   await mkdir(join(tmp, "config"));
   await writeFile(join(tmp, "config", "common.json"), JSON.stringify({ app: { name: "overridden-name", base: "/" } }));
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.name"), "overridden-name", "app.name should equal overridden-name");
   t.equal(config.get("app.base"), "/", "app.base should equal /");
 });
@@ -48,7 +60,10 @@ test("app.name and app.base overrides respected", async (t) => {
 test("Unusable package.json name and no override provide yields actionable error message", async (t) => {
   await writeFile(join(tmp, "package.json"), JSON.stringify({ name: "@scope/name" }));
   try {
-    await configuration({ cwd: tmp });
+    const state = new State();
+    const core = await Core.load();
+    state.set("core", core);
+    await configuration({ cwd: tmp, schemas: state.config });
   } catch (err) {
     t.equal(
       err.message,
@@ -61,7 +76,10 @@ test("Unusable package.json name and no override provide yields actionable error
 test("ENV set to value other than local results in development=false", async (t) => {
   const env = process.env.ENV;
   process.env.ENV = "prod";
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.development"), false, "app.development should be false");
   // reset env
   process.env.ENV = env;
@@ -69,38 +87,56 @@ test("ENV set to value other than local results in development=false", async (t)
 
 test("When fallback.js is defined, podlet.fallback should equal /fallback", async (t) => {
   await writeFile(join(tmp, "/fallback.js"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("podlet.fallback"), "/fallback", "podlet.fallback should be /fallback");
 });
 
 test("When fallback.ts is defined, podlet.fallback should equal /fallback", async (t) => {
   await writeFile(join(tmp, "/fallback.ts"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("podlet.fallback"), "/fallback", "podlet.fallback should be /fallback");
 });
 
 test("When scripts.js is defined, app.scripts should be true", async (t) => {
   await writeFile(join(tmp, "/scripts.js"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("assets.scripts"), true, "assets.scripts should be true");
 });
 
 test("When scripts.ts is defined, app.scripts should be true", async (t) => {
   await writeFile(join(tmp, "/scripts.js"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   // @ts-ignore
   t.equal(config.get("assets.scripts"), true, "assets.scripts should be true");
 });
 
 test("When lazy.js is defined, app.lazy should be true", async (t) => {
   await writeFile(join(tmp, "/lazy.js"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("assets.lazy"), true, "assets.lazy should be true");
 });
 
 test("When lazy.ts is defined, app.lazy should be true", async (t) => {
   await writeFile(join(tmp, "/lazy.ts"), "");
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("assets.lazy"), true, "assets.lazy should be true");
 });
 
@@ -125,7 +161,10 @@ test("When config/common.json is defined, values within override defaults", asyn
       },
     })
   );
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
   t.equal(config.get("metrics.timing.timeAllRoutes"), true, "metrics.timing.timeAllRoutes should be true");
@@ -157,7 +196,10 @@ test("When domain/env specific config is defined, values within override default
       },
     })
   );
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   // @ts-ignore
   t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
@@ -217,7 +259,10 @@ test("When domain/env specific config is defined, values within override config/
       },
     })
   );
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   // @ts-ignore
   t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
@@ -232,7 +277,10 @@ test("app.grace when running in development", async (t) => {
   const env = process.env.ENV;
   process.env.ENV = "local";
   await mkdir(join(tmp, "config"));
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.grace"), 0, "app.grace should equal 0");
   // reset env
   process.env.ENV = env;
@@ -242,7 +290,10 @@ test("app.grace when not running in development", async (t) => {
   const env = process.env.ENV;
   process.env.ENV = "prod";
   await mkdir(join(tmp, "config"));
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.grace"), 5000, "app.grace should equal 5000");
   // reset env
   process.env.ENV = env;
@@ -251,7 +302,10 @@ test("app.grace when not running in development", async (t) => {
 test("app.grace when overridden", async (t) => {
   await mkdir(join(tmp, "config"));
   await writeFile(join(tmp, "config", "common.json"), JSON.stringify({ app: { grace: 2500 } }));
-  const config = await configuration({ cwd: tmp });
+  const state = new State();
+  const core = await Core.load();
+  state.set("core", core);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
   t.equal(config.get("app.grace"), 2500, "app.grace should equal 2500");
 });
 
@@ -286,8 +340,14 @@ test("config loading from extensions overrides default config", async (t) => {
   await mkdir(join(tmp, "config"));
   await writeFile(join(tmp, "config", "schema.js"), 'export default {assets:{base:{default:"/app",format:String}}};');
 
+  const state = new State();
+  const core = await Core.load();
   const extensions = await Extensions.load(tmp);
-  const config = await configuration({ additionalSchemas: extensions.config, cwd: tmp });
+  const local = await Local.load(tmp);
+  state.set("core", core);
+  state.set("extensions", extensions);
+  state.set("local", local);
+  const config = await configuration({ cwd: tmp, schemas: state.config });
 
   // @ts-ignore
   t.equal(config.get("api"), "/extension", "config should be loaded from extension");

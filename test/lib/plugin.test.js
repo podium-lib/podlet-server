@@ -5,6 +5,12 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
 import fastify from "fastify";
 import plugin from "../../lib/plugin.js";
+// import { Extensions } from "../../lib/extensions/extensions.js";
+// import { Local } from "../../lib/local.js";
+// import { Core } from "../../lib/core.js";
+// import configuration from "../../lib/config.js";
+// import { State } from "../../lib/state.js";
+import convict from "convict";
 
 const tmp = join(tmpdir(), "./plugin.test.js");
 
@@ -16,6 +22,40 @@ export default class Element extends LitElement {
   }
 }
 `.trim();
+
+async function setupConfig() {
+  // const state = new State();
+  // const core = await Core.load();
+  // const extensions = await Extensions.load(path);
+  // const local = await Local.load(path);
+  // state.set("core", core);
+  // state.set("extensions", extensions);
+  // state.set("local", local);
+  // const config = await configuration({ cwd: path, schemas: state.config });
+  // // @ts-ignore
+  // config.set("app.port", 0);
+  // config.set("app.logLevel", "FATAL");
+  // return { state, config, extensions };
+  const config = convict({});
+  // @ts-ignore
+  config.set("app.name", "test-app");
+  config.set("assets.base", "/static");
+  config.set("podlet.version", "1.0.0");
+  config.set("podlet.pathname", "/");
+  config.set("podlet.manifest", "/manifest.json");
+  config.set("podlet.content", "/");
+  config.set("podlet.fallback", "");
+  config.set("app.development", false);
+  config.set("app.locale", "en-US");
+  config.set("assets.lazy", false);
+  config.set("assets.scripts", false);
+  config.set("app.compression", false);
+  config.set("app.grace", 0);
+  config.set("metrics.timing.timeAllRoutes", false);
+  config.set("metrics.timing.groupStatusCodes", false);
+  config.set("app.mode", "hydrate");
+  return config;
+}
 
 beforeEach(async (t) => {
   await mkdir(tmp);
@@ -36,10 +76,11 @@ afterEach(async () => {
 
 test("simple app with content route", async (t) => {
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
+    config,
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
@@ -58,11 +99,11 @@ test("simple app with content route", async (t) => {
 test("simple app with fallback route", async (t) => {
   await writeFile(join(tmp, "fallback.js"), contentFile);
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
-    fallback: "/fallback",
+    config,
   });
   const address = await app.listen({ port: 0 });
   const fallback = await fetch(`${address}/fallback`);
@@ -79,11 +120,11 @@ test("simple app with fallback route", async (t) => {
 test("serialising state between server and client", async (t) => {
   await writeFile(join(tmp, "fallback.js"), contentFile);
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
-    fallback: "/fallback",
+    config,
   });
   await app.register(async function server(app) {
     // @ts-ignore
@@ -110,12 +151,12 @@ test("serialising state between server and client", async (t) => {
 test("scripts", async (t) => {
   await writeFile(join(tmp, "fallback.js"), contentFile);
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
+  config.set("assets.scripts", true);
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
-    fallback: "/fallback",
-    scripts: true,
+    config,
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
@@ -133,12 +174,12 @@ test("scripts", async (t) => {
 test("lazy", async (t) => {
   await writeFile(join(tmp, "fallback.js"), contentFile);
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
+  config.set("assets.lazy", true);
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
-    fallback: "/fallback",
-    lazy: true,
+    config,
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
@@ -167,10 +208,10 @@ test("schemas: content.json", async (t) => {
     })
   );
   const app = fastify({ logger: false });
+  const config = await setupConfig();
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
+    config,
   });
   const address = await app.listen({ port: 0 });
   const noQueryParm = await fetch(`${address}/`);
@@ -195,11 +236,11 @@ test("schemas: fallback.json", async (t) => {
     })
   );
   const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
   await app.register(plugin, {
     cwd: tmp,
-    name: "test-app",
-    version: "1.0.0",
-    fallback: "/fallback",
+    config,
   });
   const address = await app.listen({ port: 0 });
   const noQueryParm = await fetch(`${address}/fallback`);
@@ -209,8 +250,8 @@ test("schemas: fallback.json", async (t) => {
   await app.close();
 });
 
-// test("build plugin", async (t) => {})
-// test("locale", async (t) => {})
-// test("metrics", async (t) => {})
-// test("typescript", async (t) => {})
-// test("errors", async (t) => {})
+// // test("build plugin", async (t) => {})
+// // test("locale", async (t) => {})
+// // test("metrics", async (t) => {})
+// // test("typescript", async (t) => {})
+// // test("errors", async (t) => {})

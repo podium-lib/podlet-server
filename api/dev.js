@@ -3,13 +3,12 @@ import { join } from "node:path";
 import chokidar from "chokidar";
 import { context } from "esbuild";
 import pino from "pino";
-import sandbox from "fastify-sandbox";
 import { start } from "@fastify/restartable";
 import httpError from "http-errors";
-import fastifyPodletPlugin from "../lib/plugin.js";
 import PathResolver from "../lib/path.js";
 import chalk from "chalk";
 import boxen from "boxen";
+import { State } from "../lib/state.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
@@ -25,12 +24,19 @@ const joinURLPathSegments = (...segments) => {
 /**
  * Set up a development environment for a Podium Podlet server.
  * @param {object} options - The options for the development environment.
- * @param {import("convict").Config} options.config - The Podlet configuration.
- * @param {import("../lib/extensions/extensions").Extensions} [options.extensions] - The Podlet configuration.
+ * @param {import("../lib/extensions/extensions").Extensions} options.extensions - The podlet extensions file resolution object.
+ * @param {import("../lib/core").Core} options.core - The podlet core file resolution object.
+ * @param {import("../lib/local").Local} options.local - The podlet local app file resolution object.
+ * @param {import("convict").Config} options.config - The podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
-export async function dev({ config, extensions, cwd = process.cwd() }) {
+export async function dev({ core, extensions, local, config, cwd = process.cwd() }) {
+  const state = new State();
+  state.set("core", core);
+  state.set("extensions", extensions);
+  state.set("local", local);
+
   // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
   // @ts-ignore
   config.set("assets.development", true);
@@ -79,14 +85,12 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
   const clientFiles = [];
   let CONTENT_FILEPATH;
   let FALLBACK_FILEPATH;
-  let plugins;
 
   async function createBuildContext() {
     CONTENT_FILEPATH = await resolver.resolve("./content");
     FALLBACK_FILEPATH = await resolver.resolve("./fallback");
     const SCRIPTS_FILEPATH = await resolver.resolve("./scripts");
     const LAZY_FILEPATH = await resolver.resolve("./lazy");
-    const BUILD_FILEPATH = await resolver.resolve("./build");
 
     const entryPoints = [];
     if (CONTENT_FILEPATH.exists) {
@@ -106,32 +110,6 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       clientFiles.push(join("dist", entryPoint.replace(cwd, "")));
     }
 
-    plugins = [];
-    if (extensions?.build.length) {
-      for (const buildPlugin of extensions.build) {
-        const extensionDefinedPlugins = await buildPlugin({ config });
-        plugins.push(...extensionDefinedPlugins);
-        LOGGER.debug(
-          `${chalk.green("♻️")}  ${chalk.magenta("bundle plugins")}: loaded file from extension ${buildPlugin.package.name}`
-        );
-      }
-    }
-    // support user defined plugins via a build.js file
-    if (BUILD_FILEPATH.exists) {
-      try {
-        const userDefinedBuild = (await resolver.import(BUILD_FILEPATH)).default;
-        const userDefinedPlugins = await userDefinedBuild({ config });
-        if (Array.isArray(userDefinedPlugins)) {
-          plugins.push(...userDefinedPlugins);
-        }
-      } catch (err) {
-        // noop
-      }
-      LOGGER.debug(
-        `${chalk.green("♻️")}  ${chalk.magenta("bundle plugins")}: loaded file ${BUILD_FILEPATH.path.replace(cwd, "")}`
-      );
-    }
-
     const ctx = await context({
       entryPoints,
       entryNames: "[name]",
@@ -142,7 +120,7 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       target: ["es2017"],
       legalComments: `none`,
       sourcemap: true,
-      plugins,
+      plugins: state.build,
     });
 
     // Esbuild built in server which provides an SSE endpoint the client can subscribe to
@@ -237,66 +215,24 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
         });
       }
 
-      await app.register(fastifyPodletPlugin, {
-        prefix: config.get("app.base") || "/",
-        pathname: config.get("podlet.pathname"),
-        manifest: config.get("podlet.manifest"),
-        content: config.get("podlet.content"),
-        fallback: config.get("podlet.fallback"),
-        base: config.get("assets.base"),
-        extensions,
-        plugins,
-        name: config.get("app.name"),
-        development: config.get("app.development"),
-        version: config.get("podlet.version"),
-        locale: config.get("app.locale"),
-        lazy: config.get("assets.lazy"),
-        scripts: config.get("assets.scripts"),
-        compression: config.get("app.compression"),
-        grace: config.get("app.grace"),
-        timeAllRoutes: config.get("metrics.timing.timeAllRoutes"),
-        groupStatusCodes: config.get("metrics.timing.groupStatusCodes"),
-        mode: config.get("app.mode"),
-      });
+      for (const serverPlugin of state.server || []) {
+        await app.register(serverPlugin, {
+          cwd,
+          prefix: config.get("app.base"),
+          logger: app.log,
+          config,
+          podlet: app.podlet,
+          errors: httpError,
+          plugins: state.build,
+          extensions,
+        });
+      }
 
       app.addHook("onError", async (request, reply, error) => {
         // console.log("fastify onError hook: disposing of build context", error);
         LOGGER.error(error, "fastify onError hook: disposing of build context");
         await buildContext.dispose();
       });
-
-      // register extension server plugins with fastify
-      for (const serverPlugin of extensions?.server || []) {
-        await app.register(serverPlugin, {
-          prefix: config.get("app.base"),
-          logger: LOGGER,
-          config,
-          podlet: app.podlet,
-          errors: httpError,
-        });
-        LOGGER.debug(`🖥️  ${chalk.magenta("server")}: loaded file from extension ${serverPlugin.package.name}`);
-      }
-
-      // register user provided plugin using sandbox to enable reloading
-      // Load user server.js file if provided.
-      const SERVER_FILEPATH = await resolver.buildAndResolve("./server");
-      if (SERVER_FILEPATH.exists) {
-        app.register(sandbox, {
-          path: SERVER_FILEPATH.path,
-          options: { prefix: config.get("app.base"), logger: LOGGER, config, podlet: app.podlet, errors: httpError },
-        });
-
-        if (SERVER_FILEPATH.typescript) {
-          LOGGER.debug(
-            `🖥️  ${chalk.magenta("server")}: loaded file server.ts after bundling as ${SERVER_FILEPATH.path.replace(
-              cwd,
-              ""
-            )}`
-          );
-        } else {
-          LOGGER.debug(`🖥️  ${chalk.magenta("server")}: loaded file ${SERVER_FILEPATH.path.replace(cwd, "")}`);
-        }
-      }
 
       done();
     },
@@ -341,10 +277,9 @@ export async function dev({ config, extensions, cwd = process.cwd() }) {
       const msgBox = boxen(greeting, { padding: 0.5 });
       console.log(msgBox);
       LOGGER.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
-      // TODO::
-      // check a hash of the server.js/ts file and ensure changedFilename has actually changed
-      // this might be slower than just always restarting though... measure.
       try {
+        // TODO: only reload the area related to the changed file
+        await local.reload();
         await started.restart();
       } catch (err) {
         LOGGER.error(err);
