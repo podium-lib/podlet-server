@@ -27,7 +27,7 @@ export const handler = async (argv) => {
   const { cwd } = argv;
   const core = await Core.load();
   const extensions = await Extensions.load(cwd);
-  const local = await Local.load(cwd);
+  const local = await Local.load({ cwd });
   const config = await configuration({ cwd, schemas: [...core.config, ...extensions.config, ...local.config] });
 
   await build({ core, extensions, local, config, cwd });

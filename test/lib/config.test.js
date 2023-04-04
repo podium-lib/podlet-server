@@ -343,7 +343,7 @@ test("config loading from extensions overrides default config", async (t) => {
   const state = new State();
   const core = await Core.load();
   const extensions = await Extensions.load(tmp);
-  const local = await Local.load(tmp);
+  const local = await Local.load({ cwd: tmp });
   state.set("core", core);
   state.set("extensions", extensions);
   state.set("local", local);
