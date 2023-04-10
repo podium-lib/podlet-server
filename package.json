@@ -1,6 +1,6 @@
 {
   "name": "@podium/podlet-server",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "type": "module",
   "bin": {
     "podlet": "./cli.js"
@@ -27,15 +27,16 @@
   "homepage": "https://podium-lib.io/",
   "description": "Server for building page fragment with web components in a micro frontend architecture.",
   "dependencies": {
-    "@fastify/compress": "6.2.0",
-    "@fastify/static": "6.9.0",
-    "@lit-labs/ssr": "3.1.0",
+    "@fastify/compress": "6.2.1",
+    "@fastify/restartable": "1.4.0",
+    "@fastify/static": "6.10.0",
+    "@lit-labs/ssr": "3.1.1",
     "@metrics/client": "2.5.0",
     "@podium/fastify-podlet": "3.0.0-next.3",
     "@podium/podlet": "5.0.0-next.6",
     "@rollup/plugin-commonjs": "24.0.1",
-    "@rollup/plugin-node-resolve": "15.0.1",
-    "@rollup/plugin-terser": "0.4.0",
+    "@rollup/plugin-node-resolve": "15.0.2",
+    "@rollup/plugin-terser": "0.4.1",
     "abslog": "2.4.0",
     "ajv": "8.12.0",
     "boxen": "7.0.2",
@@ -43,13 +44,13 @@
     "chokidar": "3.5.3",
     "convict": "6.2.4",
     "emoji-flags": "^1.3.0",
-    "esbuild": "0.17.13",
     "fastify": "^4.15.0",
+    "esbuild": "0.17.16",
     "fastify-metrics-js-prometheus": "4.0.0",
     "fastify-metrics-js-response-timing": "3.0.0",
     "fastify-plugin": "4.5.0",
     "http-errors": "2.0.0",
-    "lit": "2.7.0",
+    "lit": "2.7.2",
     "lodash.merge": "4.6.2",
     "minify-html-literals": "1.3.5",
     "ora": "6.3.0",
@@ -63,7 +64,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "6.0.1",
+    "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "semantic-release": "19.0.5",
     "tap": "^16.3.4"
