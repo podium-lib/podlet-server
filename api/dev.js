@@ -3,7 +3,7 @@ import { join } from "node:path";
 import chokidar from "chokidar";
 import { context } from "esbuild";
 import pino from "pino";
-import { start } from "@fastify/restartable";
+import fastify from "fastify";
 import httpError from "http-errors";
 import PathResolver from "../lib/path.js";
 import chalk from "chalk";
@@ -11,6 +11,77 @@ import boxen from "boxen";
 import { State } from "../lib/state.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
+
+class DevServer {
+  constructor({ cwd, config, logger, extensions, core, local, content = false }) {
+    this.cwd = cwd;
+    this.config = config;
+    this.logger = logger;
+    this.extensions = extensions;
+    this.core = core;
+    this.local = local;
+    this.state = new State();
+    this.state.set("core", core);
+    this.state.set("extensions", extensions);
+    this.state.set("local", local);
+    this.content = content;
+  }
+
+  async setup() {
+    const app = fastify({
+      logger: this.logger,
+      ignoreTrailingSlash: true,
+    });
+
+    if (!this.content) {
+      app.get("/", (request, reply) => {
+        reply.redirect(join(this.config.get("app.base"), this.config.get("podlet.manifest")));
+      });
+    }
+
+    // if content file is defined, and content url doesn't resolve to /, redirect to content route
+    if (joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.content")) !== "/" && this.content) {
+      app.get("/", (request, reply) => {
+        reply.redirect(join(this.config.get("app.base"), this.config.get("podlet.content")));
+      });
+    }
+
+    for (const serverPlugin of this.state.server || []) {
+      await app.register(serverPlugin, {
+        cwd: this.cwd,
+        prefix: this.config.get("app.base"),
+        logger: this.logger,
+        config: this.config,
+        // @ts-ignore
+        podlet: app.podlet,
+        errors: httpError,
+        plugins: this.state.build,
+        extensions: this.extensions,
+      });
+    }
+
+    // TODO: wire this up!
+    app.addHook("onError", async (request, reply, error) => {
+      // console.log("fastify onError hook: disposing of build context", error);
+      this.logger.error(error, "fastify onError hook: disposing of build context");
+      // await buildContext.dispose();
+    });
+
+    return app;
+  }
+
+  async start() {
+    this.app = await this.setup();
+    await this.app.listen({ port: this.config.get("app.port") });
+    this.app.log.info({ url: `http://localhost:${this.config.get("app.port")}` }, `Development server listening`);
+  }
+
+  async restart() {
+    const [app] = await Promise.all([this.setup(), this.app?.close()]);
+    this.app = app;
+    this.app.listen({ port: this.config.get("app.port") });
+  }
+}
 
 /**
  * Concatenate URL path segments.
@@ -83,7 +154,9 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
   mkdirSync(join(cwd, "dist"), { recursive: true });
 
   const clientFiles = [];
+  /** @type {import("../lib/path.js").Resolution} */
   let CONTENT_FILEPATH;
+  /** @type {import("../lib/path.js").Resolution} */
   let FALLBACK_FILEPATH;
 
   async function createBuildContext() {
@@ -193,52 +266,15 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
     LOGGER.error(err, "Uh Oh! Something went wrong with client side file watching. Got error");
   });
 
-  // Create and start a development server
-  const started = await start({
+  const devServer = new DevServer({
     logger: LOGGER,
+    cwd,
+    config,
+    extensions,
+    core,
+    local,
     // @ts-ignore
-    app: async (app, opts, done) => {
-      // if no content file yet defined, redirect to manifest file
-      if (!CONTENT_FILEPATH.exists) {
-        app.get("/", (request, reply) => {
-          reply.redirect(join(config.get("app.base"), config.get("podlet.manifest")));
-        });
-      }
-
-      // if content file is defined, and content url doesn't resolve to /, redirect to content route
-      if (
-        joinURLPathSegments(config.get("app.base"), config.get("podlet.content")) !== "/" &&
-        CONTENT_FILEPATH.exists
-      ) {
-        app.get("/", (request, reply) => {
-          reply.redirect(join(config.get("app.base"), config.get("podlet.content")));
-        });
-      }
-
-      for (const serverPlugin of state.server || []) {
-        await app.register(serverPlugin, {
-          cwd,
-          prefix: config.get("app.base"),
-          logger: app.log,
-          config,
-          podlet: app.podlet,
-          errors: httpError,
-          plugins: state.build,
-          extensions,
-        });
-      }
-
-      app.addHook("onError", async (request, reply, error) => {
-        // console.log("fastify onError hook: disposing of build context", error);
-        LOGGER.error(error, "fastify onError hook: disposing of build context");
-        await buildContext.dispose();
-      });
-
-      done();
-    },
-    // @ts-ignore
-    port: config.get("app.port"),
-    ignoreTrailingSlash: true,
+    content: CONTENT_FILEPATH.exists,
   });
 
   // Chokidar provides super fast native file system watching
@@ -280,7 +316,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       try {
         // TODO: only reload the area related to the changed file
         await local.reload();
-        await started.restart();
+        await devServer.restart();
       } catch (err) {
         LOGGER.error(err);
         buildContext.dispose();
@@ -305,7 +341,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
 
   // start the server for the first time
   try {
-    await started.listen();
+    await devServer.start();
   } catch (err) {
     LOGGER.error(err);
     await clientWatcher.close();
