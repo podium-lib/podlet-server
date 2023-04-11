@@ -112,7 +112,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
   // @ts-ignore
   config.set("assets.development", true);
 
-  const LOGGER = pino({
+  const logger = pino({
     transport: {
       target: "../lib/pino-dev-transport.js",
     },
@@ -127,7 +127,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
   const OUTDIR = join(cwd, "dist");
   const CLIENT_OUTDIR = join(OUTDIR, "client");
 
-  LOGGER.debug(`⚙️  ${chalk.magenta("app configuration")}: ${JSON.stringify(config.getProperties())}`);
+  logger.debug(`⚙️  ${chalk.magenta("app configuration")}: ${JSON.stringify(config.getProperties())}`);
 
   // calculate routes from config.get("podlet.content") and config.get("podlet.fallback")
   const routes = [
@@ -144,7 +144,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
     routes.push({ name: "fallback", path: config.get("podlet.fallback") });
   }
 
-  LOGGER.debug(
+  logger.debug(
     `📍 ${chalk.magenta("routes")}: ${routes
       .map((r) => `${r.name} ${chalk.cyan(`${config.get("app.base")}${r.path}`)}`)
       .join(", ")}`
@@ -209,7 +209,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
 
   // create an array of files that are output by the build process
 
-  LOGGER.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles built")}: ${clientFiles.join(", ")}`);
+  logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles built")}: ${clientFiles.join(", ")}`);
 
   // Chokidar provides super fast native file system watching
   const clientWatcher = chokidar.watch(
@@ -242,7 +242,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
       const msgBox = boxen(greeting, { padding: 0.5 });
       console.log(msgBox);
-      LOGGER.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
+      logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
       try {
         await buildContext.rebuild();
       } catch (err) {
@@ -251,7 +251,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
         await buildContext.dispose();
         buildContext = await createBuildContext();
       }
-      LOGGER.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles rebuilt")}: ${clientFiles.join(", ")}`);
+      logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles rebuilt")}: ${clientFiles.join(", ")}`);
     };
   }
   // let things settle before adding event handlers
@@ -263,11 +263,11 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
   });
 
   clientWatcher.on("error", (err) => {
-    LOGGER.error(err, "Uh Oh! Something went wrong with client side file watching. Got error");
+    logger.error(err, "Uh Oh! Something went wrong with client side file watching. Got error");
   });
 
   const devServer = new DevServer({
-    logger: LOGGER,
+    logger: logger,
     cwd,
     config,
     extensions,
@@ -302,7 +302,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
     }
   );
   serverWatcher.on("error", async (err) => {
-    LOGGER.error(err, "server watcher error: disposing of build context");
+    logger.error(err, "server watcher error: disposing of build context");
     await buildContext.dispose();
   });
 
@@ -312,16 +312,16 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
       const msgBox = boxen(greeting, { padding: 0.5 });
       console.log(msgBox);
-      LOGGER.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
+      logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
       try {
         // TODO: only reload the area related to the changed file
         await local.reload();
         await devServer.restart();
       } catch (err) {
-        LOGGER.error(err);
+        logger.error(err);
         buildContext.dispose();
       }
-      LOGGER.debug(`${chalk.green("♻️")}  ${chalk.blue("server restarted")}`);
+      logger.debug(`${chalk.green("♻️")}  ${chalk.blue("server restarted")}`);
     };
   }
 
@@ -336,14 +336,14 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
   });
 
   serverWatcher.on("error", (err) => {
-    LOGGER.error(err, "Uh Oh! Something went wrong with server side file watching. Got error");
+    logger.error(err, "Uh Oh! Something went wrong with server side file watching. Got error");
   });
 
   // start the server for the first time
   try {
     await devServer.start();
   } catch (err) {
-    LOGGER.error(err);
+    logger.error(err);
     await clientWatcher.close();
     await serverWatcher.close();
     buildContext.dispose();
