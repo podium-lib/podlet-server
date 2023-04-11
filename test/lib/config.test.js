@@ -281,6 +281,7 @@ test("app.grace when running in development", async (t) => {
   const core = await Core.load();
   state.set("core", core);
   const config = await configuration({ cwd: tmp, schemas: state.config });
+  // @ts-ignore
   t.equal(config.get("app.grace"), 0, "app.grace should equal 0");
   // reset env
   process.env.ENV = env;
@@ -294,6 +295,7 @@ test("app.grace when not running in development", async (t) => {
   const core = await Core.load();
   state.set("core", core);
   const config = await configuration({ cwd: tmp, schemas: state.config });
+  // @ts-ignore
   t.equal(config.get("app.grace"), 5000, "app.grace should equal 5000");
   // reset env
   process.env.ENV = env;
@@ -344,6 +346,7 @@ test("config loading from extensions overrides default config", async (t) => {
   const core = await Core.load();
   const extensions = await Extensions.load(tmp);
   const local = await Local.load({ cwd: tmp });
+
   state.set("core", core);
   state.set("extensions", extensions);
   state.set("local", local);
