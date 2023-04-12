@@ -79,7 +79,7 @@ touch config/schema.js
 Open schema.js in your text editor and define your custom configuration values. For example:
 
 ```js
-export default {
+export default ({ cwd, development }) => {
   db: {
     host: {
       doc: "Database host name/IP",

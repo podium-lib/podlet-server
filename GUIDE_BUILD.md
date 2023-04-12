@@ -17,8 +17,7 @@ In the build.js file, define your custom Esbuild plugin(s) by exporting a defaul
 Example: build.js
 ```javascript
 // Export a default function that returns an array of Esbuild plugins
-// The app configuration is provided to the function
-export default ({ config }) => [
+export default ({ cwd, development }) => [
   {
     // Plugin name, snake case
     name: "esbuild-my-plugin",
