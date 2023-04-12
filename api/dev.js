@@ -135,7 +135,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   logger.debug(
     `📍 ${chalk.magenta("routes")}: ${routes
-      .map((r) => `${r.name} ${chalk.cyan(`${config.get("app.base")}${r.path}`)}`)
+      .map((r) => `${r.name} ${chalk.cyan(`${(config.get("app.base") + r.path).replace("//", "/")}`)}`)
       .join(", ")}`
   );
 
