@@ -3,7 +3,7 @@ import chalk from "chalk";
 import PathResolver from "../lib/path.js";
 
 /**
- * @typedef {{ podlet: import("@podium/podlet").default, cwd: string, development: boolean, extensions?: import("../lib/extensions/extensions").Extensions }} DocumentPluginOptions
+ * @typedef {{ podlet: import("@podium/podlet").default, cwd: string, development: boolean, extensions?: import("../lib/resolvers/extensions").Extensions }} DocumentPluginOptions
  */
 
 export default fp(async function documentPlugin(
@@ -27,7 +27,9 @@ export default fp(async function documentPlugin(
   if (appDocumentFile.exists) {
     try {
       documentFile = (await resolver.import("./document")).default;
-      fastify.log.debug(`📄 ${chalk.magenta("document template")}: loaded file ${appDocumentFile.path.replace(cwd, "")}`);
+      fastify.log.debug(
+        `📄 ${chalk.magenta("document template")}: loaded file ${appDocumentFile.path.replace(cwd, "")}`
+      );
     } catch (err) {
       fastify.log.fatal(err, `document.js file located but could not be loaded.`);
     }

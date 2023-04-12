@@ -1,7 +1,8 @@
 import configuration from "../lib/config.js";
-import { Local } from "../lib/local.js";
-import { Core } from "../lib/core.js";
-import { Extensions } from "../lib/extensions/extensions.js";
+import { Local } from "../lib/resolvers/local.js";
+import { Core } from "../lib/resolvers/core.js";
+import { Extensions } from "../lib/resolvers/extensions.js";
+import { State } from "../lib/state.js";
 
 import { dev } from "../api/dev.js";
 
@@ -27,10 +28,12 @@ export const builder = (yargs) => {
 export const handler = async (argv) => {
   const { cwd } = argv;
 
-  const core = await Core.load();
-  const extensions = await Extensions.load(cwd);
-  const local = await Local.load({ cwd, development: true });
-  const config = await configuration({ cwd, schemas: [...core.config, ...extensions.config, ...local.config] });
+  const state = new State({ cwd, development: true });
+  state.set("core", await Core.load());
+  state.set("extensions", await Extensions.load({ cwd, development: true }));
+  state.set("local", await Local.load({ cwd, development: true }));
 
-  await dev({ core, extensions, local, config, cwd });
+  const config = await configuration({ cwd, schemas: await state.config() });
+
+  await dev({ state, config, cwd });
 };

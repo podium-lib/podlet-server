@@ -6,24 +6,17 @@ import rollupPluginTerser from "@rollup/plugin-terser";
 import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
-import { State } from "../lib/state.js";
 
 /**
  * Builds the project using esbuild.
  *
  * @param {Object} options
- * @param {import("../lib/extensions/extensions").Extensions} options.extensions - The podlet extensions file resolution object.
- * @param {import("../lib/core").Core} options.core - The podlet core file resolution object.
- * @param {import("../lib/local").Local} options.local - The podlet local app file resolution object.
+ * @param {import("../lib/state").State} options.state - App state object
  * @param {import("convict").Config} options.config - The podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
-export async function build({ core, extensions, local, config, cwd = process.cwd() }) {
-  const state = new State();
-  state.set("core", core);
-  state.set("extensions", extensions);
-  state.set("local", local);
+export async function build({ state, config, cwd = process.cwd() }) {
   try {
     // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
     // @ts-ignore
@@ -71,10 +64,11 @@ export async function build({ core, extensions, local, config, cwd = process.cwd
       entryPoints.push(LAZY_FILEPATH);
     }
 
+    const plugins = await state.build();
     // Run code through esbuild first to apply plugins but don't bundle or minify
     await esbuild.build({
       entryNames: "[name]",
-      plugins: state.build,
+      plugins,
       entryPoints,
       bundle: false,
       format: "esm",

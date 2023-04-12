@@ -8,22 +8,15 @@ import httpError from "http-errors";
 import PathResolver from "../lib/path.js";
 import chalk from "chalk";
 import boxen from "boxen";
-import { State } from "../lib/state.js";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
 class DevServer {
-  constructor({ cwd, config, logger, extensions, core, local, content = false }) {
+  constructor({ cwd, config, logger, state, content = false }) {
     this.cwd = cwd;
     this.config = config;
     this.logger = logger;
-    this.extensions = extensions;
-    this.core = core;
-    this.local = local;
-    this.state = new State();
-    this.state.set("core", core);
-    this.state.set("extensions", extensions);
-    this.state.set("local", local);
+    this.state = state;
     this.content = content;
   }
 
@@ -31,6 +24,7 @@ class DevServer {
     const app = fastify({
       logger: this.logger,
       ignoreTrailingSlash: true,
+      forceCloseConnections: true,
     });
 
     if (!this.content) {
@@ -46,7 +40,9 @@ class DevServer {
       });
     }
 
-    for (const serverPlugin of this.state.server || []) {
+    const plugins = await this.state.build();
+    const extensions = this.state.get("extensions");
+    for (const serverPlugin of await this.state.server()) {
       await app.register(serverPlugin, {
         cwd: this.cwd,
         prefix: this.config.get("app.base"),
@@ -55,8 +51,8 @@ class DevServer {
         // @ts-ignore
         podlet: app.podlet,
         errors: httpError,
-        plugins: this.state.build,
-        extensions: this.extensions,
+        plugins,
+        extensions,
       });
     }
 
@@ -79,7 +75,7 @@ class DevServer {
   async restart() {
     const [app] = await Promise.all([this.setup(), this.app?.close()]);
     this.app = app;
-    this.app.listen({ port: this.config.get("app.port") });
+    await this.app.listen({ port: this.config.get("app.port") });
   }
 }
 
@@ -95,19 +91,12 @@ const joinURLPathSegments = (...segments) => {
 /**
  * Set up a development environment for a Podium Podlet server.
  * @param {object} options - The options for the development environment.
- * @param {import("../lib/extensions/extensions").Extensions} options.extensions - The podlet extensions file resolution object.
- * @param {import("../lib/core").Core} options.core - The podlet core file resolution object.
- * @param {import("../lib/local").Local} options.local - The podlet local app file resolution object.
+ * @param {import("../lib/state").State} options.state - App state object
  * @param {import("convict").Config} options.config - The podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
-export async function dev({ core, extensions, local, config, cwd = process.cwd() }) {
-  const state = new State();
-  state.set("core", core);
-  state.set("extensions", extensions);
-  state.set("local", local);
-
+export async function dev({ state, config, cwd = process.cwd() }) {
   // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
   // @ts-ignore
   config.set("assets.development", true);
@@ -183,6 +172,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       clientFiles.push(join("dist", entryPoint.replace(cwd, "")));
     }
 
+    const plugins = await state.build();
     const ctx = await context({
       entryPoints,
       entryNames: "[name]",
@@ -193,7 +183,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       target: ["es2017"],
       legalComments: `none`,
       sourcemap: true,
-      plugins: state.build,
+      plugins,
     });
 
     // Esbuild built in server which provides an SSE endpoint the client can subscribe to
@@ -270,9 +260,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
     logger: logger,
     cwd,
     config,
-    extensions,
-    core,
-    local,
+    state,
     // @ts-ignore
     content: CONTENT_FILEPATH.exists,
   });
@@ -315,7 +303,7 @@ export async function dev({ core, extensions, local, config, cwd = process.cwd()
       logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
       try {
         // TODO: only reload the area related to the changed file
-        await local.reload();
+        await state.get("local").reload();
         await devServer.restart();
       } catch (err) {
         logger.error(err);
