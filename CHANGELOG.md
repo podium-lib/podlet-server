@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/podium-lib/podlet-server/compare/v1.3.1...v1.4.0) (2023-04-13)
+
+
+### Features
+
+* add support for extensions ([5540230](https://github.com/podium-lib/podlet-server/commit/5540230ea10d9fa73a506ecf9c08cd2c4f9ca585))
+
 ## [1.3.1](https://github.com/podium-lib/podlet-server/compare/v1.3.0...v1.3.1) (2023-04-10)
 
 
