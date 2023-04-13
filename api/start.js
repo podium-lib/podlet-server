@@ -1,7 +1,5 @@
 import fastify from "fastify";
 import httpError from "http-errors";
-import fastifyPodletPlugin from "../lib/plugin.js";
-import PathResolver from "../lib/path.js";
 
 /**
  * @typedef {import("fastify").FastifyInstance & { podlet: import("@podium/podlet").default }} FastifyInstance
@@ -10,72 +8,36 @@ import PathResolver from "../lib/path.js";
 /**
  * Start up a production server for a Podium Podlet server app.
  * @param {object} options - The options for the development environment.
- * @param {import("convict").Config} options.config - The Podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
+ * @param {import("../lib/state").State} options.state - App state object
+ * @param {import("convict").Config} options.config - The podlet configuration.
  * @returns {Promise<{address: string, close: function}>}
  */
-export async function start({ config, cwd = process.cwd() }) {
-  // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
-  // @ts-ignore
-  const resolver = new PathResolver({ cwd, development: config.get("app.development") });
-  const BUILD_FILEPATH = await resolver.resolve("./build");
-  const SERVER_FILEPATH = await resolver.resolve("./server");
-
-  const plugins = [];
-  if (BUILD_FILEPATH.exists) {
-    try {
-      const userDefinedBuild = (await resolver.import(BUILD_FILEPATH)).default;
-      const userDefinedPlugins = await userDefinedBuild({ config });
-      if (Array.isArray(userDefinedPlugins)) {
-        plugins.unshift(...userDefinedPlugins);
-      }
-    } catch (err) {
-      // noop
-    }
-  }
-
+export async function start({ state, config, cwd = process.cwd() }) {
   const app = /** @type {FastifyInstance}*/ (
     /**@type {unknown}*/ (
       fastify({
         logger: {
+          // @ts-ignore
           level: config.get("app.logLevel").toLowerCase(),
         },
         ignoreTrailingSlash: true,
       })
     )
   );
-  app.register(fastifyPodletPlugin, {
-    cwd,
-    prefix: config.get("app.base") || "/",
-    pathname: config.get("podlet.pathname"),
-    manifest: config.get("podlet.manifest"),
-    content: config.get("podlet.content"),
-    fallback: config.get("podlet.fallback"),
-    base: config.get("assets.base"),
-    plugins,
-    name: config.get("app.name"),
-    development: config.get("app.development"),
-    version: config.get("podlet.version"),
-    locale: config.get("app.locale"),
-    lazy: config.get("assets.lazy"),
-    scripts: config.get("assets.scripts"),
-    compression: config.get("app.compression"),
-    grace: config.get("app.grace"),
-    timeAllRoutes: config.get("metrics.timing.timeAllRoutes"),
-    groupStatusCodes: config.get("metrics.timing.groupStatusCodes"),
-    mode: config.get("app.mode"),
-  });
 
-  const { podlet } = app;
-
-  // Load user server.js file if provided.
-  if (SERVER_FILEPATH.exists) {
-    app.register((await resolver.import(SERVER_FILEPATH)).default, {
+  const plugins = await state.build();
+  const extensions = await state.get("extensions");
+  for (const serverPlugin of await state.server()) {
+    await app.register(serverPlugin, {
+      cwd,
       prefix: config.get("app.base"),
       logger: app.log,
       config,
-      podlet,
+      podlet: app.podlet,
       errors: httpError,
+      plugins,
+      extensions,
     });
   }
 

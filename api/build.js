@@ -11,11 +11,12 @@ import rollupPluginCommonjs from "@rollup/plugin-commonjs";
  * Builds the project using esbuild.
  *
  * @param {Object} options
- * @param {import("convict").Config} options.config - The configuration object.
+ * @param {import("../lib/state").State} options.state - App state object
+ * @param {import("convict").Config} options.config - The podlet configuration.
  * @param {string} [options.cwd=process.cwd()] - The current working directory.
  * @returns {Promise<void>}
  */
-export async function build({ config, cwd = process.cwd() }) {
+export async function build({ state, config, cwd = process.cwd() }) {
   try {
     // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/61750
     // @ts-ignore
@@ -27,7 +28,6 @@ export async function build({ config, cwd = process.cwd() }) {
     const CLIENT_OUTDIR = join(OUTDIR, "client");
     const CONTENT_FILEPATH = await resolve(join(cwd, "content.js"));
     const FALLBACK_FILEPATH = await resolve(join(cwd, "fallback.js"));
-    const BUILD_FILEPATH = await resolve(join(cwd, "build.js"));
     const CONTENT_ENTRYPOINT = join(OUTDIR, ".build", "content.js");
     const FALLBACK_ENTRYPOINT = join(OUTDIR, ".build", "fallback.js");
     const ESBUILD_OUTDIR = join(OUTDIR, ".build", "esbuild");
@@ -64,20 +64,7 @@ export async function build({ config, cwd = process.cwd() }) {
       entryPoints.push(LAZY_FILEPATH);
     }
 
-    // support user defined plugins via a build.js file
-    const plugins = [];
-    if (existsSync(BUILD_FILEPATH)) {
-      try {
-        const userDefinedBuild = (await import(BUILD_FILEPATH)).default;
-        const userDefinedPlugins = await userDefinedBuild({ config });
-        if (Array.isArray(userDefinedPlugins)) {
-          plugins.unshift(...userDefinedPlugins);
-        }
-      } catch (err) {
-        // noop
-      }
-    }
-
+    const plugins = await state.build();
     // Run code through esbuild first to apply plugins but don't bundle or minify
     await esbuild.build({
       entryNames: "[name]",

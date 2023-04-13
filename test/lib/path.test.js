@@ -74,11 +74,6 @@ test("Typescript and Javascript file throws", async (t) => {
   }
 });
 
-test(".buildAndResolve resolves Javascript the same as for .resolve", async (t) => {
-  const resolver = new PathResolver({ cwd: tmp, development: false });
-  t.equal((await resolver.resolve("./javascript.js")).path, (await resolver.buildAndResolve("./javascript.js")).path);
-});
-
 test(".buildAndResolve builds and then resolves Typescript to Javascript", async (t) => {
   const resolver = new PathResolver({ cwd: tmp, development: false });
   const resolution = await resolver.buildAndResolve("./typescript.js");
