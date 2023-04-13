@@ -8,8 +8,13 @@ import httpError from "http-errors";
 import PathResolver from "../lib/path.js";
 import chalk from "chalk";
 import boxen from "boxen";
+import kill from "kill-port";
 
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
+
+function cleanEsbuildPort() {
+  return kill(6935);
+}
 
 class DevServer {
   constructor({ cwd, config, logger, state, content = false }) {
@@ -75,7 +80,19 @@ class DevServer {
   async restart() {
     const [app] = await Promise.all([this.setup(), this.app?.close()]);
     this.app = app;
-    await this.app.listen({ port: this.config.get("app.port") });
+    try {
+      await this.app.listen({ port: this.config.get("app.port") });
+    } catch (err) {
+      this.logger.error(err, "Failed to restart server");
+      try {
+        this.logger.trace("Killing port %d", this.config.get("app.port"));
+        await kill(this.config.get("app.port"));
+      } catch (err) {
+        this.logger.error(err, "Failed to kill port %d", this.config.get("app.port"));
+      }
+      this.logger.trace("Attempting to restart server again");
+      await this.app.listen({ port: this.config.get("app.port") });
+    }
   }
 }
 
@@ -254,6 +271,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   clientWatcher.on("error", (err) => {
     logger.error(err, "Uh Oh! Something went wrong with client side file watching. Got error");
+    cleanEsbuildPort();
   });
 
   const devServer = new DevServer({
@@ -292,24 +310,29 @@ export async function dev({ state, config, cwd = process.cwd() }) {
   serverWatcher.on("error", async (err) => {
     logger.error(err, "server watcher error: disposing of build context");
     await buildContext.dispose();
+    await cleanEsbuildPort();
   });
 
+  let debounceTimer;
   function serverFileChange(type) {
-    return async (filename) => {
-      console.clear();
-      const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
-      const msgBox = boxen(greeting, { padding: 0.5 });
-      console.log(msgBox);
-      logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
-      try {
-        // TODO: only reload the area related to the changed file
-        await state.get("local").reload();
-        await devServer.restart();
-      } catch (err) {
-        logger.error(err);
-        buildContext.dispose();
-      }
-      logger.debug(`${chalk.green("♻️")}  ${chalk.blue("server restarted")}`);
+    return async (name) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(async () => {
+        console.clear();
+        const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
+        const msgBox = boxen(greeting, { padding: 0.5 });
+        console.log(msgBox);
+        logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${name}`);
+        try {
+          // TODO: only reload the area related to the changed file
+          await state.get("local").reload();
+          await devServer.restart();
+        } catch (err) {
+          logger.error(err);
+          buildContext.dispose();
+        }
+        logger.debug(`${chalk.green("♻️")}  ${chalk.blue("server restarted")}`);
+      }, 250);
     };
   }
 
@@ -325,6 +348,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   serverWatcher.on("error", (err) => {
     logger.error(err, "Uh Oh! Something went wrong with server side file watching. Got error");
+    cleanEsbuildPort();
   });
 
   // start the server for the first time
@@ -335,6 +359,14 @@ export async function dev({ state, config, cwd = process.cwd() }) {
     await clientWatcher.close();
     await serverWatcher.close();
     buildContext.dispose();
+    // ensure esbuild is cleaned up
+    await cleanEsbuildPort();
     process.exit(1);
   }
 }
+
+process.on("uncaughtException", cleanEsbuildPort);
+process.on("unhandledRejection", cleanEsbuildPort);
+process.on("SIGINT", cleanEsbuildPort);
+process.on("SIGTERM", cleanEsbuildPort);
+process.on("SIGHUP", cleanEsbuildPort);
