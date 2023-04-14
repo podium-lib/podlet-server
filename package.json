@@ -12,7 +12,12 @@
     "./commands": "./commands/index.js",
     "./build": "./commands/build.js",
     "./start": "./commands/start.js",
-    "./dev": "./commands/dev.js"
+    "./dev": "./commands/dev.js",
+    "./api/build": "./api/build.js",
+    "./api/start": "./api/start.js",
+    "./api/dev": "./api/dev.js",
+    "./api": "./api/index.js",
+    "./test": "./api/test.js"
   },
   "scripts": {
     "test": "tap --no-check-coverage --no-coverage-report test/**/*.test.js"
