@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/podium-lib/podlet-server/compare/v1.4.0...v1.5.0) (2023-04-16)
+
+
+### Features
+
+* add test server for testing applications ([807c753](https://github.com/podium-lib/podlet-server/commit/807c753431e96521bf534a974b7de35b35f979f8))
+
 # [1.4.0](https://github.com/podium-lib/podlet-server/compare/v1.3.1...v1.4.0) (2023-04-13)
 
 
