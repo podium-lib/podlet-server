@@ -9,10 +9,11 @@
     "./config": "./lib/config.js",
     "./schema": "./lib/config-schema.js",
     "./plugin": "./lib/plugin.js",
-    "./commands": "./commands/index.js",
-    "./build": "./commands/build.js",
-    "./start": "./commands/start.js",
-    "./dev": "./commands/dev.js"
+    "./build": "./api/build.js",
+    "./start": "./api/start.js",
+    "./dev": "./api/dev.js",
+    "./test": "./api/test.js",
+    ".": "./api/index.js"
   },
   "scripts": {
     "test": "tap --no-check-coverage --no-coverage-report test/**/*.test.js"
