@@ -66,7 +66,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
 
     const plugins = await state.build();
 
-    // Run code through esbuild first to apply plugins but don't bundle or minify
+    // Run code through esbuild first (to apply plugins and strip types) but don't bundle or minify
     // use esbuild to resolve imports and then run a build with plugins
     await esbuild.build({
       plugins: [
@@ -99,6 +99,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       entryPoints,
       bundle: true,
       write: false,
+      outdir: ESBUILD_OUTDIR,
     });
 
     // Run output of esbuild through rollup to take advantage of treeshaking etc.
