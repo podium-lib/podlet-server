@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, dirname, basename } from "node:path";
+import { unlink } from "node:fs/promises";
+import { join, dirname, parse } from "node:path";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
 import rollupPluginTerser from "@rollup/plugin-terser";
@@ -30,7 +31,6 @@ export async function build({ state, config, cwd = process.cwd() }) {
     const FALLBACK_FILEPATH = await resolve(join(cwd, "fallback.js"));
     const CONTENT_ENTRYPOINT = join(OUTDIR, ".build", "content.js");
     const FALLBACK_ENTRYPOINT = join(OUTDIR, ".build", "fallback.js");
-    const ESBUILD_OUTDIR = join(OUTDIR, ".build", "esbuild");
     const SCRIPTS_FILEPATH = await resolve(join(cwd, "scripts.js"));
     const LAZY_FILEPATH = await resolve(join(cwd, "lazy.js"));
 
@@ -65,14 +65,15 @@ export async function build({ state, config, cwd = process.cwd() }) {
     }
 
     const plugins = await state.build();
+    const hash = `${Date.now()}`;
     // Run code through esbuild first to apply plugins but don't bundle or minify
     await esbuild.build({
-      entryNames: "[name]",
+      entryNames: `[name].${hash}`,
       plugins,
       entryPoints,
       bundle: false,
       format: "esm",
-      outdir: ESBUILD_OUTDIR,
+      outdir: cwd,
       minify: false,
     });
 
@@ -80,11 +81,12 @@ export async function build({ state, config, cwd = process.cwd() }) {
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
+        const file = parse(filepath);
         rollupConfig.push({
           inlineDynamicImports: true,
-          input: `${ESBUILD_OUTDIR}/${basename(filepath)}`,
+          input: `${cwd}/${file.name}.${hash}.js`,
           output: {
-            file: `${CLIENT_OUTDIR}/${basename(filepath)}`,
+            file: `${CLIENT_OUTDIR}/${file.base}`,
             format: "es",
           },
           plugins: [
@@ -105,6 +107,15 @@ export async function build({ state, config, cwd = process.cwd() }) {
       // appease TS being difficult by casting the format string to type ModuleFormat.
       const format = /** @type {import("rollup").ModuleFormat} */ (options.output.format);
       await bundle.write({ ...options.output, format });
+    }
+
+    for (const entrypoint of entryPoints) {
+      // unlink file
+      const file = parse(entrypoint);
+      const filepath = `${cwd}/${file.name}.${hash}.js`;
+      if (existsSync(filepath)) {
+        await unlink(filepath);
+      }
     }
   } catch (error) {
     console.error("An error occurred during the build process:", error);
