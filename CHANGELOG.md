@@ -1,3 +1,10 @@
+## [1.5.2](https://github.com/podium-lib/podlet-server/compare/v1.5.1...v1.5.2) (2023-04-17)
+
+
+### Bug Fixes
+
+* ensure dependency paths are resolved correctly during a build ([ac27e41](https://github.com/podium-lib/podlet-server/commit/ac27e418d75b7f62074ce06bf5aa38b90c13a8df))
+
 ## [1.5.1](https://github.com/podium-lib/podlet-server/compare/v1.5.0...v1.5.1) (2023-04-17)
 
 
