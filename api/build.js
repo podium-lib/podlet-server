@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { unlink } from "node:fs/promises";
-import { join, dirname, parse } from "node:path";
+import { join, dirname, isAbsolute } from "node:path";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
 import rollupPluginTerser from "@rollup/plugin-terser";
@@ -31,6 +30,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     const FALLBACK_FILEPATH = await resolve(join(cwd, "fallback.js"));
     const CONTENT_ENTRYPOINT = join(OUTDIR, ".build", "content.js");
     const FALLBACK_ENTRYPOINT = join(OUTDIR, ".build", "fallback.js");
+    const ESBUILD_OUTDIR = join(OUTDIR, ".build");
     const SCRIPTS_FILEPATH = await resolve(join(cwd, "scripts.js"));
     const LAZY_FILEPATH = await resolve(join(cwd, "lazy.js"));
 
@@ -65,28 +65,53 @@ export async function build({ state, config, cwd = process.cwd() }) {
     }
 
     const plugins = await state.build();
-    const hash = `${Date.now()}`;
+
     // Run code through esbuild first to apply plugins but don't bundle or minify
+    // use esbuild to resolve imports and then run a build with plugins
     await esbuild.build({
-      entryNames: `[name].${hash}`,
-      plugins,
+      plugins: [
+        {
+          name: "esbuild-apply-plugins",
+          setup(build) {
+            build.onResolve({ filter: /(content|fallback|lazy|scripts|src).*.(ts|js)$/ }, async (args) => {
+              if (args.namespace !== "file") return;
+
+              let file = args.path;
+              if (!isAbsolute(args.path)) {
+                file = join(args.resolveDir, args.path);
+              }
+
+              const outfile = file.replace(cwd, ESBUILD_OUTDIR).replace(".ts", ".js");
+              await esbuild.build({
+                entryPoints: [file],
+                plugins,
+                sourcemap: false,
+                minify: false,
+                bundle: false,
+                outfile,
+              });
+
+              return null;
+            });
+          },
+        },
+      ],
       entryPoints,
-      bundle: false,
-      format: "esm",
-      outdir: cwd,
-      minify: false,
+      bundle: true,
+      write: false,
     });
 
     // Run output of esbuild through rollup to take advantage of treeshaking etc.
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
-        const file = parse(filepath);
+        const input = filepath.replace(cwd, ESBUILD_OUTDIR).replace(".ts", ".js");
+        const outputFile = input.replace(ESBUILD_OUTDIR, CLIENT_OUTDIR).replace(".ts", ".js");
         rollupConfig.push({
           inlineDynamicImports: true,
-          input: `${cwd}/${file.name}.${hash}.js`,
+          input,
           output: {
-            file: `${CLIENT_OUTDIR}/${file.base}`,
+            file: outputFile,
             format: "es",
           },
           plugins: [
@@ -107,15 +132,6 @@ export async function build({ state, config, cwd = process.cwd() }) {
       // appease TS being difficult by casting the format string to type ModuleFormat.
       const format = /** @type {import("rollup").ModuleFormat} */ (options.output.format);
       await bundle.write({ ...options.output, format });
-    }
-
-    for (const entrypoint of entryPoints) {
-      // unlink file
-      const file = parse(entrypoint);
-      const filepath = `${cwd}/${file.name}.${hash}.js`;
-      if (existsSync(filepath)) {
-        await unlink(filepath);
-      }
     }
   } catch (error) {
     console.error("An error occurred during the build process:", error);
