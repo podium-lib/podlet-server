@@ -54,6 +54,7 @@ export default fp(async function validation(
   });
 
   const logs = [];
+  const schemas = new Map();
 
   /**
    * Hook in as each route is defined and try to load in schema files for that route.
@@ -94,7 +95,10 @@ export default fp(async function validation(
 
     // append schema to route options
     routeOptions.schema = schema;
+    schemas.set(routePath || "/", schema);
   });
+
+  fastify.decorate("schemas", schemas);
 
   fastify.addHook("onReady", () => {
     if (logs.length) {
