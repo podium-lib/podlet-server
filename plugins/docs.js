@@ -2,6 +2,7 @@ import fp from "fastify-plugin";
 import Configuration from "./docs/handlers/configuration.get.js";
 import Docs from "./docs/handlers/docs.get.js";
 import Routes from "./docs/handlers/routes.get.js";
+import Extensions from "./docs/handlers/extensions.get.js";
 
 /**
  * @typedef {{ podlet: import("@podium/podlet").default, cwd: string, config: import("convict").Config, extensions?: import("../lib/resolvers/extensions").Extensions }} DocumentPluginOptions
@@ -45,9 +46,12 @@ export default fp(async function docsPlugin(
     
     // @ts-ignore
     const routes = new Routes({ data: routeData, schemas: fastify.schemas });
+    
+    const exts = new Extensions({ extensions });
 
     fastify.get("/docs", docs.handler.bind(docs));
     fastify.get("/docs/configuration", configuration.handler.bind(configuration));
     fastify.get("/docs/routes", routes.handler.bind(routes));
+    fastify.get("/docs/extensions", exts.handler.bind(exts));
   }
 });

@@ -28,9 +28,11 @@ export default class Docs {
       </head>
       <body>
         <h1>Documentation</h1>
+        <p>Automatically generated documentation pages for a @podium/podlet-server application.</p>
         <ul>
         <li><a href="/docs/configuration">Configuration</a></li>
         <li><a href="/docs/routes">Routes</a></li>
+        <li><a href="/docs/extensions">Extensions</a></li>
         </ul>
       </body>
       </html>
