@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/podium-lib/podlet-server/compare/v1.5.2...v1.5.3) (2023-04-20)
+
+
+### Bug Fixes
+
+* make it possible to disable compression ([e51c818](https://github.com/podium-lib/podlet-server/commit/e51c81893e9be471ccb3fb93075de0e6d1c35af9))
+
 ## [1.5.2](https://github.com/podium-lib/podlet-server/compare/v1.5.1...v1.5.2) (2023-04-17)
 
 
