@@ -63,7 +63,7 @@ test("Starting with package.json file in directory", async (t) => {
 test("Starting with content file in directory", async (t) => {
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
   );
   await writeFile(
     join(tmp, "content.js"),
@@ -115,7 +115,7 @@ test("Using validated query parameters in server.js", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
   );
   await writeFile(
     join(tmp, "content.js"),
@@ -156,7 +156,7 @@ test("Fallback route", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
   );
   execSync("npm install", { cwd: tmp });
   const { state, config } = await setupConfig({ cwd: tmp });
@@ -181,7 +181,7 @@ test("scripts.js loading", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
   );
   await writeFile(
     join(tmp, "content.js"),
@@ -231,7 +231,7 @@ test("lazy.js loading", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
   );
   execSync("npm install", { cwd: tmp });
   const { state, config } = await setupConfig({ cwd: tmp });
