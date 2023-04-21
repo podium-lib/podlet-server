@@ -10,6 +10,9 @@ import chalk from "chalk";
 import boxen from "boxen";
 import kill from "kill-port";
 import { createRequire } from "node:module";
+import { getLinguiConfig } from "../lib/lingui-config.js";
+import { linguiExtract } from "../lib/lingui-extract.js";
+import { linguiCompile } from "../lib/lingui-compile.js";
 
 const require = createRequire(import.meta.url);
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
@@ -152,6 +155,11 @@ export async function dev({ state, config, cwd = process.cwd() }) {
     routes.push({ name: "fallback", path: config.get("podlet.fallback") });
   }
 
+  // i18n launch setup
+  const linguiConfig = await getLinguiConfig({ config, cwd });
+  await linguiExtract({ linguiConfig, cwd, hideStats: true });
+  await linguiCompile({ linguiConfig, config });
+
   logger.debug(
     `📍 ${chalk.magenta("routes")}: ${routes
       .map((r) => `${r.name} ${chalk.cyan(`${(config.get("app.base") + r.path).replace("//", "/")}`)}`)
@@ -249,6 +257,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
       "lib/**/*.ts",
       "src/**/*.js",
       "src/**/*.ts",
+      "locales/**/*.po",
     ],
     {
       persistent: true,
@@ -265,6 +274,9 @@ export async function dev({ state, config, cwd = process.cwd() }) {
       console.log(msgBox);
       logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
       try {
+        // compile in case a .po file changed
+        await linguiCompile({ linguiConfig, config });
+
         await buildContext.rebuild();
       } catch (err) {
         // esbuild agressive cachine causes it to fail when files unrelated to the build are deleted
