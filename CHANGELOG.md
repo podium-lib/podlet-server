@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/podium-lib/podlet-server/compare/v1.5.3...v1.5.4) (2023-04-21)
+
+
+### Bug Fixes
+
+* replace dsd ponyfill with more comprehensive implementation ([#50](https://github.com/podium-lib/podlet-server/issues/50)) ([688d1d3](https://github.com/podium-lib/podlet-server/commit/688d1d35355476db66b3e3269125af9333e04976))
+
 ## [1.5.3](https://github.com/podium-lib/podlet-server/compare/v1.5.2...v1.5.3) (2023-04-20)
 
 
