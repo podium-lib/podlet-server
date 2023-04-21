@@ -1,3 +1,16 @@
+# [1.6.0](https://github.com/podium-lib/podlet-server/compare/v1.5.4...v1.6.0) (2023-04-21)
+
+
+### Bug Fixes
+
+* make it possible to disable compression ([ad970e4](https://github.com/podium-lib/podlet-server/commit/ad970e479a21f9e33033b4bc4e7d5beed8f68364))
+* update hydrate support to the latest package from lit ([8bd9684](https://github.com/podium-lib/podlet-server/commit/8bd96840d221fd6dcaea71908bf16962d3e5ed76))
+
+
+### Features
+
+* add auto documentation pages ([a122853](https://github.com/podium-lib/podlet-server/commit/a122853de50d80f319dc5e255bb75a23b0f73178))
+
 ## [1.5.4](https://github.com/podium-lib/podlet-server/compare/v1.5.3...v1.5.4) (2023-04-21)
 
 
