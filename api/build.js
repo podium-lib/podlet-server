@@ -6,6 +6,9 @@ import rollupPluginTerser from "@rollup/plugin-terser";
 import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 /**
  * Builds the project using esbuild.
@@ -65,6 +68,18 @@ export async function build({ state, config, cwd = process.cwd() }) {
     }
 
     const plugins = await state.build();
+
+    // build dsd ponyfill
+    await esbuild.build({
+      entryPoints: [require.resolve("@webcomponents/template-shadowroot/template-shadowroot.js")],
+      bundle: true,
+      format: "esm",
+      outfile: join(CLIENT_OUTDIR, "template-shadowroot.js"),
+      minify: true,
+      target: ["es2017"],
+      legalComments: `none`,
+      sourcemap: false,
+    });
 
     // Run code through esbuild first (to apply plugins and strip types) but don't bundle or minify
     // use esbuild to resolve imports and then run a build with plugins

@@ -39,9 +39,9 @@ afterEach(async (t) => {
 test("server rendering of a lit element", async (t) => {
   const app = /**@type {FastifyInstance}*/ (/**@type {unknown}*/(fastify({ logger: false })));
   await app.register(importElementPn, { cwd: tmp, appName: "custom" });
-  await app.register(plugin);
+  await app.register(plugin, { appName: "custom", base: "/assets" });
   await app.importElement(join(tmp, "element.js"));
-  const result = app.ssr(`<custom-element><custom-element>`);
+  const result = app.ssr("content", `<custom-element><custom-element>`);
   t.match(result, "<!--lit-part", "should contain lit comment tags");
   t.match(result, "<custom-element>", "should contain the correct html tag");
   t.match(result, `<template shadowroot="open"`, "should contain evidence of shadow dom");
