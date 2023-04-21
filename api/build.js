@@ -43,7 +43,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       mkdirSync(dirname(CONTENT_ENTRYPOINT), { recursive: true });
       writeFileSync(
         CONTENT_ENTRYPOINT,
-        `import "lit/experimental-hydrate-support.js";import Component from "${CONTENT_FILEPATH}";customElements.define("${NAME}-content",Component);`
+        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${CONTENT_FILEPATH}";customElements.define("${NAME}-content",Component);`
       );
       if (MODE !== "ssr-only") {
         entryPoints.push(CONTENT_ENTRYPOINT);
@@ -54,7 +54,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       mkdirSync(dirname(FALLBACK_ENTRYPOINT), { recursive: true });
       writeFileSync(
         FALLBACK_ENTRYPOINT,
-        `import "lit/experimental-hydrate-support.js";import Component from "${FALLBACK_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
+        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${FALLBACK_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
       );
       if (MODE !== "ssr-only") {
         entryPoints.push(FALLBACK_ENTRYPOINT);
