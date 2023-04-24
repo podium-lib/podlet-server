@@ -43,9 +43,10 @@ export async function start({ state, config, cwd = process.cwd() }) {
 
   try {
     const address = await app.listen({ host: "0.0.0.0", port: config.get("app.port") });
+    app.log.info(`Server environment '${config.get("app.env")}', host '${config.get("app.host")}'`);
     return { address, close: app.close.bind(app) };
   } catch (err) {
-    app.log.error(`Unable to start application on port ${config.get("app.port")}`);
+    app.log.error(`Unable to start server on port ${config.get("app.port")}`);
     throw err;
   }
 }
