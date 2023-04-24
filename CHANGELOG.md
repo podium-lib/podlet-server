@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/podium-lib/podlet-server/compare/v1.6.0...v1.6.1) (2023-04-24)
+
+
+### Bug Fixes
+
+* log host and env on info when app starts ([#53](https://github.com/podium-lib/podlet-server/issues/53)) ([9d5c266](https://github.com/podium-lib/podlet-server/commit/9d5c266e1f08e7ea89f5d5d0f5f930a95ef15771))
+
 # [1.6.0](https://github.com/podium-lib/podlet-server/compare/v1.5.4...v1.6.0) (2023-04-21)
 
 
