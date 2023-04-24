@@ -11,8 +11,7 @@ import boxen from "boxen";
 import kill from "kill-port";
 import { createRequire } from "node:module";
 import { getLinguiConfig } from "../lib/lingui-config.js";
-import { linguiExtract } from "../lib/lingui-extract.js";
-import { linguiCompile } from "../lib/lingui-compile.js";
+import { linguiExtract, linguiCompile } from "../lib/lingui.js";
 
 const require = createRequire(import.meta.url);
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
@@ -274,6 +273,8 @@ export async function dev({ state, config, cwd = process.cwd() }) {
       console.log(msgBox);
       logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
       try {
+        // extract in case translations were added
+        await linguiExtract({ linguiConfig, cwd, hideStats: true });
         // compile in case a .po file changed
         await linguiCompile({ linguiConfig, config });
 
@@ -326,6 +327,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
       "config/schema.ts",
       "schemas/**/*.json",
       "locale/**/*.json",
+      "locales/**/*.po",
     ],
     {
       persistent: true,
@@ -350,6 +352,10 @@ export async function dev({ state, config, cwd = process.cwd() }) {
         console.log(msgBox);
         logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${name}`);
         try {
+          // extract in case translations were added
+          await linguiExtract({ linguiConfig, cwd, hideStats: true });
+          // compile in case a .po file changed
+          await linguiCompile({ linguiConfig, config });
           // TODO: only reload the area related to the changed file
           await state.get("local").reload();
           await devServer.restart();

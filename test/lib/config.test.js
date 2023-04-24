@@ -30,6 +30,7 @@ test("default values", async (t) => {
   t.equal(config.get("app.host"), "localhost", "app.host should equal localhost");
   t.equal(config.get("app.base"), "/test-podlet", "app.base should equal /test-podlet");
   t.equal(config.get("app.development"), true, "app.development should be true");
+  t.equal(config.get("app.locales"), ["en-US", "nb"], "app.locales should default to english and norwegian");
   t.equal(config.get("podlet.fallback"), "", "podlet.fallback should be an empty string");
   t.equal(config.get("assets.scripts"), false, "assets.scripts should be false");
   t.equal(config.get("assets.lazy"), false, "assets.lazy should be false");

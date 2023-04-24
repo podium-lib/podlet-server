@@ -7,6 +7,7 @@ import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
 import { createRequire } from "node:module";
+import { getLinguiConfig, linguiCompile } from "../lib/lingui.js";
 
 const require = createRequire(import.meta.url);
 
@@ -35,21 +36,21 @@ export async function build({ state, config, cwd = process.cwd() }) {
     mkdirSync(CLIENT_OUTDIR, { recursive: true });
     mkdirSync(SERVER_OUTDIR, { recursive: true });
     mkdirSync(ESBUILD_OUTDIR, { recursive: true });
-    
+
     const CONTENT_SRC_FILEPATH = await resolve(join(cwd, "content.js"));
     const CONTENT_ENTRY = join(ESBUILD_OUTDIR, "content-entrypoint.js");
     const CONTENT_INTERMEDIATE = join(ESBUILD_OUTDIR, "content.js");
     const CONTENT_FINAL = join(CLIENT_OUTDIR, "content.js");
-    
+
     const FALLBACK_SRC_FILEPATH = await resolve(join(cwd, "fallback.js"));
     const FALLBACK_ENTRY = join(ESBUILD_OUTDIR, "fallback-entrypoint.js");
     const FALLBACK_INTERMEDIATE = join(ESBUILD_OUTDIR, "fallback.js");
     const FALLBACK_FINAL = join(CLIENT_OUTDIR, "fallback.js");
-    
+
     const SCRIPTS_ENTRY = await resolve(join(cwd, "scripts.js"));
     const SCRIPTS_INTERMEDIATE = join(ESBUILD_OUTDIR, "scripts.js");
     const SCRIPTS_FINAL = join(CLIENT_OUTDIR, "scripts.js");
-    
+
     const LAZY_ENTRY = await resolve(join(cwd, "lazy.js"));
     const LAZY_INTERMEDIATE = join(ESBUILD_OUTDIR, "lazy.js");
     const LAZY_FINAL = join(CLIENT_OUTDIR, "lazy.js");
@@ -58,17 +59,25 @@ export async function build({ state, config, cwd = process.cwd() }) {
     if (existsSync(CONTENT_SRC_FILEPATH)) {
       writeFileSync(
         CONTENT_ENTRY,
-        `import "${require.resolve("@lit-labs/ssr-client/lit-element-hydrate-support.js")}";import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`
+        `import "${require.resolve(
+          "@lit-labs/ssr-client/lit-element-hydrate-support.js"
+        )}";import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`
       );
     }
     if (existsSync(FALLBACK_SRC_FILEPATH)) {
       writeFileSync(
         FALLBACK_ENTRY,
-        `import "${require.resolve("@lit-labs/ssr-client/lit-element-hydrate-support.js")}";import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
+        `import "${require.resolve(
+          "@lit-labs/ssr-client/lit-element-hydrate-support.js"
+        )}";import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
       );
     }
 
     // detect entrypoints for each file type
+    // compile all messages before building
+    const linguiConfig = getLinguiConfig({ config, cwd });
+    await linguiCompile({ linguiConfig, config });
+
     const entryPoints = [];
     if (existsSync(CONTENT_ENTRY)) {
       if (MODE !== "ssr-only") {
@@ -88,7 +97,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     }
 
     const plugins = await state.build();
-    
+
     // build server side files
     try {
       await esbuild.build({
@@ -105,9 +114,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
         sourcemap: false,
         external: ["lit"],
       });
-    } catch (err) {
-      
-    }
+    } catch (err) {}
 
     // build dsd ponyfill
     await esbuild.build({

@@ -1,8 +1,8 @@
 import { join } from "node:path";
-import { existsSync } from "node:fs";
+import { exists } from "node:fs/promises";
 import fp from "fastify-plugin";
-import chalk from "chalk";
 import PathResolver from "../lib/path.js";
+import chalk from "chalk";
 
 export default fp(async function locale(fastify, { cwd = process.cwd(), locale = "en-US", development }) {
   const resolver = new PathResolver({ development, cwd });
@@ -12,14 +12,22 @@ export default fp(async function locale(fastify, { cwd = process.cwd(), locale =
 
   const localeFilePath = join(cwd, "locales", locale) + compiledFileExtension;
 
-  if (existsSync(localeFilePath)) {
-    try {
-      const { messages } = await resolver.import(localeFilePath);
+  fastify.decorate("readTranslations", async () => {
+    if (await exists(localeFilePath)) {
+      try {
+        const { messages } = await import(localeFilePath);
+        fastify.log.debug(
+          `🌏 ${chalk.magenta("translations")}: loaded file "${localeFilePath}" for locale "${locale}"`
+        );
 
-      fastify.decorate("translations", messages);
-      fastify.log.debug(`🌏 ${chalk.magenta("translations")}: loaded file "${localeFilePath}" for locale "${locale}"`);
-    } catch (err) {
-      fastify.log.error(`Error reading translation file: ${localeFilePath}`, err);
+        return messages;
+      } catch (err) {
+        fastify.log.error(`Error reading translation file: ${localeFilePath}`, err);
+        return {};
+      }
     }
-  }
+    return {};
+  });
+
+  return undefined;
 });
