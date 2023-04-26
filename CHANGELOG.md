@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/podium-lib/podlet-server/compare/v1.6.3...v1.6.4) (2023-04-26)
+
+
+### Bug Fixes
+
+* remove header validation as headers should not be validated by default ([#58](https://github.com/podium-lib/podlet-server/issues/58)) ([cfd83b9](https://github.com/podium-lib/podlet-server/commit/cfd83b9e99027edbbb8fce8d1c9f6ec67081009f))
+
 ## [1.6.3](https://github.com/podium-lib/podlet-server/compare/v1.6.2...v1.6.3) (2023-04-26)
 
 
