@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/podium-lib/podlet-server/compare/v1.6.2...v1.6.3) (2023-04-26)
+
+
+### Bug Fixes
+
+* **cli:** remove app header when starting app in production ([#56](https://github.com/podium-lib/podlet-server/issues/56)) ([9b85e0f](https://github.com/podium-lib/podlet-server/commit/9b85e0f8fffd7550a16b3a5074c161d1d58a55ab))
+
 ## [1.6.2](https://github.com/podium-lib/podlet-server/compare/v1.6.1...v1.6.2) (2023-04-24)
 
 
