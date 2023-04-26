@@ -28,7 +28,7 @@ async function setupConfig({ cwd }) {
 }
 
 beforeEach(async (t) => {
-  await mkdir(tmp);
+  await mkdir(tmp, { recursive: true });
 });
 
 afterEach(async (t) => {
@@ -181,7 +181,7 @@ test("scripts.js loading", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
   );
   await writeFile(
     join(tmp, "content.js"),
@@ -231,7 +231,7 @@ test("lazy.js loading", async (t) => {
   );
   await writeFile(
     join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*", "@lit-labs/ssr-client": "*" } })
+    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
   );
   execSync("npm install", { cwd: tmp });
   const { state, config } = await setupConfig({ cwd: tmp });

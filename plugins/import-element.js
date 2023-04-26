@@ -2,6 +2,7 @@ import { join, parse } from "node:path";
 import { createRequire } from "node:module";
 import esbuild from "esbuild";
 import fp from "fastify-plugin";
+import { stat } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 
@@ -78,21 +79,29 @@ export default fp(async function importElement(
 
     // bundle up SSR version of component. I wish this wasn't necessary but all experimentation so far
     // has led me to the conclusion that we need to bundle an SSR to avoid lit complaining about client/server hydration mismatches
+    let exists = false;
     try {
-      await esbuild.build({
-        entryPoints: [filepath],
-        bundle: true,
-        format: "esm",
-        outfile,
-        minify: !development,
-        plugins,
-        legalComments: `none`,
-        sourcemap: development ? "inline" : false,
-        external: ["lit"],
-      });
-    } catch (err) {
-      fastify.log.error(err);
-      if (!development) throw err;
+      await stat(outfile);
+      exists = true;
+    } catch(err) {
+      // noop
+    }
+    if (development || !exists) {
+      try {
+        await esbuild.build({
+          entryPoints: [filepath],
+          bundle: true,
+          format: "esm",
+          outfile,
+          minify: !development,
+          plugins,
+          legalComments: `none`,
+          sourcemap: development ? "inline" : false,
+          external: ["lit"],
+        });
+      } catch (err) {
+        fastify.log.error(err);
+      }
     }
 
     // import fresh copy of the custom element using date string to break module cache
