@@ -29,45 +29,85 @@ export async function build({ state, config, cwd = process.cwd() }) {
     const MODE = config.get("app.mode");
     const OUTDIR = join(cwd, "dist");
     const CLIENT_OUTDIR = join(OUTDIR, "client");
-    const CONTENT_FILEPATH = await resolve(join(cwd, "content.js"));
-    const FALLBACK_FILEPATH = await resolve(join(cwd, "fallback.js"));
-    const CONTENT_ENTRYPOINT = join(OUTDIR, ".build", "content.js");
-    const FALLBACK_ENTRYPOINT = join(OUTDIR, ".build", "fallback.js");
+    const SERVER_OUTDIR = join(OUTDIR, "server");
     const ESBUILD_OUTDIR = join(OUTDIR, ".build");
-    const SCRIPTS_FILEPATH = await resolve(join(cwd, "scripts.js"));
-    const LAZY_FILEPATH = await resolve(join(cwd, "lazy.js"));
 
+    mkdirSync(CLIENT_OUTDIR, { recursive: true });
+    mkdirSync(SERVER_OUTDIR, { recursive: true });
+    mkdirSync(ESBUILD_OUTDIR, { recursive: true });
+    
+    const CONTENT_SRC_FILEPATH = await resolve(join(cwd, "content.js"));
+    const CONTENT_ENTRY = join(ESBUILD_OUTDIR, "content-entrypoint.js");
+    const CONTENT_INTERMEDIATE = join(ESBUILD_OUTDIR, "content.js");
+    const CONTENT_FINAL = join(CLIENT_OUTDIR, "content.js");
+    
+    const FALLBACK_SRC_FILEPATH = await resolve(join(cwd, "fallback.js"));
+    const FALLBACK_ENTRY = join(ESBUILD_OUTDIR, "fallback-entrypoint.js");
+    const FALLBACK_INTERMEDIATE = join(ESBUILD_OUTDIR, "fallback.js");
+    const FALLBACK_FINAL = join(CLIENT_OUTDIR, "fallback.js");
+    
+    const SCRIPTS_ENTRY = await resolve(join(cwd, "scripts.js"));
+    const SCRIPTS_INTERMEDIATE = join(ESBUILD_OUTDIR, "scripts.js");
+    const SCRIPTS_FINAL = join(CLIENT_OUTDIR, "scripts.js");
+    
+    const LAZY_ENTRY = await resolve(join(cwd, "lazy.js"));
+    const LAZY_INTERMEDIATE = join(ESBUILD_OUTDIR, "lazy.js");
+    const LAZY_FINAL = join(CLIENT_OUTDIR, "lazy.js");
+
+    // Create entrypoints for each file type
+    if (existsSync(CONTENT_SRC_FILEPATH)) {
+      writeFileSync(
+        CONTENT_ENTRY,
+        `import "${require.resolve("@lit-labs/ssr-client/lit-element-hydrate-support.js")}";import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`
+      );
+    }
+    if (existsSync(FALLBACK_SRC_FILEPATH)) {
+      writeFileSync(
+        FALLBACK_ENTRY,
+        `import "${require.resolve("@lit-labs/ssr-client/lit-element-hydrate-support.js")}";import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
+      );
+    }
+
+    // detect entrypoints for each file type
     const entryPoints = [];
-    if (existsSync(CONTENT_FILEPATH)) {
-      // write entrypoint file to /dist/.build/content.js
-      mkdirSync(dirname(CONTENT_ENTRYPOINT), { recursive: true });
-      writeFileSync(
-        CONTENT_ENTRYPOINT,
-        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${CONTENT_FILEPATH}";customElements.define("${NAME}-content",Component);`
-      );
+    if (existsSync(CONTENT_ENTRY)) {
       if (MODE !== "ssr-only") {
-        entryPoints.push(CONTENT_ENTRYPOINT);
+        entryPoints.push(CONTENT_ENTRY);
       }
     }
-    if (existsSync(FALLBACK_FILEPATH)) {
-      // write entrypoint file to /dist/.build/content.js
-      mkdirSync(dirname(FALLBACK_ENTRYPOINT), { recursive: true });
-      writeFileSync(
-        FALLBACK_ENTRYPOINT,
-        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${FALLBACK_FILEPATH}";customElements.define("${NAME}-fallback",Component);`
-      );
+    if (existsSync(FALLBACK_ENTRY)) {
       if (MODE !== "ssr-only") {
-        entryPoints.push(FALLBACK_ENTRYPOINT);
+        entryPoints.push(FALLBACK_ENTRY);
       }
     }
-    if (existsSync(SCRIPTS_FILEPATH)) {
-      entryPoints.push(SCRIPTS_FILEPATH);
+    if (existsSync(SCRIPTS_ENTRY)) {
+      entryPoints.push(SCRIPTS_ENTRY);
     }
-    if (existsSync(LAZY_FILEPATH)) {
-      entryPoints.push(LAZY_FILEPATH);
+    if (existsSync(LAZY_ENTRY)) {
+      entryPoints.push(LAZY_ENTRY);
     }
 
     const plugins = await state.build();
+    
+    // build server side files
+    try {
+      await esbuild.build({
+        entryPoints: [
+          existsSync(CONTENT_SRC_FILEPATH) ? CONTENT_SRC_FILEPATH : null,
+          existsSync(FALLBACK_SRC_FILEPATH) ? FALLBACK_SRC_FILEPATH : null,
+        ].filter(Boolean),
+        bundle: true,
+        format: "esm",
+        outdir: SERVER_OUTDIR,
+        minify: true,
+        plugins,
+        legalComments: `none`,
+        sourcemap: false,
+        external: ["lit"],
+      });
+    } catch (err) {
+      
+    }
 
     // build dsd ponyfill
     await esbuild.build({
@@ -90,13 +130,28 @@ export async function build({ state, config, cwd = process.cwd() }) {
           setup(build) {
             build.onResolve({ filter: /(content|fallback|lazy|scripts|src).*.(ts|js)$/ }, async (args) => {
               if (args.namespace !== "file") return;
+              if (args.path.includes("node_modules")) return;
 
               let file = args.path;
               if (!isAbsolute(args.path)) {
                 file = join(args.resolveDir, args.path);
               }
 
-              const outfile = file.replace(cwd, ESBUILD_OUTDIR).replace(".ts", ".js");
+              let outfile;
+              if (file === CONTENT_ENTRY) {
+                outfile = CONTENT_INTERMEDIATE;
+              } else if (file === FALLBACK_ENTRY) {
+                outfile = FALLBACK_INTERMEDIATE;
+              } else if (file === LAZY_ENTRY) {
+                outfile = LAZY_INTERMEDIATE;
+              } else if (file === SCRIPTS_ENTRY) {
+                outfile = SCRIPTS_INTERMEDIATE;
+              }
+
+              if (!outfile) {
+                return null;
+              }
+
               await esbuild.build({
                 entryPoints: [file],
                 plugins,
@@ -121,13 +176,24 @@ export async function build({ state, config, cwd = process.cwd() }) {
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
-        const input = filepath.replace(cwd, ESBUILD_OUTDIR).replace(".ts", ".js");
-        const outputFile = input.replace(ESBUILD_OUTDIR, CLIENT_OUTDIR).replace(".ts", ".js");
+        const input = filepath.replace("-entrypoint", "");
+
+        let outfile;
+        if (filepath === CONTENT_ENTRY) {
+          outfile = CONTENT_FINAL;
+        } else if (filepath === FALLBACK_ENTRY) {
+          outfile = FALLBACK_FINAL;
+        } else if (filepath === LAZY_ENTRY) {
+          outfile = LAZY_FINAL;
+        } else if (filepath === SCRIPTS_ENTRY) {
+          outfile = SCRIPTS_FINAL;
+        }
+
         rollupConfig.push({
           inlineDynamicImports: true,
           input,
           output: {
-            file: outputFile,
+            file: outfile,
             format: "es",
           },
           plugins: [
