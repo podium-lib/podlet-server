@@ -10,12 +10,13 @@ import * as commands from "./commands/index.js";
 
 const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), { encoding: "utf8" }));
 const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
+const args = process.argv.slice(2);
 
 const msgBox = boxen(greeting, { padding: 0.5 });
 console.clear();
-console.log(msgBox);
+!args.includes("start") && console.log(msgBox);
 
-yargs(process.argv.slice(2))
+yargs(args)
   .command(commands.build)
   .command(commands.start)
   .command(commands.dev)
@@ -25,5 +26,4 @@ yargs(process.argv.slice(2))
   .demandCommand()
   .wrap(150)
   .version(false)
-  .help()
-  .argv;
+  .help().argv;
