@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import esbuild from "esbuild";
 import fp from "fastify-plugin";
 import { stat } from "node:fs/promises";
+import MetricsClient from "@metrics/client";
 
 const require = createRequire(import.meta.url);
 
@@ -39,6 +40,30 @@ export default fp(async function importElement(
   // ensure custom elements registry has been enabled
   await import("@lit-labs/ssr");
   const outdir = join(cwd, "dist", "server");
+  const metrics = new MetricsClient();
+
+  // @ts-ignore
+  if (!fastify.metricStreams) {
+    fastify.decorate("metricStreams", []);
+  }
+
+  // @ts-ignore
+  fastify.metricStreams.push(metrics);
+
+  const histogram = metrics.histogram({
+    name: "podlet_server_import_element_timer",
+    description: "Time taken when importing a custom element",
+  });
+
+  const bundlingHistogram = metrics.histogram({
+    name: "podlet_server_import_element_bundling_timer",
+    description: "Time taken to bundle when importing a custom element",
+  });
+
+  const fileImportHistogram = metrics.histogram({
+    name: "podlet_server_import_element_import_file_timer",
+    description: "Time taken to import file from disk when importing a custom element",
+  });
 
   // replace customElement shim with our own creation that allows for redefines when in development mode.
   // @ts-ignore
@@ -52,6 +77,7 @@ export default fp(async function importElement(
    * to the custom element registry.
    */
   fastify.decorate("importElement", async (path = "") => {
+    const end = histogram.timer({ labels: { path } });
     const { name } = parse(path);
 
     if (!name || name === ".") {
@@ -83,30 +109,33 @@ export default fp(async function importElement(
     try {
       await stat(outfile);
       exists = true;
-    } catch(err) {
+    } catch (err) {
       // noop
     }
     if (development || !exists) {
+      const bundlingTimerEnd = bundlingHistogram.timer({ labels: { filepath, outfile } });
+      fastify.log.debug(`Bundling ${filepath} to ${outfile}`);
       try {
         await esbuild.build({
           entryPoints: [filepath],
           bundle: true,
           format: "esm",
           outfile,
-          minify: !development,
+          minify: false,
           plugins,
-          legalComments: `none`,
-          sourcemap: development ? "inline" : false,
+          sourcemap: "inline",
           external: ["lit"],
         });
       } catch (err) {
         fastify.log.error(err);
       }
+      bundlingTimerEnd();
     }
 
     // import fresh copy of the custom element using date string to break module cache
     // in development, this makes it possible for the dev to keep making changes to the file and on
     // subsequent calls to importComponent, the newest version will be imported.
+    const fileImportEnd = fileImportHistogram.timer({ labels: { filepath: outfile } });
     let Element;
     try {
       Element = (await import(`${outfile}?s=${Date.now()}`)).default;
@@ -114,6 +143,7 @@ export default fp(async function importElement(
       fastify.log.error(err);
       if (!development) throw err;
     }
+    fileImportEnd();
 
     // define newly imported custom element in the registry
     try {
@@ -122,5 +152,6 @@ export default fp(async function importElement(
       fastify.log.error(err);
       if (!development) throw err;
     }
+    end();
   });
 });

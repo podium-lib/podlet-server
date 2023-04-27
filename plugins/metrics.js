@@ -14,6 +14,7 @@ export default fp(async function metrics(fastify) {
       stream.on("error", (err) => {
         fastify.log.error(err);
       });
+
       // @ts-ignore
       stream.pipe(fastify.metrics);
     }
