@@ -104,7 +104,7 @@ export default class Routes {
   async handler(req, reply) {
     const contentSchema = this.#schemas.get(this.#data.routes.content.path);
     const fallbackSchema = this.#schemas.get(this.#data.routes.content.path);
-    
+
     const contentQuerystringObject = this.buildObjects(contentSchema.querystring);
     const fallbackQuerystringObject = this.buildObjects(fallbackSchema.querystring);
     const contentHeadersObject = this.buildObjects(contentSchema.headers);
