@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/podium-lib/podlet-server/compare/v1.6.4...v1.6.5) (2023-04-27)
+
+
+### Bug Fixes
+
+* ensure metrics are properly streamed. Add additional metrics for import element ([#59](https://github.com/podium-lib/podlet-server/issues/59)) ([356f91b](https://github.com/podium-lib/podlet-server/commit/356f91b9eddd78704cf353bf50b6d16950cf68bd))
+
 ## [1.6.4](https://github.com/podium-lib/podlet-server/compare/v1.6.3...v1.6.4) (2023-04-26)
 
 
