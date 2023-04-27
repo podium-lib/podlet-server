@@ -1,6 +1,6 @@
 {
   "name": "@podium/podlet-server",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "type": "module",
   "bin": {
     "podlet": "./cli.js"

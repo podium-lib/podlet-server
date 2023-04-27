@@ -1,3 +1,10 @@
+## [1.6.6](https://github.com/podium-lib/podlet-server/compare/v1.6.5...v1.6.6) (2023-04-27)
+
+
+### Bug Fixes
+
+* prevent stripping of all headers ([#60](https://github.com/podium-lib/podlet-server/issues/60)) ([c8afd39](https://github.com/podium-lib/podlet-server/commit/c8afd39bbf7a50dbe245be93574a36595780d99a))
+
 ## [1.6.5](https://github.com/podium-lib/podlet-server/compare/v1.6.4...v1.6.5) (2023-04-27)
 
 
