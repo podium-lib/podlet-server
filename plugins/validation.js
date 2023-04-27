@@ -36,7 +36,7 @@ export default fp(async function validation(
       allErrors: true,
     }),
     headers: new Ajv({
-      removeAdditional: "all",
+      removeAdditional: false,
       coerceTypes: true,
       allErrors: true,
     }),
@@ -89,7 +89,9 @@ export default fp(async function validation(
       const userSchema = JSON.parse(readFileSync(schemaPath, { encoding: "utf8" }));
       merge(schema, userSchema);
       logs.push(
-        `🔍 ${chalk.magenta("validation")}: loaded file ${schemaPath.replace(cwd, "")}, schema: ${JSON.stringify(schema)}`
+        `🔍 ${chalk.magenta("validation")}: loaded file ${schemaPath.replace(cwd, "")}, schema: ${JSON.stringify(
+          schema
+        )}`
       );
     }
 
