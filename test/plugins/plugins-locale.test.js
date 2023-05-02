@@ -29,7 +29,7 @@ beforeEach(async (t) => {
 
   state.set("core", core);
   const config = await configuration({ cwd: tmp, schemas: await state.config() });
-  config.set("app.locales", ["en-US", "nb"]);
+  config.set("app.locales", ["en", "nb"]);
 
   t.context.app = fastify({ logger: false });
   t.context.appConfig = config;
@@ -41,7 +41,7 @@ afterEach(async () => {
 
 test("readTranslations method exists", async (t) => {
   const { app } = t.context;
-  await app.register(plugin, { cwd: tmp, locale: "en-US" });
+  await app.register(plugin, { cwd: tmp, locale: "en" });
 
   t.ok(app.readTranslations);
 });
@@ -54,7 +54,7 @@ test("Messages are returned by readTranslations", async (t) => {
   await linguiExtract({ linguiConfig, cwd: tmp, hideStats: true });
   await linguiCompile({ linguiConfig, config });
 
-  await app.register(plugin, { cwd: tmp, locale: "en-US" });
+  await app.register(plugin, { cwd: tmp, locale: "en" });
 
   const messages = await app.readTranslations();
 

@@ -87,15 +87,17 @@ Inside each host folder, create environment-specific configuration files as need
 ```bash
 touch config/hosts/localhost/config.local.json
 ```
+
 And for the finn.com host:
 
 ```
 touch config/hosts/finn.no/config.dev.json
 touch config/hosts/finn.no/config.prod.json
 ```
+
 In each config file, override configuration values for the specific host and environment. For example, you can change the app.port for the local environment of the localhost host:
 
-```json5
+```json
 // config/hosts/localhost/config.local.json
 {
   "app": {
@@ -115,7 +117,7 @@ Below is a list of config values that can be overwritten
 | `app.host`                     | localhost                                       | HOST        |                                                    |
 | `app.port`                     | 8080                                            | PORT        |                                                    |
 | `app.logLevel`                 | INFO                                            | LOG_LEVEL   | "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" |
-| `app.locale`                   | en-US                                           | LOCALE      |                                                    |
+| `app.locale`                   | en                                              | LOCALE      |                                                    |
 | `app.development`              | true when NODE_ENV=development, false otherwise | DEVELOPMENT | true/false                                         |
 | `app.component`                | true                                            |             |                                                    |
 | `app.mode`                     | hydrate                                         |             | hydrate, ssr-only, csr-only                        |
@@ -184,11 +186,12 @@ See [Convict](https://www.npmjs.com/package/convict) for more details about writ
 
 ## Step 5: Set environment variables for hosts and environments
 
-Finally, when running locally, you shouldn't need to set any environment variables, HOST will default to `localhost` and ENV will default to `local` 
+Finally, when running locally, you shouldn't need to set any environment variables, HOST will default to `localhost` and ENV will default to `local`
 but when running in dev/prod, there are 3 environment variables that should be set. We will likely want to get this set automatically in the platform.
 These are: HOST, ENV and VERSION. For Finn running in the current Fiaas, these would be HOST=finn.no ENV=dev|prod and VERSION={github commit hash}
 
 For example:
+
 ```
 HOST=finn.no ENV=dev VERSION=asd12df12gd3fg123 npm start
 # Uses configuration values specified in config/hosts/finn.no/config.dev.json.
