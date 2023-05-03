@@ -75,7 +75,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
 
     // detect entrypoints for each file type
     // compile all messages before building
-    const linguiConfig = getLinguiConfig({ config, cwd });
+    const linguiConfig = await getLinguiConfig({ config, cwd });
     await linguiCompile({ linguiConfig, config });
 
     const entryPoints = [];
