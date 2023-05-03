@@ -46,7 +46,7 @@ async function setupConfig() {
   config.set("podlet.content", "/");
   config.set("podlet.fallback", "");
   config.set("app.development", false);
-  config.set("app.locale", "en-US");
+  config.set("app.locale", "en");
   config.set("assets.lazy", false);
   config.set("assets.scripts", false);
   config.set("app.compression", false);

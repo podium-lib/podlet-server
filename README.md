@@ -55,14 +55,13 @@ You should see the text "This is a demo" in hot pink. This was both rendered ser
 
 See the usage guides for walkthrough of various features of the server
 
-* [Getting Started](./GUIDE_GETTING_STARTED.md)
-* [Configuration](./GUIDE_CONFIG.md)
-* [Customising the server](./GUIDE_SERVER.md)
-* [Validating routes](./GUIDE_VALIDATION.md)
-* [Using localization](./GUIDE_LOCALIZATION.md)
-* [Additional scripts and lazy loading](./GUIDE_SCRIPTS_AND_LAZY_LOADING.md)
-* [Customising the build pipeline](./GUIDE_BUILD.md)
-
+- [Getting Started](./GUIDE_GETTING_STARTED.md)
+- [Configuration](./GUIDE_CONFIG.md)
+- [Customising the server](./GUIDE_SERVER.md)
+- [Validating routes](./GUIDE_VALIDATION.md)
+- [Using localization](./GUIDE_LOCALIZATION.md)
+- [Additional scripts and lazy loading](./GUIDE_SCRIPTS_AND_LAZY_LOADING.md)
+- [Customising the build pipeline](./GUIDE_BUILD.md)
 
 ## Folder Structure and File Naming
 
@@ -497,7 +496,7 @@ Any values defined in this file, can be overridden for specific hosts and enviro
 | `app.host`                     | localhost                                       | HOST        |                                                    |
 | `app.port`                     | 8080                                            | PORT        |                                                    |
 | `app.logLevel`                 | INFO                                            | LOG_LEVEL   | "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" |
-| `app.locale`                   | en-US                                           | LOCALE      |                                                    |
+| `app.locale`                   | en                                              | LOCALE      |                                                    |
 | `app.development`              | true when NODE_ENV=development, false otherwise | DEVELOPMENT | true/false                                         |
 | `app.component`                | true                                            |             |                                                    |
 | `app.mode`                     | hydrate                                         |             | hydrate, ssr-only, csr-only                        |
