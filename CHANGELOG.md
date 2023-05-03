@@ -1,3 +1,15 @@
+# [1.7.0](https://github.com/podium-lib/podlet-server/compare/v1.6.7...v1.7.0) (2023-05-03)
+
+
+### Bug Fixes
+
+* resolve issues with tests after merging i18n changes ([#63](https://github.com/podium-lib/podlet-server/issues/63)) ([7aa786d](https://github.com/podium-lib/podlet-server/commit/7aa786d42db462022ff7eb6b95d50cfb19e72efa))
+
+
+### Features
+
+* **i18n:** add lingui with support for compilation and extraction ([#52](https://github.com/podium-lib/podlet-server/issues/52)) ([780134c](https://github.com/podium-lib/podlet-server/commit/780134c1ed162144206285b94d625d852209bb15))
+
 ## [1.6.7](https://github.com/podium-lib/podlet-server/compare/v1.6.6...v1.6.7) (2023-05-01)
 
 
