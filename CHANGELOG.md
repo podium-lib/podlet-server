@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/podium-lib/podlet-server/compare/v1.7.2...v1.8.0) (2023-05-16)
+
+
+### Features
+
+* inject convict object into extensions schema function ([#69](https://github.com/podium-lib/podlet-server/issues/69)) ([3cbb3f0](https://github.com/podium-lib/podlet-server/commit/3cbb3f0fcbbd68525017e5eeb6bf9af3c8169ab2))
+
 ## [1.7.2](https://github.com/podium-lib/podlet-server/compare/v1.7.1...v1.7.2) (2023-05-15)
 
 
