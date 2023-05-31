@@ -1,3 +1,10 @@
+## [1.8.4](https://github.com/podium-lib/podlet-server/compare/v1.8.3...v1.8.4) (2023-05-31)
+
+
+### Bug Fixes
+
+* Disable request logging ([e79677e](https://github.com/podium-lib/podlet-server/commit/e79677eabcc38c243c1191c0649e1684a53de471))
+
 ## [1.8.3](https://github.com/podium-lib/podlet-server/compare/v1.8.2...v1.8.3) (2023-05-31)
 
 
