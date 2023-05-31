@@ -21,6 +21,7 @@ export async function start({ state, config, cwd = process.cwd() }) {
           // @ts-ignore
           level: config.get("app.logLevel").toLowerCase(),
         },
+        disableRequestLogging: true,
         ignoreTrailingSlash: true,
       })
     )
