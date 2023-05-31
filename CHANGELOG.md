@@ -1,3 +1,11 @@
+## [1.8.3](https://github.com/podium-lib/podlet-server/compare/v1.8.2...v1.8.3) (2023-05-31)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @fastify/restartable to v2 ([418f26b](https://github.com/podium-lib/podlet-server/commit/418f26b4213900b0e621eeff9d24c2bd53f36bb5))
+* **deps:** update dependency @rollup/plugin-commonjs to v25 ([35f5f49](https://github.com/podium-lib/podlet-server/commit/35f5f4937c3eb11c02c5cc89cf2c0178b13bd676))
+
 ## [1.8.2](https://github.com/podium-lib/podlet-server/compare/v1.8.1...v1.8.2) (2023-05-29)
 
 
