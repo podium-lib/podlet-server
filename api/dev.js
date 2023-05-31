@@ -34,6 +34,7 @@ class DevServer {
       logger: this.logger,
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
+      disableRequestLogging: true,
     });
 
     if (!this.content) {

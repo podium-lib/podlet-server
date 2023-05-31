@@ -90,6 +90,7 @@ export class TestServer {
       logger: this.logger || false,
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
+      disableRequestLogging: true,
     });
 
     const plugins = await this.state.build();
