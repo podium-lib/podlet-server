@@ -1,22 +1,33 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, isAbsolute } from "node:path";
-import { readdir } from "node:fs/promises";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
 import rollupPluginTerser from "@rollup/plugin-terser";
 import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
-import typescriptPlugin from '@rollup/plugin-typescript';
 import { createRequire } from "node:module";
 import { getLinguiConfig, linguiCompile } from "../lib/lingui.js";
 
-async function usesTypeScript(cwd) {
-  const hasTsConfig = existsSync(join(cwd, 'tsconfig.json'));
-  if (hasTsConfig) return true;
 
-  const srcFiles = await readdir(join(cwd, 'src'));
-  return srcFiles.some(file => file.endsWith('.ts'));
+async function getCustomRollupPlugins(cwd) {
+  const rollupPluginsPath = join(cwd, 'rollup-plugins.js');
+
+  let customPlugins = [];
+
+  try {
+    const imported = await import(rollupPluginsPath);
+    customPlugins = imported.default;
+  } catch (error) {
+    console.error(`Failed to import custom Rollup plugins from ${rollupPluginsPath}:`, error);
+  }
+
+  if (!Array.isArray(customPlugins)) {
+    console.warn(`Custom Rollup plugins from ${rollupPluginsPath} should be an array. Ignoring custom plugins.`);
+    customPlugins = [];
+  }
+
+  return customPlugins;
 }
 
 const require = createRequire(import.meta.url);
@@ -206,16 +217,14 @@ export async function build({ state, config, cwd = process.cwd() }) {
           outfile = SCRIPTS_FINAL;
         }
 
-        const isUsingTypeScript = await usesTypeScript(cwd);
+        const customPlugins = await getCustomRollupPlugins(cwd);
+        
         const rollupPlugins = [
+          ...customPlugins,
           rollupPluginResolve({ preferBuiltins: true }),
           rollupPluginCommonjs({ include: /node_modules/ }),
           rollupPluginTerser({ format: { comments: false } }),
         ];
-
-        if (isUsingTypeScript) {
-          rollupPlugins.unshift(typescriptPlugin({ tsconfig: join(cwd, 'tsconfig.json') }));
-        }
 
         rollupConfig.push({
           inlineDynamicImports: true,
