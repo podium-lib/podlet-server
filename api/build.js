@@ -1,11 +1,12 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, dirname, isAbsolute } from "node:path";
+import { join, isAbsolute } from "node:path";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
 import rollupPluginTerser from "@rollup/plugin-terser";
 import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
+import typescriptPlugin from '@rollup/plugin-typescript';
 import { createRequire } from "node:module";
 import { getLinguiConfig, linguiCompile } from "../lib/lingui.js";
 
@@ -196,18 +197,25 @@ export async function build({ state, config, cwd = process.cwd() }) {
           outfile = SCRIPTS_FINAL;
         }
 
+        const rollupPlugins = [
+          rollupPluginResolve({ preferBuiltins: true }),
+          rollupPluginCommonjs({ include: /node_modules/ }),
+          rollupPluginTerser({ format: { comments: false } }),
+        ];
+
+        if (existsSync(join(cwd, 'tsconfig.json'))) {
+          rollupPlugins.unshift(typescriptPlugin({ tsconfig: join(cwd, 'tsconfig.json') }));
+        }
+
         rollupConfig.push({
           inlineDynamicImports: true,
           input,
           output: {
             file: outfile,
             format: "es",
+            sourcemap: true,
           },
-          plugins: [
-            rollupPluginResolve(),
-            rollupPluginCommonjs({ include: /node_modules/ }),
-            rollupPluginTerser({ format: { comments: false } }),
-          ],
+          plugins: rollupPlugins,
         });
       }
       return rollupConfig;
