@@ -6,9 +6,9 @@ import { readFile } from "node:fs/promises";
 import esbuild from "esbuild";
 import fp from "fastify-plugin";
 import httpError from "http-errors";
+import { rm } from "fs/promises";
 
 const require = createRequire(import.meta.url);
-const tmp = join(tmpdir(), crypto.randomUUID());
 
 /**
  * @typedef {import("fastify").FastifyRequest<{Params: { "*": string }}>} Request
@@ -17,6 +17,7 @@ const tmp = join(tmpdir(), crypto.randomUUID());
 export default fp(async function dependencies(fastify, { enabled = false, cwd = process.cwd() }) {
   // typically, you should not be enabling this outside of development mode
   if (enabled) {
+    const tmp = join(tmpdir(), crypto.randomUUID());
     // cache built dependencies for subsequent requests
     const cache = new Map();
 
@@ -69,6 +70,14 @@ export default fp(async function dependencies(fastify, { enabled = false, cwd = 
       reply.type("application/javascript").send(cache.get(depname));
       // fastify compress needs us to return reply to avoid early stream termination
       return reply;
+    });
+
+    fastify.addHook("onClose", async () => {
+      try {
+        await rm(tmp, { recursive: true, force: true });
+      } catch (err) {
+        fastify.log.error(`Cleaning up tmp dir failed: ${tmp}`);
+      }
     });
   }
 });

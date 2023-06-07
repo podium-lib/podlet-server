@@ -11,7 +11,7 @@ import { Local } from "../../lib/resolvers/local.js";
 import { Core } from "../../lib/resolvers/core.js";
 import { State } from "../../lib/state.js";
 
-const tmp = join(tmpdir(), "./api.test.js");
+const tmp = join(tmpdir(), "./start.test.js");
 
 async function setupConfig({ cwd }) {
   const state = new State({ cwd });

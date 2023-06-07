@@ -6,7 +6,7 @@ import rollupPluginTerser from "@rollup/plugin-terser";
 import { rollup } from "rollup";
 import rollupPluginResolve from "@rollup/plugin-node-resolve";
 import rollupPluginCommonjs from "@rollup/plugin-commonjs";
-import typescriptPlugin from '@rollup/plugin-typescript';
+import typescriptPlugin from "@rollup/plugin-typescript";
 import { createRequire } from "node:module";
 import { getLinguiConfig, linguiCompile } from "../lib/lingui.js";
 
@@ -203,8 +203,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
           rollupPluginTerser({ format: { comments: false } }),
         ];
 
-        if (existsSync(join(cwd, 'tsconfig.json'))) {
-          rollupPlugins.unshift(typescriptPlugin({ tsconfig: join(cwd, 'tsconfig.json') }));
+        if (existsSync(join(cwd, "tsconfig.json"))) {
+          rollupPlugins.unshift(typescriptPlugin({ tsconfig: join(cwd, "tsconfig.json") }));
         }
 
         rollupConfig.push({

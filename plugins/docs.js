@@ -11,13 +11,13 @@ import Extensions from "./docs/handlers/extensions.get.js";
 export default fp(async function docsPlugin(
   fastify,
   /**@type {DocumentPluginOptions}*/
-  { podlet, cwd, config, extensions }
+  { podlet, config, extensions }
 ) {
   // @ts-ignore
   if (config.get("app.development") === true) {
     const docs = new Docs({ config, extensions });
     const configuration = new Configuration({ config });
-    
+
     function buildUrlPath(path) {
       return path.replaceAll(/\/+/g, "/");
     }
@@ -43,10 +43,10 @@ export default fp(async function docsPlugin(
         lazy: buildUrlPath(`/${config.get("assets.base")}/client/lazy.js`),
       },
     };
-    
+
     // @ts-ignore
     const routes = new Routes({ data: routeData, schemas: fastify.schemas });
-    
+
     const exts = new Extensions({ extensions });
 
     fastify.get("/docs", docs.handler.bind(docs));

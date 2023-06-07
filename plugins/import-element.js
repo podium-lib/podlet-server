@@ -4,6 +4,8 @@ import esbuild from "esbuild";
 import fp from "fastify-plugin";
 import { stat } from "node:fs/promises";
 import MetricsClient from "@metrics/client";
+import crypto from "node:crypto";
+import { readFile } from "node:fs/promises";
 
 const require = createRequire(import.meta.url);
 
@@ -132,13 +134,18 @@ export default fp(async function importElement(
       bundlingTimerEnd();
     }
 
-    // import fresh copy of the custom element using date string to break module cache
+    // import fresh copy of the custom element using file hash to break module cache
     // in development, this makes it possible for the dev to keep making changes to the file and on
     // subsequent calls to importComponent, the newest version will be imported.
+    const hash = crypto.createHash("sha256");
+    const fileContent = await readFile(outfile, "utf8");
+    hash.update(fileContent);
+    const fileHash = hash.digest("hex");
+
     const fileImportEnd = fileImportHistogram.timer({ labels: { filepath: outfile } });
     let Element;
     try {
-      Element = (await import(`${outfile}?s=${Date.now()}`)).default;
+      Element = (await import(`${outfile}?s=${fileHash}`)).default;
     } catch (err) {
       fastify.log.error(err);
       if (!development) throw err;
