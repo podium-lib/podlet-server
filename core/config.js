@@ -26,26 +26,26 @@ const schema = {
 };
 
 export class Config {
-  #state;
+  #context;
   #config;
 
   /**
-   * @param {import("./state").State} state
+   * @param {import("./context").Context} context
    */
-  constructor(state) {
-    this.#state = state;
+  constructor(context) {
+    this.#context = context;
   }
 
   async load() {
-    const { cwd } = this.#state;
+    const { cwd } = this.#context;
 
     // load custom formats
-    for (const format of this.#state.extensions.config.formats) {
+    for (const format of this.#context.extensions.config.formats) {
       convict.addFormat(format);
     }
 
     // @ts-ignore
-    const config = (this.#config = convict({ ...schema, ...this.#state.extensions.config.schema }));
+    const config = (this.#config = convict({ ...schema, ...this.#context.extensions.config.schema }));
 
     // The expectation is that HOST and NODE_ENV env vars will be set in production
     // @ts-ignore

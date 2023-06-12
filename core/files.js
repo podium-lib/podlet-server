@@ -2,23 +2,21 @@ import { join } from "path";
 import { stat, unlink, readFile, writeFile } from "fs/promises";
 import esbuild from "esbuild";
 
-const loadFiles = ["./server"];
-
 export class Files {
-  #state;
+  context;
   // content;
   // fallback;
-  // server;
-  // build;
-  // schema;
+  server;
+  build;
+  schema;
 
   files = new Map();
 
   /**
-   * @param {import("./state").State} state
+   * @param {import("./context").Context} context
    */
-  constructor(state) {
-    this.#state = state;
+  constructor(context) {
+    this.context = context;
   }
 
   /**
@@ -28,8 +26,8 @@ export class Files {
    * @param {string} path - path to file without file extension
    */
   async importFile(path) {
-    const tsPath = `${join(this.#state.cwd, path)}.ts`;
-    const jsPath = `${join(this.#state.cwd, path)}.js`;
+    const tsPath = `${join(this.context.cwd, path)}.ts`;
+    const jsPath = `${join(this.context.cwd, path)}.js`;
     let file;
     let typescript = false;
     try {
@@ -45,13 +43,13 @@ export class Files {
           packages: "external",
           minify: false,
           legalComments: `none`,
-          sourcemap: this.#state.development ? "inline" : false,
+          sourcemap: this.context.development ? "inline" : false,
         });
       }
     } catch (e) {
       // now we know theres no ts file, so we assume a js file and try to import it
       try {
-        if (this.#state.development) {
+        if (this.context.development) {
           // if we are in development, we create a unique temp file and import that
           // to break Node's cache and garuntee we get the latest version
           const tmpPath = `${jsPath.replace(".js", "")}${Date.now()}.js`;
@@ -76,10 +74,14 @@ export class Files {
   }
 
   async load() {
-    const files = [...loadFiles, ...this.#state.extensions.loadFiles];
+    // special reserved files
+    this.schema = await this.importFile("./config/schema");
+    this.server = await this.importFile("./server");
+    this.build = await this.importFile("./build");
 
+    // load all other files defined in extensions
     await Promise.all(
-      files.map(async (file) => {
+      this.context.extensions.loadFiles.map(async (file) => {
         this.files.set(file, await this.importFile(file));
       })
     );

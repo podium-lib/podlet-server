@@ -3,7 +3,7 @@ import { EventEmitter } from "node:events";
 /**
  * Wrapper around server components that can be passed around
  */
-export class State extends EventEmitter {
+export class Context extends EventEmitter {
   /**
    * @type {import("./watcher").FileWatcher}
    */
@@ -28,26 +28,26 @@ export class State extends EventEmitter {
    * @type {import("./config").Config}
    */
   config;
-  
-  /** 
+
+  /**
    * @type {boolean}
    */
   development = false;
 
-  /** 
-   * @type {string} 
+  /**
+   * @type {string}
    */
   cwd;
 
-  /** 
-   * @type {string[]} 
+  /**
+   * @type {string[]}
    */
   extensionLoadPaths;
 
   /**
    * This class is created and then threaded through the application to provide a way for
    * state to be shared between components in a structured way.
-   * 
+   *
    * @param {{development: boolean, cwd: string, extensionLoadPaths: string[]}} options
    */
   constructor({ development = false, cwd, extensionLoadPaths }) {

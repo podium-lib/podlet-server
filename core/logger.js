@@ -1,17 +1,19 @@
 import { pino } from "pino";
 
 export class Logger {
-  #state;
+  #context;
   #log;
 
   /**
-   * @param {import("./state").State} state
+   * @param {import("./context").Context} context
    */
-  constructor(state) {
-    this.#state = state;
-    const level = this.#state.config.has("app.logLevel") ? this.#state.config.get("app.logLevel").toLowerCase() : null;
-    if (this.#state.development) {
-      this.#state.config.get("app.logLevel").toLowerCase();
+  constructor(context) {
+    this.#context = context;
+    const level = this.#context.config.has("app.logLevel")
+      ? this.#context.config.get("app.logLevel").toLowerCase()
+      : null;
+    if (this.#context.development) {
+      this.#context.config.get("app.logLevel").toLowerCase();
       this.#log = pino({
         transport: { target: "./pino-dev-transport.js" },
         level: level || "debug",
@@ -77,9 +79,9 @@ export class Logger {
     return this.#log.silent(obj, msg, ...args);
   }
   /**
-   * @param {pino.Bindings} bindings 
+   * @param {pino.Bindings} bindings
    * @param {object} [options]
-   * @returns 
+   * @returns
    */
   child(bindings, options) {
     return this.#log.child(bindings, options);

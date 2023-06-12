@@ -56,9 +56,9 @@ export class Extension {
 
 export class Extensions {
   /**
-   * @type {import("./state").State}
+   * @type {import("./context").Context}
    */
-  #state;
+  #context;
 
   /**
    * @type {Map<string, Extension>}
@@ -66,10 +66,10 @@ export class Extensions {
   #extensions = new Map();
 
   /**
-   * @param {import("./state").State} state
+   * @param {import("./context").Context} context
    */
-  constructor(state) {
-    this.#state = state;
+  constructor(context) {
+    this.#context = context;
   }
 
   /**
@@ -119,7 +119,7 @@ export class Extensions {
    * if found, load the extensions listed
    */
   async load() {
-    for (const path of this.#state.extensionLoadPaths) {
+    for (const path of this.#context.extensionLoadPaths) {
       try {
         const packageJson = JSON.parse(await readFile(join(path, "package.json"), "utf8"));
         for (const extension of packageJson.server?.extensions || []) {

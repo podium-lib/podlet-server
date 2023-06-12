@@ -36,53 +36,46 @@ const serverFiles = [
   // "locales/**/*.po",
 ];
 
-
 export class FileWatcher extends EventEmitter {
-    #state;
+  #context;
 
-    /**
-   * @param {import("./state").State} state 
+  /**
+   * @param {import("./context").Context} context
    */
-    constructor(state) {
-      super();
-      this.#state = state;
+  constructor(context) {
+    super();
+    this.#context = context;
 
-      const clientWatcher = chokidar.watch(
-        [...clientFiles, ...this.#state.extensions.watchFiles.client],
-        {
-          persistent: true,
-          followSymlinks: false,
-          cwd: this.#state.cwd,
-        }
-      );
+    const clientWatcher = chokidar.watch([...clientFiles, ...this.#context.extensions.watchFiles.client], {
+      persistent: true,
+      followSymlinks: false,
+      cwd: this.#context.cwd,
+    });
 
-      clientWatcher.on("ready", () => {
-        clientWatcher.on("change", this.emit.bind(this, "change:client"));
-        clientWatcher.on("add", this.emit.bind(this, "change:client"));
-        clientWatcher.on("unlink", this.emit.bind(this, "change:client"));
-      });
-    
-      clientWatcher.on("error", (err) => {
-        // TODO: handle error
-      });
+    clientWatcher.on("ready", () => {
+      clientWatcher.on("change", this.emit.bind(this, "change:client"));
+      clientWatcher.on("add", this.emit.bind(this, "change:client"));
+      clientWatcher.on("unlink", this.emit.bind(this, "change:client"));
+    });
 
-      const serverWatcher = chokidar.watch(
-        [...serverFiles, ...this.#state.extensions.watchFiles.server],
-        {
-          persistent: true,
-          followSymlinks: false,
-          cwd: this.#state.cwd,
-        }
-      );
+    clientWatcher.on("error", (err) => {
+      // TODO: handle error
+    });
 
-      serverWatcher.on("ready", () => {
-        serverWatcher.on("change", this.emit.bind(this, "change:server"));
-        serverWatcher.on("add", this.emit.bind(this, "change:server"));
-        serverWatcher.on("unlink", this.emit.bind(this, "change:server"));
-      });
-    
-      serverWatcher.on("error", (err) => {
-        // TODO: handle error
-      });
-    }
+    const serverWatcher = chokidar.watch([...serverFiles, ...this.#context.extensions.watchFiles.server], {
+      persistent: true,
+      followSymlinks: false,
+      cwd: this.#context.cwd,
+    });
+
+    serverWatcher.on("ready", () => {
+      serverWatcher.on("change", this.emit.bind(this, "change:server"));
+      serverWatcher.on("add", this.emit.bind(this, "change:server"));
+      serverWatcher.on("unlink", this.emit.bind(this, "change:server"));
+    });
+
+    serverWatcher.on("error", (err) => {
+      // TODO: handle error
+    });
   }
+}

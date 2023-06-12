@@ -5,31 +5,32 @@ import fastify from "fastify";
  */
 export class Application {
   #app;
-  #state;
+  #context;
 
   /**
-   * @param {import("./state").State} state 
+   * @param {import("./context").Context} context
    */
-  constructor(state) {
-    this.#state = state;
+  constructor(context) {
+    this.#context = context;
   }
 
   async start() {
     this.#app = fastify({
-      logger: this.#state.logger,
+      logger: this.#context.logger,
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
-      disableRequestLogging: !this.#state.development,
+      disableRequestLogging: !this.#context.development,
     });
 
-    for (const plugin of this.#state.extensions.server) {
-      await this.#app.register(plugin, this.#state);
+    for (const plugin of this.#context.extensions.server) {
+      await this.#app.register(plugin, this.#context);
     }
 
-    if (this.#state.files.has("./server")) {
-    await this.#app.register(this.#state.files.get("./server"), this.#state);
+    if (this.#context.files.server) {
+      await this.#app.register(this.#context.files.server, this.#context);
     }
-    this.#app.listen({ port: this.#state.config.get("app.port") });
+
+    this.#app.listen({ port: this.#context.config.get("app.port") });
   }
 
   async stop() {
