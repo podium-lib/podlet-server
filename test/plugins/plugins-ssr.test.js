@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
 import fastify from "fastify";
+import { html } from "lit";
 import importElementPn from "../../plugins/import-element.js";
 import plugin from "../../plugins/ssr.js";
 import { execSync } from "node:child_process";
@@ -41,7 +42,7 @@ test("server rendering of a lit element", async (t) => {
   await app.register(importElementPn, { cwd: tmp, appName: "custom" });
   await app.register(plugin, { appName: "custom", base: "/assets" });
   await app.importElement(join(tmp, "element.js"));
-  const result = app.ssr("content", `<custom-element><custom-element>`);
+  const result = app.ssr("content", html`<custom-element><custom-element>`);
   t.match(result, "<!--lit-part", "should contain lit comment tags");
   t.match(result, "<custom-element>", "should contain the correct html tag");
   t.match(result, `<template shadowroot="open"`, "should contain evidence of shadow dom");
