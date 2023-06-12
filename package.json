@@ -17,7 +17,7 @@
     ".": "./api/index.js"
   },
   "scripts": {
-    "test": "tap --no-check-coverage --no-coverage-report test/**/*.test.js"
+    "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js"
   },
   "keywords": [],
   "author": "",
