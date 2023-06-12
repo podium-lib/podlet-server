@@ -30,7 +30,7 @@ export const handler = async (argv) => {
 
   const state = new State({ cwd, development: true });
   state.set("core", await Core.load());
-  state.set("extensions", await Extensions.load({ cwd, development: true }));
+  state.set("extensions", await Extensions.load({ cwd }));
   state.set("local", await Local.load({ cwd, development: true }));
 
   const config = await configuration({ cwd, schemas: await state.config() });
