@@ -1,3 +1,10 @@
+## [1.8.7](https://github.com/podium-lib/podlet-server/compare/v1.8.6...v1.8.7) (2023-06-12)
+
+
+### Bug Fixes
+
+* Do not load language file on each request ([6c7df36](https://github.com/podium-lib/podlet-server/commit/6c7df36a067892ef3c24dd496ad116211933a096))
+
 ## [1.8.6](https://github.com/podium-lib/podlet-server/compare/v1.8.5...v1.8.6) (2023-06-12)
 
 
