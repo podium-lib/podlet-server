@@ -1,3 +1,10 @@
+## [1.8.8](https://github.com/podium-lib/podlet-server/compare/v1.8.7...v1.8.8) (2023-06-13)
+
+
+### Bug Fixes
+
+* replace unsafeHtml with unsafeStatic for tag names ([f917083](https://github.com/podium-lib/podlet-server/commit/f91708354b4846c50c7323fe76aa58156776a34b))
+
 ## [1.8.7](https://github.com/podium-lib/podlet-server/compare/v1.8.6...v1.8.7) (2023-06-12)
 
 
