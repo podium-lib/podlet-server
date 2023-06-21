@@ -5,9 +5,17 @@ import { FileWatcher } from "./watcher.js";
 import { Files } from "./files.js";
 import { Logger } from "./logger.js";
 import { Context } from "./context.js";
+import { Metrics } from "./metrics.js";
 
 export class Server {
+  /**
+   * @type {Context}
+   */
   #context;
+
+  /**
+   * @type {Application}
+   */
   application;
 
   // override these values if extending Server
@@ -33,12 +41,14 @@ export class Server {
 
     this.#context.logger = new Logger(this.#context);
 
+    this.#context.metrics = new Metrics(this.#context);
+
     this.application = new Application(this.#context);
     await this.application.start();
   }
 
   async stop() {
-    await this.application.close();
+    await this.application.stop();
   }
 
   async restart() {

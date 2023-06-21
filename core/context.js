@@ -30,6 +30,11 @@ export class Context extends EventEmitter {
   config;
 
   /**
+   * @type {import("./metrics").Metrics}
+   */
+  metrics;
+
+  /**
    * @type {boolean}
    */
   development = false;

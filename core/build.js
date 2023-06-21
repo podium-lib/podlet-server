@@ -3,8 +3,10 @@ import { Extensions } from "./extensions.js";
 import { Files } from "./files.js";
 import { Logger } from "./logger.js";
 import { Context } from "./context.js";
+import esbuild from "esbuild";
 
 export class Build {
+  /** @type {Context} */
   #context;
 
   // override these values if extending Server
@@ -29,5 +31,17 @@ export class Build {
     await this.#context.config.load();
 
     this.#context.logger = new Logger(this.#context);
+
+    // Run esbuild
+    await esbuild.build({
+        entryPoints: this.#context.extensions.build.flatMap(build => build.entryPoints),
+        bundle: true,
+        format: "esm",
+        outdir: `${this.cwd}/dist/client`,
+        minify: true,
+        plugins: [...this.#context.extensions.build.flatMap(build => build.plugins), ...this.#context.files.build.plugins],
+        legalComments: `none`,
+        sourcemap: false,
+    });
   }
 }

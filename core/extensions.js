@@ -11,6 +11,7 @@ import merge from "lodash.merge";
  * @typedef {{ schema: ConfigSchema, formats: ConfigFormat[] }} Config
  * @typedef {import("fastify").FastifyPluginAsync} FastifyPlugin
  * @typedef {import("esbuild").Plugin} EsbuildPlugin
+ * @typedef {{ plugins: EsbuildPlugin[], entryPoints: string[] }} Build
  */
 
 /**
@@ -22,7 +23,7 @@ export class Extension {
 
   /**
    * @param {string} name
-   * @param {{config: Config, build: EsbuildPlugin[], server: FastifyPlugin, watchFiles: WatchFiles, loadFiles: LoadFiles, meta: any}} options
+   * @param {{config: Config, build: Build, server: FastifyPlugin, watchFiles: WatchFiles, loadFiles: LoadFiles, meta: any}} options
    */
   constructor(name, options) {
     this.name = name;
@@ -87,7 +88,7 @@ export class Extensions {
    * Imports an extension from an absolute file path and assembles it into an object
    *
    * @param {string} file - absolute path to a file to import
-   * @returns {Promise<{ server: FastifyPlugin, config: Config, build: EsbuildPlugin[], watchFiles: WatchFiles, loadFiles: LoadFiles, meta: any }>}
+   * @returns {Promise<{ server: FastifyPlugin, config: Config, build: Build, watchFiles: WatchFiles, loadFiles: LoadFiles, meta: any }>}
    */
   async importExtension(file) {
     const { server, config, build, watchFiles, loadFiles, meta } = await import(file);
@@ -99,7 +100,7 @@ export class Extensions {
       options.config = config;
     }
     if (build) {
-      options.build = build;
+      options.build = build(/** @type {Build} */ build);
     }
     if (watchFiles) {
       options.watchFiles = /** @type {WatchFiles} */ (watchFiles);
@@ -157,7 +158,7 @@ export class Extensions {
 
   get build() {
     return Array.from(this.#extensions.values())
-      .flatMap((extension) => extension.build)
+      .map((extension) => extension.build)
       .filter(Boolean);
   }
 
