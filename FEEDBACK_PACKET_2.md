@@ -18,7 +18,7 @@ This week, the feedback packet is focused on app configuration.
 mkdir test-packet
 cd test-packet
 npm init -f
-npm i @podium/experimental-podium-element @podium/podlet-server
+npm i @podium/element @podium/podlet-server
 ```
 
 Edit your `package.json` file and add `"type": "module",` to enable esm support.
@@ -64,7 +64,7 @@ Open common.json in your text editor and add global configuration overrides. For
 
 ## Step 3: Create host/environment-specific configuration files
 
-Config can be overridden for different environments such as local, dev, prod. It's flexible based on 2 parameters, host and env which are themselves configurable via environment variables. Eg. HOST=localhost ENV=local. Host is meant for different domains such as finn.no or dba.dk
+Config can be overridden for different environments such as local, dev, prod. It's flexible based on 2 parameters, host and env, which are themselves configurable via environment variables. Eg. HOST=localhost ENV=local. Host is meant for different domains such as www.finn.no or www.dba.dk
 
 Since the app tries to provide a set of good defaults for most things, the hope is that you will only need to overwrite these core values in limited cases though usage may prove this
 an incorrect assumption and you might have ideas about this you can provide as feedback from the get go.
@@ -79,7 +79,7 @@ Now, create folders for each host you want to configure. For example, if you hav
 
 ```bash
 mkdir config/hosts/localhost
-mkdir config/hosts/finn.no
+mkdir config/hosts/www.finn.no
 ```
 
 Inside each host folder, create environment-specific configuration files as needed. For example, for a localhost host with local
@@ -91,8 +91,8 @@ touch config/hosts/localhost/config.local.json
 And for the finn.com host:
 
 ```
-touch config/hosts/finn.no/config.dev.json
-touch config/hosts/finn.no/config.prod.json
+touch config/hosts/www.finn.no/config.dev.json
+touch config/hosts/www.finn.no/config.prod.json
 ```
 
 In each config file, override configuration values for the specific host and environment. For example, you can change the app.port for the local environment of the localhost host:
@@ -188,15 +188,15 @@ See [Convict](https://www.npmjs.com/package/convict) for more details about writ
 
 Finally, when running locally, you shouldn't need to set any environment variables, HOST will default to `localhost` and ENV will default to `local`
 but when running in dev/prod, there are 3 environment variables that should be set. We will likely want to get this set automatically in the platform.
-These are: HOST, ENV and VERSION. For Finn running in the current Fiaas, these would be HOST=finn.no ENV=dev|prod and VERSION={github commit hash}
+These are: HOST, ENV and VERSION. For Finn running in the current Fiaas, these would be HOST=www.finn.no ENV=dev|prod and VERSION={github commit hash}
 
 For example:
 
 ```
-HOST=finn.no ENV=dev VERSION=asd12df12gd3fg123 npm start
-# Uses configuration values specified in config/hosts/finn.no/config.dev.json.
-HOST=finn.no ENV=prod VERSION=asd12df12gd3fg123 npm start
-# Uses configuration values specified in config/hosts/finn.no/config.prod.json.
+HOST=www.finn.no ENV=dev VERSION=asd12df12gd3fg123 npm start
+# Uses configuration values specified in config/hosts/wwww.finn.no/config.dev.json.
+HOST=www.finn.no ENV=prod VERSION=asd12df12gd3fg123 npm start
+# Uses configuration values specified in config/hosts/www.finn.no/config.prod.json.
 ```
 
 Thats it for config, please give us any feedback you have!

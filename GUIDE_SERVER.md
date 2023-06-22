@@ -14,13 +14,13 @@ Use the `setContentState` and `setFallbackState` hooks to define the state for y
 // server.js
 import { join } from "path";
 
-export default async function server(fastify, { config, podlet }) {
-  fastify.setContentState((request, context) => {
+export default async function server(app, { config, podlet }) {
+  app.setContentState((request, context) => {
     // Access headers, route parameters, and query parameters here
     // Set the state for your content route
   });
 
-  fastify.setFallbackState((request, context) => {
+  app.setFallbackState((request, context) => {
     // Access headers, route parameters, and query parameters here
     // Set the state for your fallback route
   });
@@ -34,8 +34,8 @@ You can throw custom errors using the http-errors package. Throwing errors from 
 
 ```js
 // server.js
-export default async function server(fastify, { errors }) {
-  fastify.setContentState(async () => {
+export default async function server(app, { errors }) {
+  app.setContentState(async () => {
     // Example: throw a 418 "I'm a Teapot" error
     throw errors.ImATeapot();
   });
@@ -46,21 +46,20 @@ export default async function server(fastify, { errors }) {
 
 ## 4. Add API routes
 
-Define additional API routes for use in the client by using the Fastify object. You can use Podium context values to build paths and send them to the client using `.setContentState`.
+Define additional API routes for use in the client by using the app object. You can use Podium context values to build paths and send them to the client using `.setContentState`.
 
 ```js
 // server.js
 import { join } from "path";
 
-export default async function server(fastify, { config, podlet }) {
+export default async function server(app, { config, podlet }) {
   // Define your API route
-  const pathname = join(config.get("app.name"), "api");
-  fastify.get(pathname, async (req, reply) => {
+  app.get("/api", async (req, reply) => {
     return { key: "value" };
   });
 
   // Send the API route to the client
-  fastify.setContentState((request, context) => ({
+  app.setContentState((request, context) => ({
     api: new URL(`${context.publicPathname}/api`, context.mountOrigin).href,
   }));
 
@@ -90,10 +89,9 @@ If you need to use Podium proxying for client-side access to podlet API routes, 
 // server.js
 import { join } from "path";
 
-export default async function server(fastify, { config, podlet }) {
+export default async function server(app, { config, podlet }) {
   // Define your API route with Podium proxying
-  const target = join(config.get("app.name"), "api");
-  fastify.get(podlet.proxy({ target, name: "api" }), async (req, reply) => {
+  app.get(podlet.proxy({ "/api", name: "api" }), async (req, reply) => {
     return { key: "value" };
   });
 }

@@ -44,7 +44,8 @@ Example: content.js
 Here's an example of how to use the i18n() function in yout content component:
 
 ```javascript
-import { PodiumElement, html } from "@podium/podlet";
+import { PodiumElement } from "@podium/element";
+import { html } from "lit";
 
 export default class Content extends PodiumElement {
   render() {
