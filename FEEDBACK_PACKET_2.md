@@ -64,7 +64,7 @@ Open common.json in your text editor and add global configuration overrides. For
 
 ## Step 3: Create host/environment-specific configuration files
 
-Config can be overridden for different environments such as local, dev, prod. It's flexible based on 2 parameters, host and env which are themselves configurable via environment variables. Eg. HOST=localhost ENV=local. Host is meant for different domains such as www.finn.no or www.dba.dk
+Config can be overridden for different environments such as local, dev, prod. It's flexible based on 2 parameters, host and env, which are themselves configurable via environment variables. Eg. HOST=localhost ENV=local. Host is meant for different domains such as www.finn.no or www.dba.dk
 
 Since the app tries to provide a set of good defaults for most things, the hope is that you will only need to overwrite these core values in limited cases though usage may prove this
 an incorrect assumption and you might have ideas about this you can provide as feedback from the get go.

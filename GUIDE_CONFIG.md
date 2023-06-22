@@ -20,7 +20,7 @@ Podlet server won't enable development features if ENV is set to any other value
 
 ### Why we use ENV and not NODE_ENV
 
-NODE_ENV is an environment popularised by the Express js framework and as such it comes with typical expectations by many developers and libraries about how it should behave. The general convention is that it be set to either development or production. Configuration in a podlet-server on the other hand is centered around a more granular environment setup usually, local, staging and production or some variation upon this.
+NODE_ENV is an environment popularised by the Express js framework and as such it comes with typical expectations by many developers and libraries about how it should behave. The general convention is that it be set to either development or production. Configuration in a podlet-server on the other hand is centered around a more granular environment setup usually. local, staging and production or some variation upon this.
 
 ## Step 1: Create a config directory
 
