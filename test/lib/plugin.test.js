@@ -39,6 +39,7 @@ async function setupConfig() {
   const config = convict({});
   // @ts-ignore
   config.set("app.name", "test-app");
+  config.set("app.port", 0);
   config.set("assets.base", "/static");
   config.set("podlet.version", "1.0.0");
   config.set("podlet.pathname", "/");
