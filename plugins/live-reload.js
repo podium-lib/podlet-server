@@ -3,7 +3,7 @@ import chokidar from "chokidar";
 import fp from "fastify-plugin";
 import etag from "@fastify/etag";
 import cors from "@fastify/cors";
-import websocket from "@fastify/websocket";
+import { WebSocketServer } from "ws";
 
 const watch = [
   "content.js",
@@ -39,9 +39,11 @@ export default fp(
     });
 
     await fastify.register(cors);
-    await fastify.register(websocket);
 
-    const wss = fastify.websocketServer;
+    const wss = new WebSocketServer({
+      server: fastify.server,
+      path: liveReloadServerPath,
+    });
 
     function onFileChange() {
       wss.clients.forEach((client) => {
@@ -51,30 +53,45 @@ export default fp(
       });
     }
 
-    wss.on("connection", (ws) => {
-      fastify.log.debug("live reload - server got connection from browser");
+    /**
+     * @typedef {import("ws").WebSocket & { isAlive: boolean }} WebSocketE
+     */
 
-      ws.isAlive = true;
+    wss.on(
+      "connection",
+      /** @param {WebSocketE} ws */
+      (ws) => {
+        fastify.log.debug("live reload - server got connection from browser");
 
-      ws.on("pong", () => {
         ws.isAlive = true;
-      });
 
-      ws.on("error", (error) => {
-        fastify.log.debug("live reload - connection to browser errored");
-        fastify.log.error(error);
-      });
-    });
+        ws.on("pong", () => {
+          ws.isAlive = true;
+        });
+
+        ws.on("error", (error) => {
+          fastify.log.debug("live reload - connection to browser errored");
+          fastify.log.error(error);
+        });
+      }
+    );
 
     const pingpong = setInterval(() => {
-      wss.clients.forEach((client) => {
-        if (client.isAlive === false) return client.terminate();
-        client.isAlive = false;
-        client.ping(() => {
+      wss.clients.forEach(
+        (client) => {
+        const c = /** @type {WebSocketE} */ (client);
+        if (c.isAlive === false) return client.terminate();
+        c.isAlive = false;
+        c.ping(() => {
           // noop
         });
       });
     }, 30000);
+
+    wss.on("error", (error) => {
+      fastify.log.debug("live reload - server errored");
+      fastify.log.error(error);
+    });
 
     wss.on("close", () => {
       fastify.log.debug("live reload - server closed");
@@ -100,11 +117,13 @@ export default fp(
 
     async function cleanup() {
       await watcher.close();
+      for (const client of wss.clients) {
+        client.close();
+      }
+      await new Promise((resolve) => wss.close(resolve));
     }
 
     fastify.addHook("onClose", cleanup);
-
-    fastify.get("/_/live/reload", { websocket: true }, (connection, request) => {});
 
     fastify.get("/_/live/client", (request, reply) => {
       reply.type("application/javascript");
