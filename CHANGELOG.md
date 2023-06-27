@@ -1,3 +1,10 @@
+## [1.8.11](https://github.com/podium-lib/podlet-server/compare/v1.8.10...v1.8.11) (2023-06-27)
+
+
+### Bug Fixes
+
+* ensure url paths have correct number of slash characters ([#89](https://github.com/podium-lib/podlet-server/issues/89)) ([d8e6b9c](https://github.com/podium-lib/podlet-server/commit/d8e6b9cd0f32e2d24a30336f35f2579e6da68aea))
+
 ## [1.8.10](https://github.com/podium-lib/podlet-server/compare/v1.8.9...v1.8.10) (2023-06-26)
 
 
