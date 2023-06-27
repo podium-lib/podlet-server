@@ -43,13 +43,43 @@ export default fp(
 
     const wss = fastify.websocketServer;
 
-    function onFileChange(path) {
+    function onFileChange() {
       wss.clients.forEach((client) => {
         client.send("update", () => {
           // Something went wrong....
         });
       });
     }
+
+    wss.on("connection", (ws) => {
+      fastify.log.debug("live reload - server got connection from browser");
+
+      ws.isAlive = true;
+
+      ws.on("pong", () => {
+        ws.isAlive = true;
+      });
+
+      ws.on("error", (error) => {
+        fastify.log.debug("live reload - connection to browser errored");
+        fastify.log.error(error);
+      });
+    });
+
+    const pingpong = setInterval(() => {
+      wss.clients.forEach((client) => {
+        if (client.isAlive === false) return client.terminate();
+        client.isAlive = false;
+        client.ping(() => {
+          // noop
+        });
+      });
+    }, 30000);
+
+    wss.on("close", () => {
+      fastify.log.debug("live reload - server closed");
+      clearInterval(pingpong);
+    });
 
     const watcher = chokidar.watch(watch, {
       persistent: true,
