@@ -44,7 +44,7 @@ export default class Content extends PodiumElement {
 Start the server in dev mode
 
 ```
-npx podlet-dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080` in your browser.
