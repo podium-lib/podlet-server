@@ -1,7 +1,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import chokidar from "chokidar";
-import { context, build } from "esbuild";
+import { context } from "esbuild";
 import pino from "pino";
 import fastify from "fastify";
 import httpError from "http-errors";
@@ -9,11 +9,11 @@ import PathResolver from "../lib/path.js";
 import chalk from "chalk";
 import boxen from "boxen";
 import kill from "kill-port";
-import { createRequire } from "node:module";
+// import { createRequire } from "node:module";
 import { getLinguiConfig } from "../lib/lingui-config.js";
 import { linguiExtract, linguiCompile } from "../lib/lingui.js";
 
-const require = createRequire(import.meta.url);
+// const require = createRequire(import.meta.url);
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
 function cleanEsbuildPort() {
@@ -180,16 +180,16 @@ export async function dev({ state, config, cwd = process.cwd() }) {
   let FALLBACK_FILEPATH;
 
   // build dsd ponyfill
-  await build({
-    entryPoints: [require.resolve("@webcomponents/template-shadowroot/template-shadowroot.js")],
-    bundle: true,
-    format: "esm",
-    outfile: join(CLIENT_OUTDIR, "template-shadowroot.js"),
-    minify: true,
-    target: ["es2017"],
-    legalComments: `none`,
-    sourcemap: false,
-  });
+  // await build({
+  //   entryPoints: [require.resolve("@webcomponents/template-shadowroot/template-shadowroot.js")],
+  //   bundle: true,
+  //   format: "esm",
+  //   outfile: join(CLIENT_OUTDIR, "template-shadowroot.js"),
+  //   minify: true,
+  //   target: ["es2017"],
+  //   legalComments: `none`,
+  //   sourcemap: false,
+  // });
 
   async function createBuildContext() {
     CONTENT_FILEPATH = await resolver.resolve("./content");
@@ -244,31 +244,31 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles built")}: ${clientFiles.join(", ")}`);
 
-  function clientFileChange(type) {
-    return async (filename) => {
-      console.clear();
-      const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
-      const msgBox = boxen(greeting, { padding: 0.5 });
-      console.log(msgBox);
-      logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
-      try {
-        // extract in case translations were added
-        // @ts-ignore
-        await linguiExtract({ linguiConfig, cwd, hideStats: true });
-        // compile in case a .po file changed
-        // @ts-ignore
-        await linguiCompile({ linguiConfig, config });
+  // function clientFileChange(type) {
+  //   return async (filename) => {
+  //     console.clear();
+  //     const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
+  //     const msgBox = boxen(greeting, { padding: 0.5 });
+  //     console.log(msgBox);
+  //     logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
+  //     try {
+  //       // extract in case translations were added
+  //       // @ts-ignore
+  //       await linguiExtract({ linguiConfig, cwd, hideStats: true });
+  //       // compile in case a .po file changed
+  //       // @ts-ignore
+  //       await linguiCompile({ linguiConfig, config });
 
-        await buildContext.rebuild();
-      } catch (err) {
-        // esbuild agressive cachine causes it to fail when files unrelated to the build are deleted
-        // to handle this, we dispose of the current context and create a new one.
-        await buildContext.dispose();
-        buildContext = await createBuildContext();
-      }
-      logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles rebuilt")}: ${clientFiles.join(", ")}`);
-    };
-  }
+  //       await buildContext.rebuild();
+  //     } catch (err) {
+  //       // esbuild agressive cachine causes it to fail when files unrelated to the build are deleted
+  //       // to handle this, we dispose of the current context and create a new one.
+  //       await buildContext.dispose();
+  //       buildContext = await createBuildContext();
+  //     }
+  //     logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles rebuilt")}: ${clientFiles.join(", ")}`);
+  //   };
+  // }
 
   const devServer = new DevServer({
     logger: logger,

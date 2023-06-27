@@ -1,12 +1,17 @@
 import fp from "fastify-plugin";
 
-export default fp(async function csrPlugin(fastify, { appName = "", base = "/", development = false }) {
+function buildUrlPath(path) {
+  return path.replaceAll(/\/+/g, "/");
+}
+
+export default fp(async function csrPlugin(fastify, { appName = "", base = "/", development = false, prefix = "" }) {
   fastify.decorate("csr", function csr(name, template) {
+    const elementPath = buildUrlPath(`${prefix}/_/dynamic/files/${name}.js`);
     if (development) {
       return `
         ${template}
         <script type="module">
-          import El from '${base}/client/${name}.js';
+          import El from '${elementPath}';
           customElements.define("${appName}-${name}",El);
         </script>
       `;
