@@ -79,8 +79,9 @@ export default fp(
     const pingpong = setInterval(() => {
       wss.clients.forEach(
         (client) => {
+          // Typescript casting dance to add the isAlive property to WebSocket
         const c = /** @type {WebSocketE} */ (client);
-        if (c.isAlive === false) return client.terminate();
+        if (c.isAlive === false) return c.terminate();
         c.isAlive = false;
         c.ping(() => {
           // noop
@@ -117,9 +118,6 @@ export default fp(
 
     async function cleanup() {
       await watcher.close();
-      for (const client of wss.clients) {
-        client.close();
-      }
       await new Promise((resolve) => wss.close(resolve));
     }
 
