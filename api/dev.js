@@ -16,10 +16,6 @@ import { linguiExtract, linguiCompile } from "../lib/lingui.js";
 // const require = createRequire(import.meta.url);
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
-function cleanEsbuildPort() {
-  return kill(6935);
-}
-
 class DevServer {
   constructor({ cwd, config, logger, state, content = false }) {
     this.cwd = cwd;
@@ -179,18 +175,6 @@ export async function dev({ state, config, cwd = process.cwd() }) {
   /** @type {import("../lib/path.js").Resolution} */
   let FALLBACK_FILEPATH;
 
-  // build dsd ponyfill
-  // await build({
-  //   entryPoints: [require.resolve("@webcomponents/template-shadowroot/template-shadowroot.js")],
-  //   bundle: true,
-  //   format: "esm",
-  //   outfile: join(CLIENT_OUTDIR, "template-shadowroot.js"),
-  //   minify: true,
-  //   target: ["es2017"],
-  //   legalComments: `none`,
-  //   sourcemap: false,
-  // });
-
   async function createBuildContext() {
     CONTENT_FILEPATH = await resolver.resolve("./content");
     FALLBACK_FILEPATH = await resolver.resolve("./fallback");
@@ -244,32 +228,6 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles built")}: ${clientFiles.join(", ")}`);
 
-  // function clientFileChange(type) {
-  //   return async (filename) => {
-  //     console.clear();
-  //     const greeting = chalk.white.bold(`Podium Podlet Server (v${version})`);
-  //     const msgBox = boxen(greeting, { padding: 0.5 });
-  //     console.log(msgBox);
-  //     logger.debug(`📁 ${chalk.blue(`file ${type}`)}: ${filename}`);
-  //     try {
-  //       // extract in case translations were added
-  //       // @ts-ignore
-  //       await linguiExtract({ linguiConfig, cwd, hideStats: true });
-  //       // compile in case a .po file changed
-  //       // @ts-ignore
-  //       await linguiCompile({ linguiConfig, config });
-
-  //       await buildContext.rebuild();
-  //     } catch (err) {
-  //       // esbuild agressive cachine causes it to fail when files unrelated to the build are deleted
-  //       // to handle this, we dispose of the current context and create a new one.
-  //       await buildContext.dispose();
-  //       buildContext = await createBuildContext();
-  //     }
-  //     logger.debug(`${chalk.green("♻️")}  ${chalk.magenta("bundles rebuilt")}: ${clientFiles.join(", ")}`);
-  //   };
-  // }
-
   const devServer = new DevServer({
     logger: logger,
     cwd,
@@ -307,7 +265,6 @@ export async function dev({ state, config, cwd = process.cwd() }) {
   serverWatcher.on("error", async (err) => {
     logger.error(err, "server watcher error: disposing of build context");
     await buildContext.dispose();
-    await cleanEsbuildPort();
   });
 
   let debounceTimer;
@@ -351,7 +308,6 @@ export async function dev({ state, config, cwd = process.cwd() }) {
 
   serverWatcher.on("error", (err) => {
     logger.error(err, "Uh Oh! Something went wrong with server side file watching. Got error");
-    cleanEsbuildPort();
   });
 
   // start the server for the first time
@@ -361,14 +317,7 @@ export async function dev({ state, config, cwd = process.cwd() }) {
     logger.error(err);
     await serverWatcher.close();
     buildContext.dispose();
-    // ensure esbuild is cleaned up
-    await cleanEsbuildPort();
     process.exit(1);
   }
 }
 
-process.on("uncaughtException", cleanEsbuildPort);
-process.on("unhandledRejection", cleanEsbuildPort);
-process.on("SIGINT", cleanEsbuildPort);
-process.on("SIGTERM", cleanEsbuildPort);
-process.on("SIGHUP", cleanEsbuildPort);

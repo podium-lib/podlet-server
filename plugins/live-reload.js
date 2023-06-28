@@ -3,7 +3,7 @@ import chokidar from "chokidar";
 import fp from "fastify-plugin";
 import etag from "@fastify/etag";
 import cors from "@fastify/cors";
-import websocket from "@fastify/websocket";
+import { WebSocketServer } from "ws";
 
 const watch = [
   "content.js",
@@ -39,17 +39,65 @@ export default fp(
     });
 
     await fastify.register(cors);
-    await fastify.register(websocket);
 
-    const wss = fastify.websocketServer;
+    const wss = new WebSocketServer({
+      server: fastify.server,
+      path: liveReloadServerPath,
+    });
 
-    function onFileChange(path) {
+    function onFileChange() {
       wss.clients.forEach((client) => {
         client.send("update", () => {
           // Something went wrong....
         });
       });
     }
+
+    /**
+     * @typedef {import("ws").WebSocket & { isAlive: boolean }} WebSocketE
+     */
+
+    wss.on(
+      "connection",
+      /** @param {WebSocketE} ws */
+      (ws) => {
+        fastify.log.debug("live reload - server got connection from browser");
+
+        ws.isAlive = true;
+
+        ws.on("pong", () => {
+          ws.isAlive = true;
+        });
+
+        ws.on("error", (error) => {
+          fastify.log.debug("live reload - connection to browser errored");
+          fastify.log.error(error);
+        });
+      }
+    );
+
+    const pingpong = setInterval(() => {
+      wss.clients.forEach(
+        (client) => {
+          // Typescript casting dance to add the isAlive property to WebSocket
+        const c = /** @type {WebSocketE} */ (client);
+        if (c.isAlive === false) return c.terminate();
+        c.isAlive = false;
+        c.ping(() => {
+          // noop
+        });
+      });
+    }, 30000);
+
+    wss.on("error", (error) => {
+      fastify.log.debug("live reload - server errored");
+      fastify.log.error(error);
+    });
+
+    wss.on("close", () => {
+      fastify.log.debug("live reload - server closed");
+      clearInterval(pingpong);
+    });
 
     const watcher = chokidar.watch(watch, {
       persistent: true,
@@ -70,11 +118,10 @@ export default fp(
 
     async function cleanup() {
       await watcher.close();
+      await new Promise((resolve) => wss.close(resolve));
     }
 
     fastify.addHook("onClose", cleanup);
-
-    fastify.get("/_/live/reload", { websocket: true }, (connection, request) => {});
 
     fastify.get("/_/live/client", (request, reply) => {
       reply.type("application/javascript");

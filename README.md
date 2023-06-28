@@ -14,10 +14,10 @@ This package can be used to bootstrap an opinionated Podium podlet server that p
 
 ## Getting started
 
-Install the following 2 packages:
+Install the following 3 packages:
 
 ```
-npm install @podium/podlet-server @podium/element
+npm install @podium/podlet-server @podium/element lit
 ```
 
 Create a file called `content.js` in your project root that provides a Lit custom element as the default export.
@@ -44,7 +44,7 @@ export default class Content extends PodiumElement {
 Start the server in dev mode
 
 ```
-npx podlet-dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080` in your browser.

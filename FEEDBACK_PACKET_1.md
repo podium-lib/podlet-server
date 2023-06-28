@@ -24,7 +24,7 @@ Edit your `package.json` file and add `"type": "module",` to enable esm support.
 ## Running the server
 
 ```
-npx podlet dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080` and you should be redirected to the podlet's manifest file.
@@ -63,7 +63,7 @@ export default class Content extends PodiumElement {
 Fire up the server again 
 
 ```
-npx podlet dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080`
