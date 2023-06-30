@@ -427,7 +427,8 @@ class ProcessExceptionHandlers {
 
 let handlersAdded = false;
 
-export default fp(async function exceptions(fastify, { grace }) {
+export default fp(async function exceptions(fastify, { grace, development }, next) {
+  if (development) return next();
   if (!handlersAdded) {
     const procExp = new ProcessExceptionHandlers(fastify.log);
     procExp.closeOnExit(fastify, { grace: grace });
@@ -441,5 +442,6 @@ export default fp(async function exceptions(fastify, { grace }) {
 
     // @ts-ignore
     fastify.metricStreams.push(procExp.metrics);
+    next();
   }
 });
