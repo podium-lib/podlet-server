@@ -1,3 +1,45 @@
+## [1.8.12](https://github.com/podium-lib/podlet-server/compare/v1.8.11...v1.8.12) (2023-06-28)
+
+
+### Bug Fixes
+
+* update hydrate support ([#90](https://github.com/podium-lib/podlet-server/issues/90)) ([9f5851f](https://github.com/podium-lib/podlet-server/commit/9f5851faef72d760a87460d12dafaad75a74b496))
+
+## [1.8.11](https://github.com/podium-lib/podlet-server/compare/v1.8.10...v1.8.11) (2023-06-27)
+
+
+### Bug Fixes
+
+* ensure url paths have correct number of slash characters ([#89](https://github.com/podium-lib/podlet-server/issues/89)) ([d8e6b9c](https://github.com/podium-lib/podlet-server/commit/d8e6b9cd0f32e2d24a30336f35f2579e6da68aea))
+
+## [1.8.10](https://github.com/podium-lib/podlet-server/compare/v1.8.9...v1.8.10) (2023-06-26)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies (non-major) ([460df25](https://github.com/podium-lib/podlet-server/commit/460df25b60ec1248a1639339d7d45e74df3da81f))
+
+## [1.8.9](https://github.com/podium-lib/podlet-server/compare/v1.8.8...v1.8.9) (2023-06-19)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies (non-major) ([d60f4bb](https://github.com/podium-lib/podlet-server/commit/d60f4bb9b4ce2747466223829c74c755f048cfea))
+
+## [1.8.8](https://github.com/podium-lib/podlet-server/compare/v1.8.7...v1.8.8) (2023-06-13)
+
+
+### Bug Fixes
+
+* replace unsafeHtml with unsafeStatic for tag names ([f917083](https://github.com/podium-lib/podlet-server/commit/f91708354b4846c50c7323fe76aa58156776a34b))
+
+## [1.8.7](https://github.com/podium-lib/podlet-server/compare/v1.8.6...v1.8.7) (2023-06-12)
+
+
+### Bug Fixes
+
+* Do not load language file on each request ([6c7df36](https://github.com/podium-lib/podlet-server/commit/6c7df36a067892ef3c24dd496ad116211933a096))
+
 ## [1.8.6](https://github.com/podium-lib/podlet-server/compare/v1.8.5...v1.8.6) (2023-06-12)
 
 

@@ -29,7 +29,7 @@ touch content.js
 Open `content.js` in your text editor and add the following code:
 ```js
 import { html } from 'lit';
-import { PodiumElement } from '@podium/experimental-podium-element';
+import { PodiumElement } from '@podium/element';
 
 export default class Content extends PodiumElement {
   render() {

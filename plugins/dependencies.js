@@ -29,7 +29,7 @@ export default fp(async function dependencies(fastify, { enabled = false, cwd = 
         let filepath = "";
         try {
           // resolve the full path to the dependency using node's dep resolving mechanism
-          filepath = require.resolve(depname, { paths: [cwd] });
+          filepath = require.resolve(depname, { paths: [cwd, new URL("../", import.meta.url).pathname] });
         } catch (err) {
           fastify.log.debug(`Serving 404 - Not Found - Unable to resolve file path for ${depname}.`);
           throw new httpError.NotFound();

@@ -16,7 +16,7 @@ that would be most appreciated.
 mkdir test-packet
 cd test-packet
 npm init -f
-npm i @podium/experimental-podium-element @podium/experimental-fastify-podlet-server
+npm i @podium/element @podium/podlet-server
 ```
 
 Edit your `package.json` file and add `"type": "module",` to enable esm support.
@@ -24,7 +24,7 @@ Edit your `package.json` file and add `"type": "module",` to enable esm support.
 ## Running the server
 
 ```
-npx podlet dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080` and you should be redirected to the podlet's manifest file.
@@ -41,7 +41,7 @@ Here is an example of a basic component with some simple markup in it.
 ```js
 // content.js
 import { html } from "lit";
-import { PodiumElement } from "@podium/experimental-podium-element";
+import { PodiumElement } from "@podium/element";
 
 export default class Content extends PodiumElement {
   render() {
@@ -63,7 +63,7 @@ export default class Content extends PodiumElement {
 Fire up the server again 
 
 ```
-npx podlet dev
+npx @podium/podlet-server dev
 ```
 
 And visit `http://localhost:8080`
@@ -75,7 +75,7 @@ Adding a fallback is much the same. Define a component in the file fallback.js
 ```js
 // content.js
 import { html } from "lit";
-import { PodiumElement } from "@podium/experimental-podium-element";
+import { PodiumElement } from "@podium/element";
 
 export default class Fallback extends PodiumElement {
   render() {
@@ -111,7 +111,7 @@ And then back in content.js you can access this data using `this.initialState`.
 ```js
 // content.js
 import { html } from "lit";
-import { PodiumElement } from "@podium/experimental-podium-element";
+import { PodiumElement } from "@podium/element";
 
 export default class Content extends PodiumElement {
   render() {

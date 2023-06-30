@@ -12,20 +12,22 @@ export default fp(async function locale(fastify, { cwd = process.cwd(), locale =
 
   const localeFilePath = join(cwd, "locales", locale) + compiledFileExtension;
 
-  fastify.decorate("readTranslations", async () => {
-    try {
-      const { messages } = await import(`${localeFilePath}?s=${Date.now()}`);
-      fastify.log.debug(`🌏 ${chalk.magenta("translations")}: loaded file "${localeFilePath}" for locale "${locale}"`);
+  let msgs = {};
 
-      return messages;
-    } catch (err) {
-      try {
-        await fs.promises.access(localeFilePath, fs.F_OK);
-        fastify.log.error(`Error reading translation file: ${localeFilePath}`, err);
-        return;
-      } catch {
-        return;
-      }
+  try {
+    const { messages } = await import(`${localeFilePath}?s=${Date.now()}`);
+    fastify.log.debug(`🌏 ${chalk.magenta("translations")}: loaded file "${localeFilePath}" for locale "${locale}"`);
+    msgs = messages;
+  } catch (err) {
+    try {
+      await fs.promises.access(localeFilePath, fs.F_OK);
+      fastify.log.error(`Error reading translation file: ${localeFilePath}`, err);
+    } catch {
+      // eat error
     }
+  }
+
+  fastify.decorate("readTranslations", async () => {
+    return msgs;
   });
 });
