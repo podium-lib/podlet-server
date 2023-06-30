@@ -47,6 +47,6 @@ test("server rendering of a lit element with hydration support", async (t) => {
   t.notMatch(result, `<div>hello world</div>`, "should contain component rendered markup");
   t.notMatch(result, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
   t.match(result, "<custom-element>", "should contain the correct html tag");
-  t.match(result, `import El from '/static/client/element.js';`, "should contain client side element import");
+  t.match(result, `import El from '/_/dynamic/files/element.js';`, "should contain client side element import");
   t.match(result, `customElements.define("custom-element",El);`, "should contain client side element registration");
 });
