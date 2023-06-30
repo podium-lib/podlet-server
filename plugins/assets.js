@@ -2,17 +2,7 @@ import { join } from "node:path";
 import fp from "fastify-plugin";
 import chalk from "chalk";
 import { fastifyStatic } from "@fastify/static";
-
-/**
- * Determines if a given path or url is an absolute url
- * @param {string} pathOrUrl
- * @returns {boolean}
- */
-const isAbsoluteURL = (pathOrUrl) => {
-  const url = new URL(pathOrUrl, "http://local");
-  if (url.origin !== "http://local") return true;
-  return false;
-};
+import { isAbsoluteURL } from "../lib/utils.js";
 
 /**
  * @typedef {Object} AssetsOptions

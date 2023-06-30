@@ -1,12 +1,9 @@
 import fp from "fastify-plugin";
-
-function buildUrlPath(path) {
-  return path.replaceAll(/\/+/g, "/");
-}
+import { joinURLPathSegments } from "../lib/utils.js";
 
 export default fp(async function csrPlugin(fastify, { appName = "", base = "/", development = false, prefix = "" }) {
   fastify.decorate("csr", function csr(name, template) {
-    const elementPath = buildUrlPath(`${prefix}/_/dynamic/files/${name}.js`);
+    const elementPath = joinURLPathSegments(prefix, `/_/dynamic/files/${name}.js`);
     if (development) {
       return `
         ${template}

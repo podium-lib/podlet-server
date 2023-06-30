@@ -1,13 +1,10 @@
 import { render } from "@lit-labs/ssr";
 import fp from "fastify-plugin";
-
-function buildUrlPath(path) {
-  return path.replaceAll(/\/+/g, "/");
-}
+import { joinURLPathSegments } from "../lib/utils.js";
 
 export default fp(async function ssrPlugin(fastify, { appName = "", prefix = "" }) {
   fastify.decorate("ssr", function ssr(type, template) {
-    const shadowRootPath = buildUrlPath(`${prefix}/_/dynamic/modules/@webcomponents/template-shadowroot/template-shadowroot.js`);
+    const shadowRootPath = joinURLPathSegments(prefix, `/_/dynamic/modules/@webcomponents/template-shadowroot/template-shadowroot.js`);
     // user provided markup, SSR'd
     const ssrMarkup = Array.from(render(template)).join("");
     // polyfill for browsers that don't support declarative shadow dom

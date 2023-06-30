@@ -4,6 +4,7 @@ import fp from "fastify-plugin";
 import etag from "@fastify/etag";
 import cors from "@fastify/cors";
 import { WebSocketServer } from "ws";
+import { joinURLPathSegments } from "../lib/utils.js";
 
 const watch = [
   "content.js",
@@ -23,16 +24,12 @@ const watch = [
   "locales/**/*.po",
 ];
 
-function buildUrlPath(path) {
-  return path.replaceAll(/\/+/g, "/");
-}
-
 export default fp(
   async (fastify, { cwd = process.cwd(), development, port, prefix = "/" }, next) => {
     if (!development) return next();
 
-    const liveReloadServerPath = buildUrlPath(`/${prefix}/_/live/reload`);
-    const liveReloadClientPath = buildUrlPath(`/${prefix}/_/live/client`);
+    const liveReloadServerPath = joinURLPathSegments(prefix, `/_/live/reload`);
+    const liveReloadClientPath = joinURLPathSegments(prefix, `/_/live/client`);
 
     await fastify.register(etag, {
       algorithm: "fnv1a",
