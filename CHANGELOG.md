@@ -1,3 +1,17 @@
+## [1.8.13](https://github.com/podium-lib/podlet-server/compare/v1.8.12...v1.8.13) (2023-06-30)
+
+
+### Bug Fixes
+
+* try to avoid running scripts etc in dev mode when starting the app ([#78](https://github.com/podium-lib/podlet-server/issues/78)) ([fa7a12f](https://github.com/podium-lib/podlet-server/commit/fa7a12fc23a9c40d6bf70155b092e468592cd3a1))
+
+## [1.8.12](https://github.com/podium-lib/podlet-server/compare/v1.8.11...v1.8.12) (2023-06-28)
+
+
+### Bug Fixes
+
+* update hydrate support ([#90](https://github.com/podium-lib/podlet-server/issues/90)) ([9f5851f](https://github.com/podium-lib/podlet-server/commit/9f5851faef72d760a87460d12dafaad75a74b496))
+
 ## [1.8.11](https://github.com/podium-lib/podlet-server/compare/v1.8.10...v1.8.11) (2023-06-27)
 
 
