@@ -32,7 +32,7 @@ export class TestServer {
   static async create({ cwd = process.cwd(), development = false } = {}) {
     const state = new State({ cwd });
     state.set("core", await Core.load());
-    state.set("extensions", await Extensions.load({ cwd, development: true }));
+    state.set("extensions", await Extensions.load({ cwd }));
     state.set("local", await Local.load({ cwd, development: true }));
     const config = await configuration({ cwd, schemas: await state.config() });
     // @ts-ignore
@@ -127,11 +127,13 @@ export class TestServer {
     };
 
     if (this.config.get("podlet.content")) {
-        routeObject.content = this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.content"));
+      routeObject.content =
+        this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.content"));
     }
 
     if (this.config.get("podlet.fallback")) {
-        routeObject.fallback = this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.fallback"));
+      routeObject.fallback =
+        this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.fallback"));
     }
 
     return routeObject;
