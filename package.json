@@ -16,8 +16,16 @@
     "./i18n": "./api/i18n.js",
     ".": "./api/index.js"
   },
+  "types": "index.d.ts",
+  "files": [
+    "index.d.ts",
+    "lib",
+    "api",
+    "cli.js"
+  ],
   "scripts": {
-    "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js"
+    "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
+    "prepublish": "tsc"
   },
   "keywords": [],
   "author": "",
@@ -78,8 +86,10 @@
     "@fastify/cors": "^8.3.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
+    "@types/http-errors": "^2.0.1",
     "@types/ws": "^8.5.5",
     "semantic-release": "21.0.2",
-    "tap": "^16.3.4"
+    "tap": "^16.3.4",
+    "typescript": "^5.1.6"
   }
 }

@@ -497,6 +497,7 @@ Any values defined in this file, can be overridden for specific hosts and enviro
 | `app.port`                     | 8080                                            | PORT        |                                                    |
 | `app.logLevel`                 | INFO                                            | LOG_LEVEL   | "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL" |
 | `app.locale`                   | en                                              | LOCALE      |                                                    |
+| `app.locales`                  | []                                              | LOCALES     |                                                    |
 | `app.development`              | true when NODE_ENV=development, false otherwise | DEVELOPMENT | true/false                                         |
 | `app.component`                | true                                            |             |                                                    |
 | `app.mode`                     | hydrate                                         |             | hydrate, ssr-only, csr-only                        |
@@ -530,38 +531,6 @@ Any values defined in this file, can be overridden for specific hosts and enviro
 | `assets.development` | false       |     | true/false      |
 | `assets.scripts`     | auto detect |     | true/false      |
 | `assets.lazy`        | auto detect |     | true/false      |
-
-## Localisation
-
-The app supports localisation out of the box. To start using it, you need to do the following 3 things:
-
-1. Define locale json files in a `locale` folder
-
-```json5
-// locale/no.json
-{
-  how_much_money: "Hvor mye penger har du i boden, egentlig?",
-}
-```
-
-2. Use the `t()` function in your content and fallback routes.
-
-```js
-// content.js
-export default class Content extends PodiumElement {
-  render() {
-    return html`<section>${this.t("how_much_money")}</section>`;
-  }
-}
-```
-
-3. Set the correct locale setting, either in config or via the LOCALE environment variable
-
-```
-LOCALE=no podlet dev
-```
-
-Under the hood, lit-translate is used. [See the docs](https://www.npmjs.com/package/lit-translate?activeTab=readme) for more information
 
 ## Customising The Build Pipeline [Advanced]
 
