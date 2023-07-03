@@ -4,7 +4,7 @@ import { Core } from "../lib/resolvers/core.js";
 import { Extensions } from "../lib/resolvers/extensions.js";
 import { State } from "../lib/state.js";
 
-import { dev } from "../api/dev.js";
+import { DevServer } from "../api/dev.js";
 
 export const command = "dev";
 
@@ -35,5 +35,6 @@ export const handler = async (argv) => {
 
   const config = await configuration({ cwd, schemas: await state.config() });
 
-  await dev({ state, config, cwd });
+  const devServer = new DevServer({ state, config, cwd });
+  await devServer.start();
 };

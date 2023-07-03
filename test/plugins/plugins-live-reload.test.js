@@ -37,7 +37,7 @@ test("live reload script injected when content-type is html and app in developme
   const response2 = await result2.text();
   t.match(
     response2,
-    `const ws = new WebSocket('ws://localhost:1234/_/live/reload');`,
+    `const ws = new WebSocket('ws://localhost:3925');`,
     "should inject correct live reload script URL"
   );
   await app.close();
@@ -69,7 +69,7 @@ test("live reload script injected in wrapping plugin with prefix /foo", async (t
   const response2 = await result2.text();
   t.match(
     response2,
-    `const ws = new WebSocket('ws://localhost:1235/foo/_/live/reload');`,
+    `const ws = new WebSocket('ws://localhost:3925');`,
     "should inject correct live reload script URL"
   );
   await app.close();
