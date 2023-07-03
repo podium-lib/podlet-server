@@ -155,6 +155,7 @@ test("scripts", async (t) => {
   const config = await setupConfig();
   config.set("podlet.fallback", "/fallback");
   config.set("assets.scripts", true);
+  config.set("assets.base", "/assets");
   await app.register(plugin, {
     cwd: tmp,
     config,
@@ -167,8 +168,34 @@ test("scripts", async (t) => {
   const cMarkup = await content.text();
   const fMarkup = await fallback.text();
   t.notMatch(mMarkup, `scripts.js`);
-  t.match(cMarkup, `scripts.js`);
-  t.match(fMarkup, `scripts.js`);
+  t.match(cMarkup, `/assets/client/scripts.js`);
+  t.match(fMarkup, `/assets/client/scripts.js`);
+  await app.close();
+});
+
+test("scripts: plugin mounted under /app, development mode urls", async (t) => {
+  await writeFile(join(tmp, "fallback.js"), contentFile);
+  const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
+  config.set("assets.scripts", true);
+  config.set("app.base", "/app");
+  config.set("app.development", true);
+  await app.register(plugin, {
+    prefix: "/app",
+    cwd: tmp,
+    config,
+  });
+  const address = await app.listen({ port: 0 });
+  const manifest = await fetch(`${address}/app/manifest.json`);
+  const content = await fetch(`${address}/app`);
+  const fallback = await fetch(`${address}/app/fallback`);
+  const mMarkup = await manifest.text();
+  const cMarkup = await content.text();
+  const fMarkup = await fallback.text();
+  t.notMatch(mMarkup, `scripts.js`);
+  t.match(cMarkup, `/app/_/dynamic/files/scripts.js`);
+  t.match(fMarkup, `/app/_/dynamic/files/scripts.js`);
   await app.close();
 });
 
@@ -178,6 +205,7 @@ test("lazy", async (t) => {
   const config = await setupConfig();
   config.set("podlet.fallback", "/fallback");
   config.set("assets.lazy", true);
+  config.set("assets.base", "/assets");
   await app.register(plugin, {
     cwd: tmp,
     config,
@@ -190,8 +218,34 @@ test("lazy", async (t) => {
   const cMarkup = await content.text();
   const fMarkup = await fallback.text();
   t.notMatch(mMarkup, `lazy.js`);
-  t.match(cMarkup, `lazy.js`);
-  t.match(fMarkup, `lazy.js`);
+  t.match(cMarkup, `/assets/client/lazy.js`);
+  t.match(fMarkup, `/assets/client/lazy.js`);
+  await app.close();
+});
+
+test("lazy: plugin mounted under /app, development mode urls", async (t) => {
+  await writeFile(join(tmp, "fallback.js"), contentFile);
+  const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set("podlet.fallback", "/fallback");
+  config.set("assets.lazy", true);
+  config.set("app.base", "/app");
+  config.set("app.development", true);
+  await app.register(plugin, {
+    prefix: "/app",
+    cwd: tmp,
+    config,
+  });
+  const address = await app.listen({ port: 0 });
+  const manifest = await fetch(`${address}/app/manifest.json`);
+  const content = await fetch(`${address}/app`);
+  const fallback = await fetch(`${address}/app/fallback`);
+  const mMarkup = await manifest.text();
+  const cMarkup = await content.text();
+  const fMarkup = await fallback.text();
+  t.notMatch(mMarkup, `lazy.js`);
+  t.match(cMarkup, `/app/_/dynamic/files/lazy.js`);
+  t.match(fMarkup, `/app/_/dynamic/files/lazy.js`);
   await app.close();
 });
 

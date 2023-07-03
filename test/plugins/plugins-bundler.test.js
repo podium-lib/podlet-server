@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { test, beforeEach, afterEach } from "tap";
 import fastify from "fastify";
-import plugin from "../../plugins/dependencies.js";
+import plugin from "../../plugins/bundler.js";
 
-const tmp = join(tmpdir(), "./plugins-dependencies.test.js");
+const tmp = join(tmpdir(), "./plugins-dependencies");
 
 beforeEach(async (t) => {
   await mkdir(tmp);
@@ -27,7 +27,7 @@ test("dependency in node_modules folder bundled and served via url request", asy
   const app = fastify({ logger: false });
   await app.register(plugin, { cwd: tmp, enabled: true });
   const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/node_modules/test-dep`);
+  const result = await fetch(`${address}/_/dynamic/modules/test-dep`);
   const response = await result.text();
   t.equal(result.status, 200, "requested dependency should be served");
   t.equal(
@@ -57,7 +57,7 @@ test("dependency bundled and served via url request: prefixed plugin", async (t)
     { prefix: "/test" }
   );
   const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/test/node_modules/test-dep`);
+  const result = await fetch(`${address}/test/_/dynamic/modules/test-dep`);
   t.equal(result.status, 200, "requested dependency should be served");
   await app.close();
 });
@@ -66,7 +66,7 @@ test("non-existent dependency results in a 404 error", async (t) => {
   const app = fastify({ logger: false });
   await app.register(plugin, { cwd: tmp, enabled: true });
   const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/node_modules/does-not-exist`);
+  const result = await fetch(`${address}/_/dynamic/modules/does-not-exist`);
   const response = await result.json();
   t.equal(result.status, 404, "missing dependency should respond with a 404");
   t.same(

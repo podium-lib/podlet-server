@@ -1,12 +1,14 @@
 import fp from "fastify-plugin";
+import { joinURLPathSegments } from "../lib/utils.js";
 
-export default fp(async function csrPlugin(fastify, { appName = "", base = "/", development = false }) {
+export default fp(async function csrPlugin(fastify, { appName = "", base = "/", development = false, prefix = "" }) {
   fastify.decorate("csr", function csr(name, template) {
+    const elementPath = joinURLPathSegments(prefix, `/_/dynamic/files/${name}.js`);
     if (development) {
       return `
         ${template}
         <script type="module">
-          import El from '${base}/client/${name}.js';
+          import El from '${elementPath}';
           customElements.define("${appName}-${name}",El);
         </script>
       `;

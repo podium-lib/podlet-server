@@ -1,7 +1,7 @@
 import { readFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import chokidar from "chokidar";
-import { context, build } from "esbuild";
+import { context } from "esbuild";
 import pino from "pino";
 import fastify from "fastify";
 import httpError from "http-errors";
@@ -9,11 +9,11 @@ import PathResolver from "../lib/path.js";
 import chalk from "chalk";
 import boxen from "boxen";
 import kill from "kill-port";
-import { createRequire } from "node:module";
+// import { createRequire } from "node:module";
 import { getLinguiConfig } from "../lib/lingui-config.js";
 import { linguiExtract, linguiCompile } from "../lib/lingui.js";
 
-const require = createRequire(import.meta.url);
+// const require = createRequire(import.meta.url);
 const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), { encoding: "utf8" }));
 
 class DevServer {
@@ -174,18 +174,6 @@ export async function dev({ state, config, cwd = process.cwd() }) {
   let CONTENT_FILEPATH;
   /** @type {import("../lib/path.js").Resolution} */
   let FALLBACK_FILEPATH;
-
-  // build dsd ponyfill
-  await build({
-    entryPoints: [require.resolve("@webcomponents/template-shadowroot/template-shadowroot.js")],
-    bundle: true,
-    format: "esm",
-    outfile: join(CLIENT_OUTDIR, "template-shadowroot.js"),
-    minify: true,
-    target: ["es2017"],
-    legalComments: `none`,
-    sourcemap: false,
-  });
 
   async function createBuildContext() {
     CONTENT_FILEPATH = await resolver.resolve("./content");
