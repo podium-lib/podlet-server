@@ -45,6 +45,10 @@ export default fp(async (fastify, { development, port, prefix = "/", clientWatch
     clientWatcher.on("change", onFileChange);
     clientWatcher.on("add", onFileChange);
     clientWatcher.on("unlink", onFileChange);
+
+    fastify.addHook("onReady", () => {
+      onFileChange();
+    });
   }
 
   // ensure we dont get 503s when using live reload
@@ -52,10 +56,6 @@ export default fp(async (fastify, { development, port, prefix = "/", clientWatch
     reply.header("connection", "close");
     done();
   })
-
-  fastify.addHook("onReady", () => {
-    onFileChange();
-  });
 
   fastify.get("/_/live/client", (request, reply) => {
     reply.type("application/javascript");
