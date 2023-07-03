@@ -1,3 +1,10 @@
+## [1.8.14](https://github.com/podium-lib/podlet-server/compare/v1.8.13...v1.8.14) (2023-07-03)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies (non-major) ([696e2b0](https://github.com/podium-lib/podlet-server/commit/696e2b026909f2cbb81090c9d82ccc985596ce86))
+
 ## [1.8.13](https://github.com/podium-lib/podlet-server/compare/v1.8.12...v1.8.13) (2023-06-30)
 
 
