@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import chokidar from "chokidar";
 import pino from "pino";
@@ -94,11 +93,6 @@ export class DevServer {
         cwd,
       }
     );
-    this.sWatcher.on("ready", () => {
-      this.sWatcher.on("add", debounce(this.restart.bind(this), 1000));
-      this.sWatcher.on("change", debounce(this.restart.bind(this), 1000));
-      this.sWatcher.on("unlink", debounce(this.restart.bind(this), 1000));
-    });
     this.cWatcher = chokidar.watch(
       [
         "content.js",
@@ -209,11 +203,16 @@ export class DevServer {
         extensions,
         webSocketServer: this.webSocketServer,
         clientWatcher: this.cWatcher,
-        serverWatcher: this.sWatcher,
       });
     }
 
     return app;
+  }
+
+  #listenForChangesAndRestart() {
+    this.sWatcher.on("add", debounce(this.restart.bind(this), 500));
+    this.sWatcher.on("change", debounce(this.restart.bind(this), 500));
+    this.sWatcher.on("unlink", debounce(this.restart.bind(this), 500));
   }
 
   async start() {
@@ -224,14 +223,18 @@ export class DevServer {
     this.app = await this.#setup();
     await this.app.listen({ port: this.config.get("app.port") });
     this.app.log.info({ url: `http://localhost:${this.config.get("app.port")}` }, `Development server listening`);
+    this.#listenForChangesAndRestart();
   }
 
   async restart() {
     // clean up any listeners added by plugins
     this.cWatcher.removeAllListeners();
+    this.sWatcher.removeAllListeners();
     await this.app.close();
     this.app = await this.#setup();
     await this.app.listen({ port: this.config.get("app.port") });
+    await this.app.ready();
     this.app.log.info({ url: `http://localhost:${this.config.get("app.port")}` }, `Development server listening`);
+    this.#listenForChangesAndRestart();
   }
 }
