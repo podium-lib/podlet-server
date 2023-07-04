@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/podium-lib/podlet-server/compare/v1.9.0...v1.9.1) (2023-07-04)
+
+
+### Bug Fixes
+
+* make sure commands are included on publish as well ([b6a2ff5](https://github.com/podium-lib/podlet-server/commit/b6a2ff502f1b1945e6ee4bc1a9e9ced1bf39a9a7))
+
 # [1.9.0](https://github.com/podium-lib/podlet-server/compare/v1.8.14...v1.9.0) (2023-07-04)
 
 
