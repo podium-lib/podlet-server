@@ -1,3 +1,16 @@
+# [1.9.0](https://github.com/podium-lib/podlet-server/compare/v1.8.14...v1.9.0) (2023-07-04)
+
+
+### Bug Fixes
+
+* refactor file watching and ws out of plugins ([80ad3e7](https://github.com/podium-lib/podlet-server/commit/80ad3e7602531fff941a224f704e3f3b254ca9aa))
+* set connection close to stop 503s on restarts ([7002057](https://github.com/podium-lib/podlet-server/commit/7002057f2a2f352b6c7c7d7ae1ec2d5063d00bbb))
+
+
+### Features
+
+* add generated types for the podlet-server ([c9f9ec1](https://github.com/podium-lib/podlet-server/commit/c9f9ec1765b776d32427a27e9df92cf80c320524))
+
 ## [1.8.14](https://github.com/podium-lib/podlet-server/compare/v1.8.13...v1.8.14) (2023-07-03)
 
 
