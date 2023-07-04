@@ -1,3 +1,10 @@
+## [1.9.3](https://github.com/podium-lib/podlet-server/compare/v1.9.2...v1.9.3) (2023-07-04)
+
+
+### Bug Fixes
+
+* remove files altogether ([b1234f7](https://github.com/podium-lib/podlet-server/commit/b1234f74d0239952bac51f7d8b9fffafcb633298))
+
 ## [1.9.2](https://github.com/podium-lib/podlet-server/compare/v1.9.1...v1.9.2) (2023-07-04)
 
 
