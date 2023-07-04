@@ -17,15 +17,6 @@
     ".": "./api/index.js"
   },
   "types": "index.d.ts",
-  "files": [
-    "index.d.ts",
-    "lib",
-    "api",
-    "commands",
-    "plugins",
-    "cli.js",
-    "README.md"
-  ],
   "scripts": {
     "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
     "prepublish": "tsc"
