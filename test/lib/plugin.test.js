@@ -55,6 +55,7 @@ async function setupConfig() {
   config.set("metrics.timing.timeAllRoutes", false);
   config.set("metrics.timing.groupStatusCodes", false);
   config.set("app.mode", "hydrate");
+  config.set("development.liveReload.port", 8081);
   return config;
 }
 
