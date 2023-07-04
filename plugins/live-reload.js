@@ -9,15 +9,21 @@ const clideSideScript = (port) => `(() => {
     const ws = new WebSocket(\`ws://\${host}:${port}\`);
     ws.addEventListener("message", (event) => {
       if (event.data === 'update') {
-        window.location.reload(true);
+        console.debug("live reload update, reloading page");
+        // short timeout seems to avoid intermittent page reload failures
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 50);
       }
     });
     ws.addEventListener("close", () => {
+      console.debug("live reload socket closed, reconnecting in 1s");
       setTimeout(() => {
         livereload();
       }, 1000);
     });
     ws.addEventListener("error", () => {
+      console.debug("live reload error detected, closing socket");
       ws.close();
     });
   };
