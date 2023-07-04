@@ -1,3 +1,10 @@
+## [1.9.4](https://github.com/podium-lib/podlet-server/compare/v1.9.3...v1.9.4) (2023-07-04)
+
+
+### Bug Fixes
+
+* small i18n improvements ([#88](https://github.com/podium-lib/podlet-server/issues/88)) ([b16031b](https://github.com/podium-lib/podlet-server/commit/b16031bfdc9754f4d77e8c343707d4cb872fac13))
+
 ## [1.9.3](https://github.com/podium-lib/podlet-server/compare/v1.9.2...v1.9.3) (2023-07-04)
 
 
