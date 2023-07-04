@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "lib": ["es2020", "DOM"],
+    "module": "esnext",
+    "target": "es2020",
+    "resolveJsonModule": true,
+    "checkJs": true,
+    "allowJs": true,
+    "moduleResolution": "node",
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "outFile": "index.d.ts"
+  },
+  "include": ["./lib", "./plugins"]
+}

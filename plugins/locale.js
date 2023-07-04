@@ -20,7 +20,7 @@ export default fp(async function locale(fastify, { cwd = process.cwd(), locale =
     msgs = messages;
   } catch (err) {
     try {
-      await fs.promises.access(localeFilePath, fs.F_OK);
+      await fs.promises.access(localeFilePath, fs.constants.F_OK);
       fastify.log.error(`Error reading translation file: ${localeFilePath}`, err);
     } catch {
       // eat error
