@@ -21,7 +21,9 @@
     "index.d.ts",
     "lib",
     "api",
-    "cli.js"
+    "commands",
+    "cli.js",
+    "README.md"
   ],
   "scripts": {
     "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
