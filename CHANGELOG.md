@@ -1,3 +1,10 @@
+## [1.9.2](https://github.com/podium-lib/podlet-server/compare/v1.9.1...v1.9.2) (2023-07-04)
+
+
+### Bug Fixes
+
+* include plugins ([441fade](https://github.com/podium-lib/podlet-server/commit/441fadedebbd5d8348fc2d78a4114822c0ad7fa0))
+
 ## [1.9.1](https://github.com/podium-lib/podlet-server/compare/v1.9.0...v1.9.1) (2023-07-04)
 
 
