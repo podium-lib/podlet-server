@@ -119,7 +119,7 @@ export class DevServer {
       }
     );
     this.webSocketServer = new WebSocketServer({
-      port: 3925,
+      port: config.get("development.liveReload.port"),
     });
     /**
      * @typedef {import("ws").WebSocket & { isAlive: boolean }} WebSocketE

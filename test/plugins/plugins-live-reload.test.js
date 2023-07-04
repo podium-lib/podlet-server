@@ -18,7 +18,7 @@ test("live reload script not injected when not in development mode", async (t) =
 
 test("live reload script injected when content-type is html and app in development mode, no prefix", async (t) => {
   const app = fastify({ logger: false });
-  await app.register(plugin, { development: true, port: 1234 });
+  await app.register(plugin, { development: true, port: 1234, webSocketServerPort: 1235 });
   app.get("/", (request, reply) => {
     reply.type("text/html");
     reply.send("<div>hello world</div>");
@@ -37,7 +37,7 @@ test("live reload script injected when content-type is html and app in developme
   const response2 = await result2.text();
   t.match(
     response2,
-    `const ws = new WebSocket('ws://localhost:3925');`,
+    `const ws = new WebSocket(\`ws://\${host}:1235\`);`,
     "should inject correct live reload script URL"
   );
   await app.close();
@@ -47,7 +47,7 @@ test("live reload script injected in wrapping plugin with prefix /foo", async (t
   const app = fastify({ logger: false });
   await app.register(
     async (f) => {
-      await f.register(plugin, { development: true, port: 1235, prefix: "/foo" });
+      await f.register(plugin, { development: true, port: 1235, prefix: "/foo", webSocketServerPort: 1236 });
       f.get("/", (request, reply) => {
         reply.type("text/html");
         reply.send("<div>hello world</div>");
@@ -69,7 +69,7 @@ test("live reload script injected in wrapping plugin with prefix /foo", async (t
   const response2 = await result2.text();
   t.match(
     response2,
-    `const ws = new WebSocket('ws://localhost:3925');`,
+    `const ws = new WebSocket(\`ws://\${host}:1236\`);`,
     "should inject correct live reload script URL"
   );
   await app.close();

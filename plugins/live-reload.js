@@ -3,9 +3,10 @@ import etag from "@fastify/etag";
 import cors from "@fastify/cors";
 import { joinURLPathSegments } from "../lib/utils.js";
 
-const CLIENT = `(() => {
+const clideSideScript = (port) => `(() => {
   const livereload = () => {
-    const ws = new WebSocket('ws://localhost:3925');
+    const host = window.location.hostname;
+    const ws = new WebSocket(\`ws://\${host}:${port}\`);
     ws.addEventListener("message", (event) => {
       if (event.data === 'update') {
         window.location.reload(true);
@@ -23,7 +24,7 @@ const CLIENT = `(() => {
   livereload();
 })()`;
 
-export default fp(async (fastify, { development, port, prefix = "/", clientWatcher, webSocketServer }) => {
+export default fp(async (fastify, { development, port, prefix = "/", clientWatcher, webSocketServer, webSocketServerPort }) => {
   if (!development) return;
 
   const liveReloadClientPath = joinURLPathSegments(prefix, `/_/live/client`);
@@ -59,7 +60,7 @@ export default fp(async (fastify, { development, port, prefix = "/", clientWatch
 
   fastify.get("/_/live/client", (request, reply) => {
     reply.type("application/javascript");
-    reply.send(CLIENT);
+    reply.send(clideSideScript(webSocketServerPort));
   });
 
   fastify.addHook("onSend", (request, reply, /** @type {string} */ payload, done) => {
