@@ -25,7 +25,7 @@ afterEach(async (t) => {
 
 test("dependency in node_modules folder bundled and served via url request", async (t) => {
   const app = fastify({ logger: false });
-  await app.register(plugin, { cwd: tmp, enabled: true });
+  await app.register(plugin, { cwd: tmp, development: true });
   const address = await app.listen({ port: 0 });
   const result = await fetch(`${address}/_/dynamic/modules/test-dep`);
   const response = await result.text();
@@ -52,7 +52,7 @@ test("dependency bundled and served via url request: prefixed plugin", async (t)
   const app = fastify({ logger: false });
   await app.register(
     async () => {
-      await app.register(plugin, { cwd: tmp, enabled: true });
+      await app.register(plugin, { cwd: tmp, development: true });
     },
     { prefix: "/test" }
   );
@@ -64,7 +64,7 @@ test("dependency bundled and served via url request: prefixed plugin", async (t)
 
 test("non-existent dependency results in a 404 error", async (t) => {
   const app = fastify({ logger: false });
-  await app.register(plugin, { cwd: tmp, enabled: true });
+  await app.register(plugin, { cwd: tmp, development: true });
   const address = await app.listen({ port: 0 });
   const result = await fetch(`${address}/_/dynamic/modules/does-not-exist`);
   const response = await result.json();
