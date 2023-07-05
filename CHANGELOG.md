@@ -1,3 +1,10 @@
+## [1.9.6](https://github.com/podium-lib/podlet-server/compare/v1.9.5...v1.9.6) (2023-07-05)
+
+
+### Bug Fixes
+
+* do not use development bundling urls in non development context ([#98](https://github.com/podium-lib/podlet-server/issues/98)) ([10cfde2](https://github.com/podium-lib/podlet-server/commit/10cfde2fe5a10a6f1f6f4a0f567a85a3b36c184d))
+
 ## [1.9.5](https://github.com/podium-lib/podlet-server/compare/v1.9.4...v1.9.5) (2023-07-05)
 
 
