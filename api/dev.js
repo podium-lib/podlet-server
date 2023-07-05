@@ -119,6 +119,7 @@ export class DevServer {
       }
     );
     this.webSocketServer = new WebSocketServer({
+      // @ts-ignore
       port: config.get("development.liveReload.port"),
     });
     /**
@@ -210,9 +211,27 @@ export class DevServer {
   }
 
   #listenForChangesAndRestart() {
-    this.sWatcher.on("add", debounce(this.restart.bind(this), 500));
-    this.sWatcher.on("change", debounce(this.restart.bind(this), 500));
-    this.sWatcher.on("unlink", debounce(this.restart.bind(this), 500));
+    this.sWatcher.on("add", (file) => {
+      if (file.startsWith("config/")) {
+        this.logger.warn(`App configuration has changed, please restart the development server to apply changes`);
+        return;
+      }
+      debounce(this.restart.bind(this), 500)();
+    });
+    this.sWatcher.on("change", (file) => {
+      if (file.startsWith("config/")) {
+        this.logger.warn(`App configuration has changed, please restart the development server to apply changes`);
+        return;
+      }
+      debounce(this.restart.bind(this), 500)();
+    });
+    this.sWatcher.on("unlink", (file) => {
+      if (file.startsWith("config/")) {
+        this.logger.warn(`App configuration has changed, please restart the development server to apply changes`);
+        return;
+      }
+      debounce(this.restart.bind(this), 500);
+    });
   }
 
   async start() {
@@ -234,7 +253,10 @@ export class DevServer {
     this.app = await this.#setup();
     await this.app.listen({ port: this.config.get("app.port") });
     await this.app.ready();
-    this.app.log.info({ url: `http://localhost:${this.config.get("app.port")}` }, `Development server listening`);
+    this.app.log.info(
+      { url: `http://localhost:${this.config.get("app.port")}` },
+      `Development server restarted and listening`
+    );
     this.#listenForChangesAndRestart();
   }
 }

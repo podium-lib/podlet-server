@@ -17,6 +17,7 @@ class CustomElementRegistry {
     this.development = development;
   }
   define(name, ctor) {
+    if (!name || !ctor) return;
     // we turn off this check for development mode to allow us to replace existing definitions each time
     // a file changes on disk.
     if (!this.development && this.__definitions.has(name)) {
