@@ -31,7 +31,9 @@ const build = async ({ entryPoints = [] } = {}) => {
  * @typedef {import("fastify").FastifyRequest<{Params: { "*": string }}>} Request
  */
 
-export default fp(async function bundler(fastify, { cwd = process.cwd() }) {
+export default fp(async function bundler(fastify, { cwd = process.cwd(), development = false }) {
+  if (!development) return;
+
   await fastify.register(etag, { algorithm: "fnv1a" });
 
   fastify.get("/_/dynamic/modules/*", async (/** @type {Request} */ request, reply) => {
