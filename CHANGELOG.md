@@ -1,3 +1,10 @@
+## [1.9.5](https://github.com/podium-lib/podlet-server/compare/v1.9.4...v1.9.5) (2023-07-05)
+
+
+### Bug Fixes
+
+* prevent undefined registry error and further reduce intermittent page reload delay error ([#97](https://github.com/podium-lib/podlet-server/issues/97)) ([dee4df9](https://github.com/podium-lib/podlet-server/commit/dee4df96040c9f4e0ab4e2a19c3af24eafca9fea))
+
 ## [1.9.4](https://github.com/podium-lib/podlet-server/compare/v1.9.3...v1.9.4) (2023-07-04)
 
 
