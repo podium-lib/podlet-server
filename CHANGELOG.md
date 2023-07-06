@@ -1,3 +1,10 @@
+## [1.9.7](https://github.com/podium-lib/podlet-server/compare/v1.9.6...v1.9.7) (2023-07-06)
+
+
+### Bug Fixes
+
+* correct export of DevServer ([#99](https://github.com/podium-lib/podlet-server/issues/99)) ([cd53477](https://github.com/podium-lib/podlet-server/commit/cd53477290531da312936c0a1dcaceade046f7f5))
+
 ## [1.9.6](https://github.com/podium-lib/podlet-server/compare/v1.9.5...v1.9.6) (2023-07-05)
 
 
