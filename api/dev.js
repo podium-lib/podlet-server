@@ -6,8 +6,9 @@ import httpError from "http-errors";
 import PathResolver from "../lib/path.js";
 import { WebSocketServer } from "ws";
 import { getLinguiConfig } from "../lib/lingui-config.js";
-import { linguiExtract, linguiCompile } from "../lib/lingui.js";
+import { linguiCompile, linguiExtract } from "../lib/lingui.js";
 import { joinURLPathSegments } from "../lib/utils.js";
+import { mkdir, stat } from 'node:fs/promises'
 
 function debounce(func, wait) {
   let timeout;
@@ -187,6 +188,10 @@ export class DevServer {
         reply.redirect(join(this.config.get("app.base"), this.config.get("podlet.content")));
       });
     }
+
+    stat("dist").catch(async () => {
+      await mkdir("dist")
+    })
 
     const plugins = await this.state.build();
     const extensions = this.state.get("extensions");
