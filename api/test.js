@@ -8,6 +8,7 @@ import { Core } from "../lib/resolvers/core.js";
 import { Extensions } from "../lib/resolvers/extensions.js";
 import { State } from "../lib/state.js";
 import PathResolver from "../lib/path.js";
+import pino from "pino"
 
 /**
  * Concatenate URL path segments.
@@ -29,8 +30,9 @@ export class TestServer {
   logger;
   #resolver;
 
-  static async create({ cwd = process.cwd(), development = false } = {}) {
+  static async create({ cwd = process.cwd(), development = false, loggerFunction = undefined } = {},) {
     const state = new State({ cwd });
+    state.set("loggerFunction", loggerFunction);
     state.set("core", await Core.load());
     state.set("extensions", await Extensions.load({ cwd }));
     state.set("local", await Local.load({ cwd, development: true }));
@@ -86,8 +88,14 @@ export class TestServer {
   }
 
   async setup() {
+    const logger = this.state.get("loggerFunction") || pino
     const app = fastify({
-      logger: this.logger || false,
+      logger: logger({
+        transport: {
+          target: "../lib/pino-dev-transport.js",
+        },
+        level: this.config.get("app.logLevel").toLowerCase(),
+      }),
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
       disableRequestLogging: true,
