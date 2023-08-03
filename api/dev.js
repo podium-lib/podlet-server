@@ -193,7 +193,8 @@ export class DevServer {
       await mkdir("dist")
     })
 
-    const plugins = await this.state.build();
+    const plugins = await this.state.build(this.config);
+
     const extensions = this.state.get("extensions");
     for (const serverPlugin of await this.state.server()) {
       await app.register(serverPlugin, {

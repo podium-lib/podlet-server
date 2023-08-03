@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { join, isAbsolute } from "node:path";
+import { isAbsolute, join } from "node:path";
 import esbuild from "esbuild";
 import resolve from "../lib/resolve.js";
 import rollupPluginTerser from "@rollup/plugin-terser";
@@ -98,7 +98,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       entryPoints.push(LAZY_ENTRY);
     }
 
-    const plugins = await state.build();
+    const plugins = await state.build(config);
 
     // build server side files
     try {
@@ -116,7 +116,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
         sourcemap: false,
         external: ["lit"],
       });
-    } catch (err) {}
+    } catch (err) {
+    }
 
     // build dsd ponyfill
     await esbuild.build({

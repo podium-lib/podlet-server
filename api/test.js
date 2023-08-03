@@ -81,7 +81,7 @@ export class TestServer {
       target: ["es2017"],
       legalComments: `none`,
       sourcemap: true,
-      plugins: await state.build(),
+      plugins: await state.build(this.config),
     });
   }
 
