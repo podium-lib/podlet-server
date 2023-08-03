@@ -1,27 +1,27 @@
-import fs from "node:fs"
 import pino from "pino"
 import tap from "tap"
+import fs from "fs"
+import * as os from "os"
 
 import memoryDestination from "./memory-destination.js"
 import { TestServer } from "../../api/index.js"
 
 const logLevelDebug = "debug"
-
-tap.before(() => {
+const tempDirectory = os.tmpdir()
+tap.before(async () => {
   // Hack to work around the Podlet using the package.json name on creation
-  fs.writeFileSync("package.json", `{"name": "test", "type": "module"}`)
+  fs.writeFileSync(tempDirectory + "/package.json", `{"name": "test-server-app", "type": "module"}`)
 })
 
-tap.teardown(() => {
-  fs.unlinkSync("package.json")
-
+tap.teardown(async () => {
+  fs.unlinkSync(tempDirectory + "/package.json")
 })
 tap.afterEach(async () => {
   memoryDestination.reset()
 })
 tap.test("Logs with debug level when told to", async (t) => {
   const server = await TestServer.create({
-    cwd: process.cwd(), development: true,
+    cwd: tempDirectory, development: true,
     loggerFunction: () => pino({ level: logLevelDebug }, memoryDestination)
   })
   server.config.set("app.logLevelDebug", logLevelDebug)
@@ -34,7 +34,7 @@ tap.test("Logs with debug level when told to", async (t) => {
 tap.test("Logs nothing when set to error", async (t) => {
   const logLevelSilent = "silent"
   const server = await TestServer.create({
-    cwd: process.cwd(), development: true,
+    cwd: tempDirectory, development: true,
     loggerFunction: () => pino({ level: logLevelSilent }, memoryDestination)
   })
   server.config.set("app.logLevel", logLevelSilent)

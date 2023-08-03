@@ -30,23 +30,23 @@ export class TestServer {
   logger;
   #resolver;
 
-  static async create({ cwd = process.cwd(), development = false, loggerFunction = undefined } = {},) {
+  static async create({ cwd = process.cwd(), development = false, loggerFunction = pino } = {},) {
     const state = new State({ cwd });
-    state.set("loggerFunction", loggerFunction);
     state.set("core", await Core.load());
     state.set("extensions", await Extensions.load({ cwd }));
     state.set("local", await Local.load({ cwd, development: true }));
     const config = await configuration({ cwd, schemas: await state.config() });
     // @ts-ignore
     config.set("assets.development", development);
-    return new TestServer({ cwd, development, config, state });
+    return new TestServer({ cwd, development, config, state, loggerFunction });
   }
 
-  constructor({ cwd, development, config, state }) {
+  constructor({ cwd, development, config, state, loggerFunction }) {
     this.cwd = cwd;
     this.development = development;
     this.config = config;
     this.state = state;
+    this.loggerFunction = loggerFunction;
     this.#resolver = new PathResolver({ cwd, development });
   }
 
@@ -88,9 +88,8 @@ export class TestServer {
   }
 
   async setup() {
-    const logger = this.state.get("loggerFunction") || pino
     const app = fastify({
-      logger: logger({
+      logger: this.loggerFunction({
         transport: {
           target: "../lib/pino-dev-transport.js",
         },
