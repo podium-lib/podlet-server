@@ -100,39 +100,88 @@ test("All possible supported Typescript files defined and built", async (t) => {
   t.ok(existsSync(join(tmp, "dist", "client", "lazy.js")));
 });
 
+test("Supports a plugin returning one build plugin", async (t) => {
+  await createFakeBuildPluginFiles();
+  await writeFile(
+    join(tmpDir, "node_modules", "fake-extension", "index.js"),
+    `
+    export const build = (config) => ({
+      name: "fake-build-plugin",
+      setup(build) {}
+    })
+  `,
+  );
+
+  const { state, config } = await setupConfig({ cwd: tmpDir });
+  await build({ state, config, cwd: tmp });
+});
+
+test("Supports a plugin returning multiple build plugins", async (t) => {
+  await createFakeBuildPluginFiles();
+  await writeFile(
+    join(tmpDir, "node_modules", "fake-extension", "index.js"),
+    `
+    export const build = (config) => [{
+      name: "fake-build-plugin",
+      setup(build) {}
+    }, {
+      name: "super-fake-build-plugin",
+      setup(build) {}
+    }]
+  `,
+  );
+
+  const { state, config } = await setupConfig({ cwd: tmpDir });
+  await build({ state, config, cwd: tmp });
+});
+
 test("Build plugins receive the configuration object", async (t) => {
-  await writeFile(join(tmpDir, "package.json"), JSON.stringify({
-    name: "fake-app",
-    type: "module",
-    podium: {
-      extensions: { "podlet-server": ["fake-extension"] }
-    }
-  }));
-  await mkdir(join(tmpDir, "node_modules"));
-  await mkdir(join(tmpDir, "node_modules", "fake-extension"));
-  await writeFile(join(tmpDir, "node_modules", "fake-extension", "package.json"), JSON.stringify({
-    name: "fake-extension", version: "1.0.0", type: "module", main: "index.js"
-  }));
+  const pluginName = "fake-extension-with-config";
+  await createFakeBuildPluginFiles(pluginName);
 
   // A build plugin which writes the passed in config to a file for verification
   const debugConfigFile = join(tmpDir, "config.txt");
-  await writeFile(join(tmpDir, "node_modules", "fake-extension", "index.js"), `
+  await writeFile(
+    join(tmpDir, "node_modules", pluginName, "index.js"),
+    `
     import fs from "fs"
-    
     export const build = (config) => [{
       name: "fake-build-plugin",
       setup(build) {
         fs.writeFileSync("${debugConfigFile}", JSON.stringify(config))
       }
     }]
-  `);
+  `,
+  );
 
   const { state, config } = await setupConfig({ cwd: tmpDir });
-  config.set("app.base", "/test-app");
-  config.set("app.name", "test-app");
-  await build({ state, config, cwd: tmp });
+  await build({ state, config, cwd: tmpDir });
 
   const file = (await readFile(debugConfigFile)).toString("utf-8");
   t.equal(await config.load(JSON.parse(file).config), config, "Verified valid config is accessible");
   await rm(debugConfigFile);
-})
+});
+
+async function createFakeBuildPluginFiles(pluginName = "fake-extension") {
+  await writeFile(
+    join(tmpDir, "package.json"),
+    JSON.stringify({
+      name: "fake-app",
+      type: "module",
+      podium: {
+        extensions: { "podlet-server": [pluginName] },
+      },
+    }),
+  );
+  await mkdir(join(tmpDir, "node_modules"));
+  await mkdir(join(tmpDir, "node_modules", pluginName));
+  await writeFile(
+    join(tmpDir, "node_modules", pluginName, "package.json"),
+    JSON.stringify({
+      name: pluginName,
+      version: "1.0.0",
+      type: "module",
+      main: "index.js",
+    }),
+  );
+}
