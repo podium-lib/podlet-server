@@ -1,43 +1,52 @@
-import { join } from "path";
-import fastify from "fastify";
-import httpError from "http-errors";
-import esbuild from "esbuild";
-import configuration from "../lib/config.js";
-import { Local } from "../lib/resolvers/local.js";
-import { Core } from "../lib/resolvers/core.js";
-import { Extensions } from "../lib/resolvers/extensions.js";
-import { State } from "../lib/state.js";
-import PathResolver from "../lib/path.js";
-import pino from "pino"
+import { join } from 'path';
+import fastify from 'fastify';
+import httpError from 'http-errors';
+import esbuild from 'esbuild';
+import pino from 'pino';
+import configuration from '../lib/config.js';
+import { Local } from '../lib/resolvers/local.js';
+import { Core } from '../lib/resolvers/core.js';
+import { Extensions } from '../lib/resolvers/extensions.js';
+import { State } from '../lib/state.js';
+import PathResolver from '../lib/path.js';
+import { joinURLPathSegments } from '../lib/utils.js';
 
 /**
  * Concatenate URL path segments.
  * @param {...string} segments - URL path segments to concatenate.
  * @returns {string} - The concatenated URL.
  */
-const joinURLPathSegments = (...segments) => {
-  return segments.join("/").replace(/[\/]+/g, "/");
-};
-
 export class TestServer {
   cwd;
+
   development;
+
   config;
+
   state;
+
   app;
+
   port;
+
   address;
+
   logger;
+
   #resolver;
 
-  static async create({ cwd = process.cwd(), development = false, loggerFunction = pino } = {},) {
+  static async create({
+    cwd = process.cwd(),
+    development = false,
+    loggerFunction = pino,
+  } = {}) {
     const state = new State({ cwd });
-    state.set("core", await Core.load());
-    state.set("extensions", await Extensions.load({ cwd }));
-    state.set("local", await Local.load({ cwd, development: true }));
+    state.set('core', await Core.load());
+    state.set('extensions', await Extensions.load({ cwd }));
+    state.set('local', await Local.load({ cwd, development: true }));
     const config = await configuration({ cwd, schemas: await state.config() });
     // @ts-ignore
-    config.set("assets.development", development);
+    config.set('assets.development', development);
     return new TestServer({ cwd, development, config, state, loggerFunction });
   }
 
@@ -52,12 +61,12 @@ export class TestServer {
 
   async build() {
     const { cwd, state } = this;
-    const outdir = join(cwd, "dist");
-    const clientOutdir = join(outdir, "client");
-    const contentFilepath = await this.#resolver.resolve("./content");
-    const fallbackFilepath = await this.#resolver.resolve("./fallback");
-    const scriptsFilepath = await this.#resolver.resolve("./scripts");
-    const lazyFilepath = await this.#resolver.resolve("./lazy");
+    const outdir = join(cwd, 'dist');
+    const clientOutdir = join(outdir, 'client');
+    const contentFilepath = await this.#resolver.resolve('./content');
+    const fallbackFilepath = await this.#resolver.resolve('./fallback');
+    const scriptsFilepath = await this.#resolver.resolve('./scripts');
+    const lazyFilepath = await this.#resolver.resolve('./lazy');
 
     const entryPoints = [];
     if (contentFilepath.exists) {
@@ -75,12 +84,12 @@ export class TestServer {
 
     await esbuild.build({
       entryPoints,
-      entryNames: "[name]",
+      entryNames: '[name]',
       bundle: true,
-      format: "esm",
+      format: 'esm',
       outdir: clientOutdir,
       minify: true,
-      target: ["es2017"],
+      target: ['es2017'],
       legalComments: `none`,
       sourcemap: true,
       plugins: await state.build(this.config),
@@ -91,9 +100,9 @@ export class TestServer {
     const app = fastify({
       logger: this.loggerFunction({
         transport: {
-          target: "../lib/pino-dev-transport.js",
+          target: '../lib/pino-dev-transport.js',
         },
-        level: this.config.get("app.logLevel").toLowerCase(),
+        level: this.config.get('app.logLevel').toLowerCase(),
       }),
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
@@ -101,11 +110,11 @@ export class TestServer {
     });
 
     const plugins = await this.state.build();
-    const extensions = this.state.get("extensions");
+    const extensions = this.state.get('extensions');
     for (const serverPlugin of await this.state.server()) {
       await app.register(serverPlugin, {
         cwd: this.cwd,
-        prefix: this.config.get("app.base"),
+        prefix: this.config.get('app.base'),
         config: this.config,
         // @ts-ignore
         podlet: app.podlet,
@@ -120,7 +129,7 @@ export class TestServer {
 
   async start() {
     this.app = await this.setup();
-    this.address = await this.app.listen({ port: 0, host: "127.0.0.1" });
+    this.address = await this.app.listen({ port: 0, host: '127.0.0.1' });
     this.port = this.app.server.address().port;
   }
 
@@ -130,17 +139,30 @@ export class TestServer {
 
   get routes() {
     const routeObject = {
-      manifest: this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.manifest")),
+      manifest:
+        this.address +
+        joinURLPathSegments(
+          this.config.get('app.base'),
+          this.config.get('podlet.manifest'),
+        ),
     };
 
-    if (this.config.get("podlet.content")) {
+    if (this.config.get('podlet.content')) {
       routeObject.content =
-        this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.content"));
+        this.address +
+        joinURLPathSegments(
+          this.config.get('app.base'),
+          this.config.get('podlet.content'),
+        );
     }
 
-    if (this.config.get("podlet.fallback")) {
+    if (this.config.get('podlet.fallback')) {
       routeObject.fallback =
-        this.address + joinURLPathSegments(this.config.get("app.base"), this.config.get("podlet.fallback"));
+        this.address +
+        joinURLPathSegments(
+          this.config.get('app.base'),
+          this.config.get('podlet.fallback'),
+        );
     }
 
     return routeObject;

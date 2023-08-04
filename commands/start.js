@@ -1,18 +1,18 @@
-import configuration from "../lib/config.js";
-import { Local } from "../lib/resolvers/local.js";
-import { Core } from "../lib/resolvers/core.js";
-import { Extensions } from "../lib/resolvers/extensions.js";
-import { start } from "../api/start.js";
-import { State } from "../lib/state.js";
+import configuration from '../lib/config.js';
+import { Local } from '../lib/resolvers/local.js';
+import { Core } from '../lib/resolvers/core.js';
+import { Extensions } from '../lib/resolvers/extensions.js';
+import { start } from '../api/start.js';
+import { State } from '../lib/state.js';
 
-export const command = "start";
+export const command = 'start';
 
-export const aliases = ["s"];
+export const aliases = ['s'];
 
 export const describe = `Starts the app in production mode`;
 
 export const builder = (yargs) => {
-  yargs.example("podlet start");
+  yargs.example('podlet start');
 
   yargs.options({
     cwd: {
@@ -28,9 +28,9 @@ export const handler = async (argv) => {
   const { cwd } = argv;
 
   const state = new State({ cwd });
-  state.set("core", await Core.load());
-  state.set("extensions", await Extensions.load({ cwd }));
-  state.set("local", await Local.load({ cwd, development: false }));
+  state.set('core', await Core.load());
+  state.set('extensions', await Extensions.load({ cwd }));
+  state.set('local', await Local.load({ cwd, development: false }));
 
   const config = await configuration({ cwd, schemas: await state.config() });
 

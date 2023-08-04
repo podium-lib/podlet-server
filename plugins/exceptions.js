@@ -1,19 +1,19 @@
-import fp from "fastify-plugin";
+import fp from 'fastify-plugin';
 
-import assert from "node:assert";
-import abslog from "abslog";
-import Metrics from "@metrics/client";
+import assert from 'node:assert';
+import abslog from 'abslog';
+import Metrics from '@metrics/client';
 
-const timeout = Symbol("timeout");
-const uncaughtException = Symbol("uncaughtException");
-const unhandledRejection = Symbol("unhandledRejection");
-const SIGINT = Symbol("SIGINT");
-const SIGTERM = Symbol("SIGTERM");
-const SIGHUP = Symbol("SIGHUP");
-const processWarn = Symbol("processWarn");
-const processDeprecation = Symbol("processDeprecation");
-const registerProcessHandlers = Symbol("registerProcessHandlers");
-const unregisterProcessHandlers = Symbol("unregisterProcessHandlers");
+const timeout = Symbol('timeout');
+const uncaughtException = Symbol('uncaughtException');
+const unhandledRejection = Symbol('unhandledRejection');
+const SIGINT = Symbol('SIGINT');
+const SIGTERM = Symbol('SIGTERM');
+const SIGHUP = Symbol('SIGHUP');
+const processWarn = Symbol('processWarn');
+const processDeprecation = Symbol('processDeprecation');
+const registerProcessHandlers = Symbol('registerProcessHandlers');
+const unregisterProcessHandlers = Symbol('unregisterProcessHandlers');
 
 class ProcessExceptionHandlers {
   constructor(logger) {
@@ -26,44 +26,44 @@ class ProcessExceptionHandlers {
     this.metrics = new Metrics();
 
     this.uncaughtExceptionCounter = this.metrics.counter({
-      name: "process_exception_handlers_uncaught_exception_count",
-      description: "Count for number of uncaught exceptions",
+      name: 'process_exception_handlers_uncaught_exception_count',
+      description: 'Count for number of uncaught exceptions',
     });
 
     this.unhandledRejectionCounter = this.metrics.counter({
-      name: "process_exception_handlers_unhandled_rejection_count",
-      description: "Count for number of unhandled rejections",
+      name: 'process_exception_handlers_unhandled_rejection_count',
+      description: 'Count for number of unhandled rejections',
     });
 
     this.sigintCounter = this.metrics.counter({
-      name: "process_exception_handlers_sigint_count",
-      description: "Count for number of sigints",
+      name: 'process_exception_handlers_sigint_count',
+      description: 'Count for number of sigints',
     });
 
     this.sigtermCounter = this.metrics.counter({
-      name: "process_exception_handlers_sigterm_count",
-      description: "Count for number of sigterms",
+      name: 'process_exception_handlers_sigterm_count',
+      description: 'Count for number of sigterms',
     });
 
     this.processWarnCounter = this.metrics.counter({
-      name: "process_exception_handlers_warn_count",
-      description: "Count for number of process warnings",
+      name: 'process_exception_handlers_warn_count',
+      description: 'Count for number of process warnings',
     });
 
     this.processDeprecationCounter = this.metrics.counter({
-      name: "process_exception_handlers_deprecation_count",
-      description: "Count for number of process deprecations",
+      name: 'process_exception_handlers_deprecation_count',
+      description: 'Count for number of process deprecations',
     });
 
     this.terminateTimer = this.metrics.histogram({
-      name: "process_exception_handlers_terminate_timer",
-      description: "Time taken to terminate",
+      name: 'process_exception_handlers_terminate_timer',
+      description: 'Time taken to terminate',
       buckets: [0.001, 0.01, 0.1, 0.5, 1, 2, 10],
     });
 
     this.shutdownTimer = this.metrics.histogram({
-      name: "process_exception_handlers_shutdown_timer",
-      description: "Time taken to shutdown server",
+      name: 'process_exception_handlers_shutdown_timer',
+      description: 'Time taken to shutdown server',
       buckets: [0.001, 0.01, 0.1, 0.5, 1, 2, 10],
     });
 
@@ -79,23 +79,26 @@ class ProcessExceptionHandlers {
   }
 
   [registerProcessHandlers]() {
-    process.on("uncaughtException", this.uncaughtExceptionHandler);
-    process.on("unhandledRejection", this.unhandledRejectionHandler);
-    process.on("SIGINT", this.sigintHandler);
-    process.on("SIGTERM", this.sigtermHandler);
-    process.on("SIGHUP", this.sighupHandler);
-    process.on("warning", this.processWarnHandler);
-    process.on("deprecation", this.processDeprecationHandler);
+    process.on('uncaughtException', this.uncaughtExceptionHandler);
+    process.on('unhandledRejection', this.unhandledRejectionHandler);
+    process.on('SIGINT', this.sigintHandler);
+    process.on('SIGTERM', this.sigtermHandler);
+    process.on('SIGHUP', this.sighupHandler);
+    process.on('warning', this.processWarnHandler);
+    process.on('deprecation', this.processDeprecationHandler);
   }
 
   [unregisterProcessHandlers]() {
-    process.removeListener("uncaughtException", this.uncaughtExceptionHandler);
-    process.removeListener("unhandledRejection", this.unhandledRejectionHandler);
-    process.removeListener("SIGINT", this.sigintHandler);
-    process.removeListener("SIGTERM", this.sigtermHandler);
-    process.removeListener("SIGHUP", this.sighupHandler);
-    process.removeListener("warning", this.logger.warn);
-    process.removeListener("deprecation", this.logger.warn);
+    process.removeListener('uncaughtException', this.uncaughtExceptionHandler);
+    process.removeListener(
+      'unhandledRejection',
+      this.unhandledRejectionHandler,
+    );
+    process.removeListener('SIGINT', this.sigintHandler);
+    process.removeListener('SIGTERM', this.sigtermHandler);
+    process.removeListener('SIGHUP', this.sighupHandler);
+    process.removeListener('warning', this.logger.warn);
+    process.removeListener('deprecation', this.logger.warn);
   }
 
   /**
@@ -103,7 +106,11 @@ class ProcessExceptionHandlers {
    * an error code of 1.
    */
   [uncaughtException](err) {
-    this.logger.fatal("global uncaught exception - terminating with error.", err, { extras: err.stack });
+    this.logger.fatal(
+      'global uncaught exception - terminating with error.',
+      err,
+      { extras: err.stack },
+    );
 
     this.uncaughtExceptionCounter.inc();
 
@@ -115,7 +122,11 @@ class ProcessExceptionHandlers {
    * with an error code of 1.
    */
   [unhandledRejection](err) {
-    this.logger.fatal("global uncaught promise rejection - terminating with error.", err, { extras: err.stack });
+    this.logger.fatal(
+      'global uncaught promise rejection - terminating with error.',
+      err,
+      { extras: err.stack },
+    );
 
     this.unhandledRejectionCounter.inc();
 
@@ -128,7 +139,7 @@ class ProcessExceptionHandlers {
    * SIGINT can be sent with ctrl+c
    */
   [SIGINT]() {
-    this.logger.info("shutdown - got SIGINT - terminating gracefully");
+    this.logger.info('shutdown - got SIGINT - terminating gracefully');
 
     this.sigintCounter.inc();
 
@@ -141,7 +152,7 @@ class ProcessExceptionHandlers {
    * SIGTERM can be triggered by upstart.
    */
   [SIGTERM]() {
-    this.logger.info("shutdown - got SIGTERM - terminating gracefully");
+    this.logger.info('shutdown - got SIGTERM - terminating gracefully');
 
     this.sigtermCounter.inc();
 
@@ -154,11 +165,11 @@ class ProcessExceptionHandlers {
    * SIGHUP can be triggered the controlling terminal being closed.
    */
   [SIGHUP]() {
-    this.logger.info("shutdown - got SIGHUP - terminating gracefully");
+    this.logger.info('shutdown - got SIGHUP - terminating gracefully');
 
     this.metrics.metric({
-      name: "process_exception_handlers_sighup_count",
-      description: "Count for number of sighups",
+      name: 'process_exception_handlers_sighup_count',
+      description: 'Count for number of sighups',
     });
 
     this.terminate(0);
@@ -192,8 +203,9 @@ class ProcessExceptionHandlers {
    */
   set(callback) {
     assert(
-      {}.toString.call(callback) === "[object Function]" || {}.toString.call(callback) === "[object AsyncFunction]",
-      'Attribute "callback" must be a function'
+      {}.toString.call(callback) === '[object Function]' ||
+        {}.toString.call(callback) === '[object AsyncFunction]',
+      'Attribute "callback" must be a function',
     );
     const index = this.deathrow.push(callback);
     return index - 1;
@@ -249,7 +261,7 @@ class ProcessExceptionHandlers {
         return;
       }
 
-      this.logger.error("Exiting with status 1 in 2 seconds.");
+      this.logger.error('Exiting with status 1 in 2 seconds.');
 
       setTimeout(() => {
         process.exitCode = 1;
@@ -259,7 +271,7 @@ class ProcessExceptionHandlers {
           this.terminateTimer.observe(
             // @ts-ignore
             Date.now() - this.shutdownInitiated,
-            { labels: { exitCode: 1, timeout: false } }
+            { labels: { exitCode: 1, timeout: false } },
           );
 
           exiter(1);
@@ -268,7 +280,7 @@ class ProcessExceptionHandlers {
     }
 
     if (this.terminating) {
-      this.logger.info("Already terminating");
+      this.logger.info('Already terminating');
       return;
     }
 
@@ -279,8 +291,8 @@ class ProcessExceptionHandlers {
         this[unregisterProcessHandlers]();
 
         this.metrics.metric({
-          name: "process_exception_handlers_terminate_timer",
-          description: "Time taken to terminate",
+          name: 'process_exception_handlers_terminate_timer',
+          description: 'Time taken to terminate',
           // @ts-ignore
           time: Date.now() - this.shutdownInitiated,
           meta: { exitCode: this.exitCodeToUse, timeout: false },
@@ -294,7 +306,7 @@ class ProcessExceptionHandlers {
               exitCode: this.exitCodeToUse,
               timeout: false,
             },
-          }
+          },
         );
 
         exiter(this.exitCodeToUse);
@@ -348,7 +360,7 @@ class ProcessExceptionHandlers {
                 exitCode: this.exitCodeToUse,
                 timeout: false,
               },
-            }
+            },
           );
 
           exiter(this.exitCodeToUse);
@@ -360,7 +372,7 @@ class ProcessExceptionHandlers {
       try {
         cb(resolver, this.exitCodeToUse === 1);
       } catch (e) {
-        this.logger.error("Got error when invoking shutdown callback", e);
+        this.logger.error('Got error when invoking shutdown callback', e);
         resolver();
       }
     });
@@ -368,16 +380,17 @@ class ProcessExceptionHandlers {
 
   functionOnExit(func, server, options) {
     assert(
-      {}.toString.call(server[func]) === "[object Function]" ||
-        {}.toString.call(server[func]) === "[object AsyncFunction]",
-      `server must have a '${func}' function`
+      {}.toString.call(server[func]) === '[object Function]' ||
+        {}.toString.call(server[func]) === '[object AsyncFunction]',
+      `server must have a '${func}' function`,
     );
 
-    const grace = options && typeof options.grace === "number" ? options.grace : 5000;
+    const grace =
+      options && typeof options.grace === 'number' ? options.grace : 5000;
 
     const shutdown = (done) => {
       const hrtime = process.hrtime();
-      this.logger.info("Closing down server");
+      this.logger.info('Closing down server');
       server[func]((err) => {
         const time = process.hrtime(hrtime);
         const nanoseconds = time[0] * 1e9 + time[1];
@@ -414,30 +427,31 @@ class ProcessExceptionHandlers {
    * Gracefully close a resource on shutdown, e.g a vanilla or express server or a db-connection
    */
   closeOnExit(server, options) {
-    return this.functionOnExit("close", server, options);
+    return this.functionOnExit('close', server, options);
   }
 
   /**
    * Gracefully stop a resource on shutdown, e.g a vanilla or express server wrapped in stoppable: https://github.com/hunterloftis/stoppable
    */
   stopOnExit(server, options) {
-    return this.functionOnExit("stop", server, options);
+    return this.functionOnExit('stop', server, options);
   }
 }
 
 let handlersAdded = false;
 
-export default fp(async function exceptions(fastify, { grace, development }, next) {
+// eslint-disable-next-line
+export default fp(async (fastify, { grace, development }, next) => {
   if (development) return next();
   if (!handlersAdded) {
     const procExp = new ProcessExceptionHandlers(fastify.log);
-    procExp.closeOnExit(fastify, { grace: grace });
+    procExp.closeOnExit(fastify, { grace });
 
     handlersAdded = true;
 
     // @ts-ignore
     if (!fastify.metricStreams) {
-      fastify.decorate("metricStreams", []);
+      fastify.decorate('metricStreams', []);
     }
 
     // @ts-ignore

@@ -1,18 +1,18 @@
-import { execSync } from "node:child_process";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import { test, beforeEach, afterEach } from "tap";
-import fastify from "fastify";
-import plugin from "../../lib/plugin.js";
+import { execSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { afterEach, beforeEach, test } from 'tap';
+import fastify from 'fastify';
+import convict from 'convict';
+import plugin from '../../lib/plugin.js';
 // import { Extensions } from "../../lib/extensions/extensions.js";
 // import { Local } from "../../lib/local.js";
 // import { Core } from "../../lib/core.js";
 // import configuration from "../../lib/config.js";
 // import { State } from "../../lib/state.js";
-import convict from "convict";
 
-const tmp = join(tmpdir(), "./plugin.test.js");
+const tmp = join(tmpdir(), './plugin.test.js');
 
 const contentFile = `
 import { html, LitElement } from "lit";
@@ -38,45 +38,49 @@ async function setupConfig() {
   // return { state, config, extensions };
   const config = convict({});
   // @ts-ignore
-  config.set("app.name", "test-app");
-  config.set("app.port", 0);
-  config.set("assets.base", "/static");
-  config.set("podlet.version", "1.0.0");
-  config.set("podlet.pathname", "/");
-  config.set("podlet.manifest", "/manifest.json");
-  config.set("podlet.content", "/");
-  config.set("podlet.fallback", "");
-  config.set("app.development", false);
-  config.set("app.locale", "en");
-  config.set("assets.lazy", false);
-  config.set("assets.scripts", false);
-  config.set("app.compression", false);
-  config.set("app.grace", 0);
-  config.set("metrics.timing.timeAllRoutes", false);
-  config.set("metrics.timing.groupStatusCodes", false);
-  config.set("app.mode", "hydrate");
-  config.set("development.liveReload.port", 8081);
+  config.set('app.name', 'test-app');
+  config.set('app.port', 0);
+  config.set('assets.base', '/static');
+  config.set('podlet.version', '1.0.0');
+  config.set('podlet.pathname', '/');
+  config.set('podlet.manifest', '/manifest.json');
+  config.set('podlet.content', '/');
+  config.set('podlet.fallback', '');
+  config.set('app.development', false);
+  config.set('app.locale', 'en');
+  config.set('assets.lazy', false);
+  config.set('assets.scripts', false);
+  config.set('app.compression', false);
+  config.set('app.grace', 0);
+  config.set('metrics.timing.timeAllRoutes', false);
+  config.set('metrics.timing.groupStatusCodes', false);
+  config.set('app.mode', 'hydrate');
+  config.set('development.liveReload.port', 8081);
   return config;
 }
 
-beforeEach(async (t) => {
+beforeEach(async () => {
   await mkdir(tmp);
-  await mkdir(join(tmp, "schemas"));
-  await mkdir(join(tmp, "locale"));
+  await mkdir(join(tmp, 'schemas'));
+  await mkdir(join(tmp, 'locale'));
   await writeFile(
-    join(tmp, "package.json"),
-    JSON.stringify({ name: "test-app", type: "module", dependencies: { lit: "*" } })
+    join(tmp, 'package.json'),
+    JSON.stringify({
+      name: 'test-app',
+      type: 'module',
+      dependencies: { lit: '*' },
+    }),
   );
-  await mkdir(join(tmp, "dist"));
-  await writeFile(join(tmp, "content.js"), contentFile);
-  execSync("npm install", { cwd: tmp });
+  await mkdir(join(tmp, 'dist'));
+  await writeFile(join(tmp, 'content.js'), contentFile);
+  execSync('npm install', { cwd: tmp });
 });
 
 afterEach(async () => {
   await rm(tmp, { recursive: true, force: true });
 });
 
-test("simple app with content route", async (t) => {
+test('simple app with content route', async (t) => {
   const app = fastify({ logger: false });
   const config = await setupConfig();
 
@@ -88,21 +92,33 @@ test("simple app with content route", async (t) => {
   const manifest = await fetch(`${address}/manifest.json`);
   const content = await fetch(`${address}/`);
   const markup = await content.text();
-  t.equal(manifest.status, 200, "manifest file should be sucessfully served");
-  t.equal(content.status, 200, "content file should be sucessfully served");
-  t.match(markup, "<!--lit-part", "should contain lit comment tags");
-  t.match(markup, "<test-app-content", "should contain the correct html tag");
-  t.match(markup, `<template shadowroot="open"`, "should contain evidence of shadow dom");
-  t.match(markup, `<div>hello world</div>`, "should contain component rendered markup");
-  t.match(markup, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
+  t.equal(manifest.status, 200, 'manifest file should be sucessfully served');
+  t.equal(content.status, 200, 'content file should be sucessfully served');
+  t.match(markup, '<!--lit-part', 'should contain lit comment tags');
+  t.match(markup, '<test-app-content', 'should contain the correct html tag');
+  t.match(
+    markup,
+    `<template shadowroot="open"`,
+    'should contain evidence of shadow dom',
+  );
+  t.match(
+    markup,
+    `<div>hello world</div>`,
+    'should contain component rendered markup',
+  );
+  t.match(
+    markup,
+    `hasOwnProperty("shadowRoot")`,
+    'should contain evidence of dsd polyfill',
+  );
   await app.close();
 });
 
-test("simple app with fallback route", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('simple app with fallback route', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
+  config.set('podlet.fallback', '/fallback');
   await app.register(plugin, {
     cwd: tmp,
     config,
@@ -110,33 +126,45 @@ test("simple app with fallback route", async (t) => {
   const address = await app.listen({ port: 0 });
   const fallback = await fetch(`${address}/fallback`);
   const markup = await fallback.text();
-  t.equal(fallback.status, 200, "fallback file should be sucessfully served");
-  t.match(markup, "<!--lit-part", "should contain lit comment tags");
-  t.match(markup, "<test-app-fallback", "should contain the correct html tag");
-  t.match(markup, `<template shadowroot="open"`, "should contain evidence of shadow dom");
-  t.match(markup, `<div>hello world</div>`, "should contain component rendered markup");
-  t.match(markup, `hasOwnProperty("shadowRoot")`, "should contain evidence of dsd polyfill");
+  t.equal(fallback.status, 200, 'fallback file should be sucessfully served');
+  t.match(markup, '<!--lit-part', 'should contain lit comment tags');
+  t.match(markup, '<test-app-fallback', 'should contain the correct html tag');
+  t.match(
+    markup,
+    `<template shadowroot="open"`,
+    'should contain evidence of shadow dom',
+  );
+  t.match(
+    markup,
+    `<div>hello world</div>`,
+    'should contain component rendered markup',
+  );
+  t.match(
+    markup,
+    `hasOwnProperty("shadowRoot")`,
+    'should contain evidence of dsd polyfill',
+  );
   await app.close();
 });
 
-test("serialising state between server and client", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('serialising state between server and client', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
+  config.set('podlet.fallback', '/fallback');
   await app.register(plugin, {
     cwd: tmp,
     config,
   });
-  await app.register(async function server(app) {
+  await app.register(async (instance) => {
     // @ts-ignore
-    app.setContentState(async () => {
-      return { initialContentState: "serialised" };
-    });
+    instance.setContentState(async () => ({
+      initialContentState: 'serialised',
+    }));
     // @ts-ignore
-    app.setFallbackState(async () => {
-      return { initialFallbackState: "serialised" };
-    });
+    instance.setFallbackState(async () => ({
+      initialFallbackState: 'serialised',
+    }));
   });
   const address = await app.listen({ port: 0 });
   const content = await fetch(`${address}/`);
@@ -150,13 +178,13 @@ test("serialising state between server and client", async (t) => {
   await app.close();
 });
 
-test("scripts", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('scripts', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
-  config.set("assets.scripts", true);
-  config.set("assets.base", "/assets");
+  config.set('podlet.fallback', '/fallback');
+  config.set('assets.scripts', true);
+  config.set('assets.base', '/assets');
   await app.register(plugin, {
     cwd: tmp,
     config,
@@ -174,16 +202,16 @@ test("scripts", async (t) => {
   await app.close();
 });
 
-test("scripts: plugin mounted under /app, development mode urls", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('scripts: plugin mounted under /app, development mode urls', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
-  config.set("assets.scripts", true);
-  config.set("app.base", "/app");
-  config.set("app.development", true);
+  config.set('podlet.fallback', '/fallback');
+  config.set('assets.scripts', true);
+  config.set('app.base', '/app');
+  config.set('app.development', true);
   await app.register(plugin, {
-    prefix: "/app",
+    prefix: '/app',
     cwd: tmp,
     config,
   });
@@ -200,13 +228,13 @@ test("scripts: plugin mounted under /app, development mode urls", async (t) => {
   await app.close();
 });
 
-test("lazy", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('lazy', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
-  config.set("assets.lazy", true);
-  config.set("assets.base", "/assets");
+  config.set('podlet.fallback', '/fallback');
+  config.set('assets.lazy', true);
+  config.set('assets.base', '/assets');
   await app.register(plugin, {
     cwd: tmp,
     config,
@@ -224,16 +252,16 @@ test("lazy", async (t) => {
   await app.close();
 });
 
-test("lazy: plugin mounted under /app, development mode urls", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('lazy: plugin mounted under /app, development mode urls', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
-  config.set("assets.lazy", true);
-  config.set("app.base", "/app");
-  config.set("app.development", true);
+  config.set('podlet.fallback', '/fallback');
+  config.set('assets.lazy', true);
+  config.set('app.base', '/app');
+  config.set('app.development', true);
   await app.register(plugin, {
-    prefix: "/app",
+    prefix: '/app',
     cwd: tmp,
     config,
   });
@@ -250,18 +278,18 @@ test("lazy: plugin mounted under /app, development mode urls", async (t) => {
   await app.close();
 });
 
-test("schemas: content.json", async (t) => {
+test('schemas: content.json', async (t) => {
   await writeFile(
-    join(tmp, "schemas", "content.json"),
+    join(tmp, 'schemas', 'content.json'),
     JSON.stringify({
       querystring: {
-        type: "object",
+        type: 'object',
         properties: {
-          asd: { type: "integer" },
+          asd: { type: 'integer' },
         },
-        required: ["test"],
+        required: ['test'],
       },
-    })
+    }),
   );
   const app = fastify({ logger: false });
   const config = await setupConfig();
@@ -277,23 +305,23 @@ test("schemas: content.json", async (t) => {
   await app.close();
 });
 
-test("schemas: fallback.json", async (t) => {
-  await writeFile(join(tmp, "fallback.js"), contentFile);
+test('schemas: fallback.json', async (t) => {
+  await writeFile(join(tmp, 'fallback.js'), contentFile);
   await writeFile(
-    join(tmp, "schemas", "fallback.json"),
+    join(tmp, 'schemas', 'fallback.json'),
     JSON.stringify({
       querystring: {
-        type: "object",
+        type: 'object',
         properties: {
-          asd: { type: "integer" },
+          asd: { type: 'integer' },
         },
-        required: ["test"],
+        required: ['test'],
       },
-    })
+    }),
   );
   const app = fastify({ logger: false });
   const config = await setupConfig();
-  config.set("podlet.fallback", "/fallback");
+  config.set('podlet.fallback', '/fallback');
   await app.register(plugin, {
     cwd: tmp,
     config,
