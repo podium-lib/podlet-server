@@ -8,6 +8,7 @@ import { Core } from "../lib/resolvers/core.js";
 import { Extensions } from "../lib/resolvers/extensions.js";
 import { State } from "../lib/state.js";
 import PathResolver from "../lib/path.js";
+import pino from "pino"
 
 /**
  * Concatenate URL path segments.
@@ -29,7 +30,7 @@ export class TestServer {
   logger;
   #resolver;
 
-  static async create({ cwd = process.cwd(), development = false } = {}) {
+  static async create({ cwd = process.cwd(), development = false, loggerFunction = pino } = {},) {
     const state = new State({ cwd });
     state.set("core", await Core.load());
     state.set("extensions", await Extensions.load({ cwd }));
@@ -37,14 +38,15 @@ export class TestServer {
     const config = await configuration({ cwd, schemas: await state.config() });
     // @ts-ignore
     config.set("assets.development", development);
-    return new TestServer({ cwd, development, config, state });
+    return new TestServer({ cwd, development, config, state, loggerFunction });
   }
 
-  constructor({ cwd, development, config, state }) {
+  constructor({ cwd, development, config, state, loggerFunction }) {
     this.cwd = cwd;
     this.development = development;
     this.config = config;
     this.state = state;
+    this.loggerFunction = loggerFunction;
     this.#resolver = new PathResolver({ cwd, development });
   }
 
@@ -87,7 +89,12 @@ export class TestServer {
 
   async setup() {
     const app = fastify({
-      logger: this.logger || false,
+      logger: this.loggerFunction({
+        transport: {
+          target: "../lib/pino-dev-transport.js",
+        },
+        level: this.config.get("app.logLevel").toLowerCase(),
+      }),
       ignoreTrailingSlash: true,
       forceCloseConnections: true,
       disableRequestLogging: true,
