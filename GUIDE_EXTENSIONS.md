@@ -1,7 +1,9 @@
 Advanced Guide: Writing Extensions for Podium Podlet-Server
 ===========================================================
 
-This guide assumes you have already completed the beginner's guide and are familiar with the basics of setting up and running a Podium podlet server. In this advanced guide, we will cover how to create, publish, and use extensions for Podium podlet-server applications.
+This guide assumes you have already completed the beginner's guide and are familiar with the basics of setting up and
+running a Podium podlet server. In this advanced guide, we will cover how to create, publish, and use extensions for
+Podium podlet-server applications.
 
 Step 1: Create an extension project
 -----------------------------------
@@ -35,7 +37,8 @@ json
 Step 3: Implement the extension
 -------------------------------
 
-Create an `index.js` file in the project root and implement one or more of the optional hooks: `server`, `build`, `document`, and `config`.
+Create an `index.js` file in the project root and implement one or more of the optional
+hooks: `server`, `build`, `document`, and `config`.
 
 sh
 
@@ -58,9 +61,9 @@ export const server = async (app, opts) => {
 };
 
 // Build hook (esbuild plugins)
-export const build = async ({ cwd, development }) => [
-  // Add esbuild plugins here
-];
+export const build = async ({ cwd, development }) => [{
+  // Add one or more esbuild plugins
+}];
 
 // Document hook (Podium document template)
 export const document = (incoming, template) => {
@@ -77,7 +80,8 @@ export const config = ({ cwd, development }) => {
 Step 4: Publish the extension to npm
 ------------------------------------
 
-Before publishing your extension to npm, make sure you have an npm account and are logged in. If you don't have an account, create one at [npmjs.com](https://www.npmjs.com/).
+Before publishing your extension to npm, make sure you have an npm account and are logged in. If you don't have an
+account, create one at [npmjs.com](https://www.npmjs.com/).
 
 sh
 
@@ -105,17 +109,23 @@ json
 {
   "podium": {
     "extensions": {
-      "podlet-server": ["my-extension"]
+      "podlet-server": [
+        "my-extension"
+      ]
     }
   }
 }
 ```
 
-That's it! You have now successfully created, published, and used an extension for Podium podlet-server applications. This extension can enhance your Podium podlet-server applications with additional functionality, such as custom Fastify routes, esbuild plugins, Podium document templates, or Convict schema configuration.
+That's it! You have now successfully created, published, and used an extension for Podium podlet-server applications.
+This extension can enhance your Podium podlet-server applications with additional functionality, such as custom Fastify
+routes, esbuild plugins, Podium document templates, or Convict schema configuration.
 
 For more information on each of the hooks, refer to the following resources:
 
-*   Fastify plugins: [https://www.fastify.io/docs/latest/Guides/Plugins-Guide/](https://www.fastify.io/docs/latest/Guides/Plugins-Guide/)
-*   esbuild plugins: [https://esbuild.github.io/plugins/](https://esbuild.github.io/plugins/)
-*   Podium document templates: [https://podium-lib.io/docs/api/document](https://podium-lib.io/docs/api/document)
-*   Convict schema: \[[https://github.com/mozilla/node-convict/tree/master/packages/convict\](](https://github.com/mozilla/node-convict/tree/master/packages/convict%5D()[https://github.com/mozilla/node-convict](https://github.com/mozilla/node-convict)
+* Fastify
+  plugins: [https://www.fastify.io/docs/latest/Guides/Plugins-Guide/](https://www.fastify.io/docs/latest/Guides/Plugins-Guide/)
+* esbuild plugins: [https://esbuild.github.io/plugins/](https://esbuild.github.io/plugins/)
+* Podium document templates: [https://podium-lib.io/docs/api/document](https://podium-lib.io/docs/api/document)
+* Convict
+  schema: \[[https://github.com/mozilla/node-convict/tree/master/packages/convict\](](https://github.com/mozilla/node-convict/tree/master/packages/convict%5D()[https://github.com/mozilla/node-convict](https://github.com/mozilla/node-convict)
