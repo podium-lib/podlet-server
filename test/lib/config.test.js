@@ -1,14 +1,14 @@
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { test, beforeEach, afterEach } from "tap";
+import { afterEach, beforeEach, test } from "tap";
 import { State } from "../../lib/state.js";
 import { Extensions } from "../../lib/resolvers/extensions.js";
 import { Local } from "../../lib/resolvers/local.js";
 import { Core } from "../../lib/resolvers/core.js";
 import configuration from "../../lib/config.js";
 
-const tmp = join(tmpdir(), "./config.test.js");
+const tmp = join(tmpdir(), "./test.js");
 
 beforeEach(async () => {
   await mkdir(tmp);
@@ -69,7 +69,7 @@ test("Unusable package.json name and no override provide yields actionable error
     t.equal(
       err.message,
       `Name field in package.json was not usable as a default app name because it uses characters other than a-z and -.\nYou have 2 choices:\n1. Either set it to a different name using lower case letters and the - character\n2. keep it as is and define the app name in config.\nA good place for this is in /config/common.json\neg. { "app": { "name": "my-app-name-here" } }"`,
-      "err.message should be useful"
+      "err.message should be useful",
     );
   }
 });
@@ -160,7 +160,7 @@ test("When config/common.json is defined, values within override defaults", asyn
       assets: {
         scripts: true,
       },
-    })
+    }),
   );
   const state = new State({ cwd: tmp });
   const core = await Core.load();
@@ -179,7 +179,7 @@ test("When domain/env specific config is defined, values within override default
   process.env.HOST = "www.finn.no";
   await mkdir(join(tmp, "config/hosts/www.finn.no"), { recursive: true });
   await writeFile(
-    join(tmp, "config", "hosts", "www.finn.no", "config.prod.json"),
+    join(tmp, "config", "hosts", "www.finn.no", "prod.json"),
     JSON.stringify({
       app: {
         mode: "csr-only",
@@ -195,7 +195,7 @@ test("When domain/env specific config is defined, values within override default
       assets: {
         scripts: true,
       },
-    })
+    }),
   );
   const state = new State({ cwd: tmp });
   const core = await Core.load();
@@ -206,6 +206,30 @@ test("When domain/env specific config is defined, values within override default
   t.equal(config.get("podlet.content"), "/content", "podlet.content should equal /content");
   t.equal(config.get("metrics.timing.timeAllRoutes"), true, "metrics.timing.timeAllRoutes should be true");
   t.equal(config.get("assets.scripts"), true, "assets.scripts should be true");
+  // reset env
+  process.env.ENV = env;
+  process.env.HOST = host;
+});
+
+test("When domain/env specific config is defined in the old format, it still overrides the defaults", async (t) => {
+  const env = process.env.ENV;
+  const host = process.env.HOST;
+  process.env.ENV = "prod";
+  process.env.HOST = "www.finn.no";
+  await mkdir(join(tmp, "config/hosts/www.finn.no"), { recursive: true });
+  await writeFile(
+    join(tmp, "config", "hosts", "www.finn.no", "config.prod.json"),
+    JSON.stringify({
+      app: {
+        mode: "csr-only",
+      },
+    }),
+  );
+  const state = new State({ cwd: tmp });
+  state.set("core", await Core.load());
+  const config = await configuration({ cwd: tmp, schemas: await state.config() });
+  // @ts-ignore
+  t.equal(config.get("app.mode"), "csr-only", "app.mode should be csr-only");
   // reset env
   process.env.ENV = env;
   process.env.HOST = host;
@@ -236,13 +260,13 @@ test("When domain/env specific config is defined, values within override config/
       assets: {
         scripts: true,
       },
-    })
+    }),
   );
 
   // override again with domain specific config
   await mkdir(join(tmp, "config/hosts/www.finn.no"), { recursive: true });
   await writeFile(
-    join(tmp, "config", "hosts", "www.finn.no", "config.prod.json"),
+    join(tmp, "config", "hosts", "www.finn.no", "prod.json"),
     JSON.stringify({
       app: {
         mode: "csr-only",
@@ -258,7 +282,7 @@ test("When domain/env specific config is defined, values within override config/
       assets: {
         scripts: false,
       },
-    })
+    }),
   );
   const state = new State({ cwd: tmp });
   const core = await Core.load();
@@ -320,7 +344,7 @@ test("config loading from extensions overrides default config", async (t) => {
       type: "module",
       version: "1.0.0",
       podium: { extensions: { "podlet-server": ["test-extension"] } },
-    })
+    }),
   );
   await mkdir(join(tmp, "node_modules"));
   await mkdir(join(tmp, "node_modules", "test-extension"));
@@ -332,18 +356,18 @@ test("config loading from extensions overrides default config", async (t) => {
       version: "1.0.0",
       main: "index.js",
       type: "module",
-    })
+    }),
   );
   await writeFile(
     join(tmp, "node_modules", "test-extension", "index.js"),
     `
     export const config = ({cwd, development}) => ({api:{default:"/extension",format:String},assets:{base:{default:"/extension",format:String}},app:{base:{default:"/extension",format:String}}});
-  `
+  `,
   );
   await mkdir(join(tmp, "config"));
   await writeFile(
     join(tmp, "config", "schema.js"),
-    'export default ({cwd, development}) => ({assets:{base:{default:"/app",format:String}}});'
+    'export default ({cwd, development}) => ({assets:{base:{default:"/app",format:String}}});',
   );
 
   const state = new State({ cwd: tmp });
