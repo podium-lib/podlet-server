@@ -1,3 +1,10 @@
+# [1.10.0](https://github.com/podium-lib/podlet-server/compare/v1.9.7...v1.10.0) (2023-08-11)
+
+
+### Features
+
+* enabling config override files on the format "config/<host>/<env>.json" ([#107](https://github.com/podium-lib/podlet-server/issues/107)) ([124fd4e](https://github.com/podium-lib/podlet-server/commit/124fd4e3ba353f82f39f52e65e155740eb01f8ac))
+
 ## [1.9.7](https://github.com/podium-lib/podlet-server/compare/v1.9.6...v1.9.7) (2023-07-06)
 
 
