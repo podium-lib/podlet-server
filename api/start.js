@@ -1,5 +1,5 @@
-import fastify from "fastify";
-import httpError from "http-errors";
+import fastify from 'fastify';
+import httpError from 'http-errors';
 
 /**
  * @typedef {import("fastify").FastifyInstance & { podlet: import("@podium/podlet").default }} FastifyInstance
@@ -14,12 +14,12 @@ import httpError from "http-errors";
  * @returns {Promise<{address: string, close: function}>}
  */
 export async function start({ state, config, cwd = process.cwd() }) {
-  const app = /** @type {FastifyInstance}*/ (
-    /**@type {unknown}*/ (
+  const app = /** @type {FastifyInstance} */ (
+    /** @type {unknown} */ (
       fastify({
         logger: {
           // @ts-ignore
-          level: config.get("app.logLevel").toLowerCase(),
+          level: config.get('app.logLevel').toLowerCase(),
         },
         disableRequestLogging: true,
         ignoreTrailingSlash: true,
@@ -28,11 +28,11 @@ export async function start({ state, config, cwd = process.cwd() }) {
   );
 
   const plugins = await state.build();
-  const extensions = await state.get("extensions");
+  const extensions = await state.get('extensions');
   for (const serverPlugin of await state.server()) {
     await app.register(serverPlugin, {
       cwd,
-      prefix: config.get("app.base"),
+      prefix: config.get('app.base'),
       logger: app.log,
       config,
       podlet: app.podlet,
@@ -43,11 +43,18 @@ export async function start({ state, config, cwd = process.cwd() }) {
   }
 
   try {
-    const address = await app.listen({ host: "0.0.0.0", port: config.get("app.port") });
-    app.log.info(`Server environment '${config.get("app.env")}', host '${config.get("app.host")}'`);
+    const address = await app.listen({
+      host: '0.0.0.0',
+      port: config.get('app.port'),
+    });
+    app.log.info(
+      `Server environment '${config.get('app.env')}', host '${config.get(
+        'app.host',
+      )}'`,
+    );
     return { address, close: app.close.bind(app) };
   } catch (err) {
-    app.log.error(`Unable to start server on port ${config.get("app.port")}`);
+    app.log.error(`Unable to start server on port ${config.get('app.port')}`);
     throw err;
   }
 }

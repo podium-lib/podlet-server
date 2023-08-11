@@ -6,7 +6,7 @@ export default class Extensions {
   }
 
   createTables(data) {
-    let tables = "";
+    let tables = '';
 
     for (const [key, value] of data) {
       tables += `
@@ -22,10 +22,10 @@ export default class Extensions {
             </thead>
             <tbody>
               <tr>
-                <td>${value.server ? "✔" : "✘"}</td>
-                <td>${value.config ? "✔" : "✘"}</td>
-                <td>${value.build ? "✔" : "✘"}</td>
-                <td>${value.document ? "✔" : "✘"}</td>
+                <td>${value.server ? '✔' : '✘'}</td>
+                <td>${value.config ? '✔' : '✘'}</td>
+                <td>${value.build ? '✔' : '✘'}</td>
+                <td>${value.document ? '✔' : '✘'}</td>
               </tr>
             </tbody>
           </table>`;
@@ -35,8 +35,7 @@ export default class Extensions {
   }
 
   async handler(req, reply) {
-    console.log("data", this.#data);
-    reply.type("text/html").send(
+    reply.type('text/html').send(
       `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -107,7 +106,7 @@ export default class Extensions {
 				</nav>
 				<div>${this.createTables(this.#data.extensions.entries())}</div>
 			</body>
-			</html>`
+			</html>`,
     );
     return reply;
   }

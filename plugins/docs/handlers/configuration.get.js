@@ -6,7 +6,7 @@ export default class Configuration {
   }
 
   createKeyValueTable(data) {
-    let tableValues = "";
+    let tableValues = '';
     for (const key in data) {
       tableValues += `<tr><td>${key}</td><td>${data[key]}</td></tr>`;
     }
@@ -18,12 +18,14 @@ export default class Configuration {
   }
 
   createTable(section, data) {
-    let tableHeaders = "";
-    let tableValues = "";
+    let tableHeaders = '';
+    let tableValues = '';
 
     for (const key in data) {
       const value =
-        typeof data[key] === "object" && data[key] !== null ? this.createKeyValueTable(data[key]) : data[key];
+        typeof data[key] === 'object' && data[key] !== null
+          ? this.createKeyValueTable(data[key])
+          : data[key];
 
       tableHeaders += `<th>${key}</th>`;
       tableValues += `<td>${value}</td>`;
@@ -43,11 +45,11 @@ export default class Configuration {
   }
 
   async handler(req, reply) {
-    let tables = "";
-    let additionalRows = "";
+    let tables = '';
+    let additionalRows = '';
 
     for (const key in this.#data) {
-      if (typeof this.#data[key] === "string") {
+      if (typeof this.#data[key] === 'string') {
         additionalRows += this.createKeyValueTableRow(key, this.#data[key]);
       } else {
         tables += this.createTable(key, this.#data[key]);
@@ -68,7 +70,7 @@ export default class Configuration {
 					`;
     }
 
-    reply.type("text/html").send(
+    reply.type('text/html').send(
       `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -139,8 +141,8 @@ export default class Configuration {
 				</nav>
 				<div>${tables}</div>
 			</body>
-			</html>`
+			</html>`,
     );
-		return reply;
+    return reply;
   }
 }

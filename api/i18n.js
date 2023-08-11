@@ -1,6 +1,6 @@
-import pino from "pino";
-import chalk from "chalk";
-import { getLinguiConfig, linguiExtract, linguiCompile } from "../lib/lingui.js";
+import pino from 'pino';
+import chalk from 'chalk';
+import { getLinguiConfig, linguiCompile, linguiExtract, } from '../lib/lingui.js';
 
 /**
  * Handle i18n extraction and compilation for the podlet
@@ -12,34 +12,36 @@ import { getLinguiConfig, linguiExtract, linguiCompile } from "../lib/lingui.js"
 export async function i18n({ command, config, cwd = process.cwd }) {
   const logger = pino({
     transport: {
-      target: "../lib/pino-dev-transport.js",
+      target: '../lib/pino-dev-transport.js',
     },
     // @ts-ignore
-    level: config.get("app.logLevel").toLowerCase(),
+    level: config.get('app.logLevel').toLowerCase(),
   });
 
   const linguiConfig = await getLinguiConfig({ config, cwd });
 
   try {
     switch (command) {
-      case "extract": {
+      case 'extract': {
         await linguiExtract({ linguiConfig, cwd });
         break;
       }
-      case "compile": {
+      case 'compile': {
         await linguiCompile({ linguiConfig, config });
         break;
       }
       default:
         logger.error(
-          chalk.red("Could not resolve what i18n command to run - please specify either extract or compile")
+          chalk.red(
+            'Could not resolve what i18n command to run - please specify either extract or compile',
+          ),
         );
         break;
     }
 
     process.exit();
   } catch (e) {
-    logger.error("Error while running i18n command: ", e);
+    logger.error('Error while running i18n command: ', e);
     process.exit(1);
   }
 }

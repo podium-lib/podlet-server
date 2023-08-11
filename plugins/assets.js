@@ -1,8 +1,8 @@
-import { join } from "node:path";
-import fp from "fastify-plugin";
-import chalk from "chalk";
-import { fastifyStatic } from "@fastify/static";
-import { isAbsoluteURL } from "../lib/utils.js";
+import { join } from 'node:path';
+import fp from 'fastify-plugin';
+import chalk from 'chalk';
+import { fastifyStatic } from '@fastify/static';
+import { isAbsoluteURL } from '../lib/utils.js';
 
 /**
  * @typedef {Object} AssetsOptions
@@ -21,13 +21,23 @@ import { isAbsoluteURL } from "../lib/utils.js";
  * @param {AssetsOptions} options
  * @returns {Promise<void>}
  */
-const assets = async function assets(fastify, { base = "/static", cwd = process.cwd(), dist = "/dist" }) {
+const assets = async function assets(
+  fastify,
+  { base = '/static', cwd = process.cwd(), dist = '/dist' },
+) {
   if (isAbsoluteURL(base)) {
-    fastify.log.debug(`📁 ${chalk.magenta("static files")}: served externally at ${base}`);
+    fastify.log.debug(
+      `📁 ${chalk.magenta('static files')}: served externally at ${base}`,
+    );
     return;
   }
 
-  fastify.log.debug(`📁 ${chalk.magenta("static files")}: serving from ${join(cwd, dist)} at {app.base}${base}`);
+  fastify.log.debug(
+    `📁 ${chalk.magenta('static files')}: serving from ${join(
+      cwd,
+      dist,
+    )} at {app.base}${base}`,
+  );
   await fastify.register(fastifyStatic, {
     root: join(cwd, dist),
     prefix: base,

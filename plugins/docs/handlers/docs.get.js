@@ -3,9 +3,9 @@ export default class Docs {
     this.config = config;
     this.extensions = extensions;
   }
+
   async handler(req, reply) {
-    console.log("docs handler")
-    reply.type("text/html").send(`
+    reply.type('text/html').send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>

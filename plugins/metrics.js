@@ -1,17 +1,17 @@
-import MetricsClient from "@metrics/client";
-import fp from "fastify-plugin";
+import MetricsClient from '@metrics/client';
+import fp from 'fastify-plugin';
 
-export default fp(async function metrics(fastify) {
+export default fp(async (fastify) => {
   // add metrics client
-  fastify.decorate("metrics", new MetricsClient());
+  fastify.decorate('metrics', new MetricsClient());
 
   // process metrics streams at the end
-  fastify.addHook("onReady", async function () {
+  fastify.addHook('onReady', async () => {
     // @ts-ignore
     if (!fastify.metricStreams) return;
     // @ts-ignore
     for (const stream of fastify.metricStreams) {
-      stream.on("error", (err) => {
+      stream.on('error', (err) => {
         fastify.log.error(err);
       });
 

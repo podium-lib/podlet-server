@@ -1,17 +1,21 @@
-import httpError from "http-errors";
-import fp from "fastify-plugin";
+import httpError from 'http-errors';
+import fp from 'fastify-plugin';
 
-export default fp(async function errors(fastify) {
+export default fp(async (fastify) => {
   fastify.setErrorHandler((error, request, reply) => {
     fastify.log.error(error);
     let err;
 
     // check if we have a validation error
     if (error.validation) {
-      err = new httpError.BadRequest(`A validation error occurred when validating the ${error.validationContext}`);
+      err = new httpError.BadRequest(
+        `A validation error occurred when validating the ${error.validationContext}`,
+      );
       err.errors = error.validation;
     } else {
-      err = httpError.isHttpError(error) ? error : new httpError.InternalServerError();
+      err = httpError.isHttpError(error)
+        ? error
+        : new httpError.InternalServerError();
 
       if (err.headers) {
         for (const key in err.headers) {
@@ -28,9 +32,9 @@ export default fp(async function errors(fastify) {
         errors: err.errors || undefined,
       });
     } else {
-      reply.send("");
+      reply.send('');
     }
   });
 
-  fastify.decorate("errors", httpError);
+  fastify.decorate('errors', httpError);
 });

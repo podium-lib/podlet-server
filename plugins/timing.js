@@ -1,7 +1,7 @@
-import fp from "fastify-plugin";
-import ResponseTiming from "fastify-metrics-js-response-timing";
+import fp from 'fastify-plugin';
+import ResponseTiming from 'fastify-metrics-js-response-timing';
 
-export default fp(async function timing(fastify, { timeAllRoutes, groupStatusCodes }) {
+export default fp(async (fastify, { timeAllRoutes, groupStatusCodes }) => {
   const responseTiming = new ResponseTiming({
     timeAllRoutes,
     groupStatusCodes,
@@ -10,7 +10,7 @@ export default fp(async function timing(fastify, { timeAllRoutes, groupStatusCod
 
   // @ts-ignore
   if (!fastify.metricStreams) {
-    fastify.decorate("metricStreams", []);
+    fastify.decorate('metricStreams', []);
   }
   // @ts-ignore
   fastify.metricStreams.push(responseTiming.metrics);

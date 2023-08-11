@@ -1,0 +1,29 @@
+{
+  "root": true,
+  "extends": ["airbnb-base", "prettier"],
+  "overrides": [
+    {
+      "files": "__tests__/**/*",
+      "env": {
+        "jest": true
+      }
+    }
+  ],
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "sourceType": "module",
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "strict": [0, "global"],
+    "class-methods-use-this": [0],
+    "no-param-reassign": [0],
+    "import/extensions": [2, "always", {ignorePackages: true}],
+    "import/prefer-default-export": [0],
+    "no-underscore-dangle": [0, "global"],
+    /* These are questionable ignores which should be debated. */
+    "no-await-in-loop": [0],
+    "guard-for-in": [0],
+    "no-restricted-syntax": [0],
+  }
+}

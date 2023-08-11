@@ -1,6 +1,8 @@
 export default class Routes {
   #data;
+
   #schemas;
+
   constructor({ data, schemas }) {
     this.#data = data;
     this.#schemas = schemas;
@@ -13,7 +15,7 @@ export default class Routes {
     if (!schema) return results;
     if (schema.required) required = schema.required;
     // check top level for object and properties keys
-    if (schema.type === "object" && schema.properties) {
+    if (schema.type === 'object' && schema.properties) {
       for (const [key, value] of Object.entries(schema.properties)) {
         obj[key] = value;
       }
@@ -25,7 +27,7 @@ export default class Routes {
       results.push({
         name: key,
         required: required.includes(key),
-        description: value.description || "",
+        description: value.description || '',
         type: value.type,
         options: value.enum || [],
       });
@@ -35,12 +37,12 @@ export default class Routes {
   }
 
   buildUrlPath(path) {
-    return path.replaceAll(/\/+/g, "/");
+    return path.replaceAll(/\/+/g, '/');
   }
 
   createDataTable(caption, data) {
-    if (!data.length) return "";
-    let tableValues = "";
+    if (!data.length) return '';
+    let tableValues = '';
     for (const { name, required, description, type, options } of data) {
       tableValues += `
         <tr>
@@ -48,7 +50,7 @@ export default class Routes {
           <td>${type}</td>
           <td>${required}</td>
           <td>${description}</td>
-          <td>${options.length ? options.join(", ") : ""}</td>
+          <td>${options.length ? options.join(', ') : ''}</td>
         </tr>`;
     }
     return `
@@ -93,10 +95,12 @@ export default class Routes {
   }
 
   createAssetsTable(data) {
-    let tableValues = "";
+    let tableValues = '';
     for (const key in data) {
-      if (!data[key]) tableValues += `<tr><td>${key}</td><td>disabled</td></tr>`;
-      else tableValues += `<tr><td>${key}</td><td><a href="${data[key]}">${data[key]}</a></td></tr>`;
+      if (!data[key])
+        tableValues += `<tr><td>${key}</td><td>disabled</td></tr>`;
+      else
+        tableValues += `<tr><td>${key}</td><td><a href="${data[key]}">${data[key]}</a></td></tr>`;
     }
     return `<table><thead><th>Name</th><th>Path</th></thead><tbody>${tableValues}</tbody></table>`;
   }
@@ -105,14 +109,18 @@ export default class Routes {
     const contentSchema = this.#schemas.get(this.#data.routes.content.path);
     const fallbackSchema = this.#schemas.get(this.#data.routes.content.path);
 
-    const contentQuerystringObject = this.buildObjects(contentSchema.querystring);
-    const fallbackQuerystringObject = this.buildObjects(fallbackSchema.querystring);
+    const contentQuerystringObject = this.buildObjects(
+      contentSchema.querystring,
+    );
+    const fallbackQuerystringObject = this.buildObjects(
+      fallbackSchema.querystring,
+    );
     const contentHeadersObject = this.buildObjects(contentSchema.headers);
     const fallbackHeadersObject = this.buildObjects(fallbackSchema.headers);
     const contentParamsObject = this.buildObjects(contentSchema.params);
     const fallbackParamsObject = this.buildObjects(fallbackSchema.params);
 
-    reply.type("text/html").send(`
+    reply.type('text/html').send(`
       <!DOCTYPE html>
       <html lang="en">
       <head>
@@ -181,18 +189,24 @@ export default class Routes {
 						<li><a href="#">Routes</a></li>
 					</ul>
 				</nav>
-        <h2>Manifest <a href="${this.#data.routes.manifest.path}">${this.#data.routes.manifest.path}</a></h2>
+        <h2>Manifest <a href="${this.#data.routes.manifest.path}">${
+          this.#data.routes.manifest.path
+        }</a></h2>
         ${this.createManifestTable(this.#data.routes.manifest.data)}
         
-        <h2>Content <a href="${this.#data.routes.content.path}">${this.#data.routes.content.path}</a></h2>
-        ${this.createDataTable("Headers", contentHeadersObject)}
-        ${this.createDataTable("Query params", contentQuerystringObject)}
-        ${this.createDataTable("URL params", contentParamsObject)}
+        <h2>Content <a href="${this.#data.routes.content.path}">${
+          this.#data.routes.content.path
+        }</a></h2>
+        ${this.createDataTable('Headers', contentHeadersObject)}
+        ${this.createDataTable('Query params', contentQuerystringObject)}
+        ${this.createDataTable('URL params', contentParamsObject)}
         
-        <h2>Fallback <a href="${this.#data.routes.fallback.path}">${this.#data.routes.fallback.path}</a></h2>
-        ${this.createDataTable("Headers", fallbackHeadersObject)}
-        ${this.createDataTable("Query params", fallbackQuerystringObject)}
-        ${this.createDataTable("URL params", fallbackParamsObject)}
+        <h2>Fallback <a href="${this.#data.routes.fallback.path}">${
+          this.#data.routes.fallback.path
+        }</a></h2>
+        ${this.createDataTable('Headers', fallbackHeadersObject)}
+        ${this.createDataTable('Query params', fallbackQuerystringObject)}
+        ${this.createDataTable('URL params', fallbackParamsObject)}
 
         <h2>Assets</h2>
         ${this.createAssetsTable(this.#data.assets)}
