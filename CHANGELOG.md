@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/podium-lib/podlet-server/compare/v1.10.0...v1.10.1) (2023-08-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency ora to v7 ([#101](https://github.com/podium-lib/podlet-server/issues/101)) ([bea734c](https://github.com/podium-lib/podlet-server/commit/bea734c6df14e06c4d85fc791bb16e574ba26acb))
+
 # [1.10.0](https://github.com/podium-lib/podlet-server/compare/v1.9.7...v1.10.0) (2023-08-11)
 
 
