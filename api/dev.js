@@ -234,33 +234,19 @@ export class DevServer {
   }
 
   #listenForChangesAndRestart() {
-    this.sWatcher.on('add', (file) => {
+    const debouncedRestart = debounce(this.restart.bind(this), 500);
+
+    const handleFileChange = (file) => {
       if (file.startsWith('config/')) {
-        this.logger.warn(
-          `App configuration has changed, please restart the development server to apply changes`,
-        );
+        this.logger.warn(`App configuration has changed, please restart the development server to apply changes`);
         return;
       }
-      debounce(this.restart.bind(this), 500)();
-    });
-    this.sWatcher.on('change', (file) => {
-      if (file.startsWith('config/')) {
-        this.logger.warn(
-          `App configuration has changed, please restart the development server to apply changes`,
-        );
-        return;
-      }
-      debounce(this.restart.bind(this), 500)();
-    });
-    this.sWatcher.on('unlink', (file) => {
-      if (file.startsWith('config/')) {
-        this.logger.warn(
-          `App configuration has changed, please restart the development server to apply changes`,
-        );
-        return;
-      }
-      debounce(this.restart.bind(this), 500);
-    });
+      debouncedRestart();
+    };
+
+    this.sWatcher.on('add', handleFileChange);
+    this.sWatcher.on('change', handleFileChange);
+    this.sWatcher.on('unlink', handleFileChange);
   }
 
   async start() {
