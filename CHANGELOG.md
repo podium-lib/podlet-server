@@ -1,3 +1,10 @@
+## [1.10.2](https://github.com/podium-lib/podlet-server/compare/v1.10.1...v1.10.2) (2023-09-14)
+
+
+### Bug Fixes
+
+* fixed debouce bug casing rare dev server crash ([48752e7](https://github.com/podium-lib/podlet-server/commit/48752e7bb47713fd4499a05eba8554e2245de120))
+
 ## [1.10.1](https://github.com/podium-lib/podlet-server/compare/v1.10.0...v1.10.1) (2023-08-13)
 
 
