@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/podium-lib/podlet-server/compare/v1.10.2...v1.10.3) (2023-10-06)
+
+
+### Bug Fixes
+
+* use esm as output for intermediary esbuild ([59b6899](https://github.com/podium-lib/podlet-server/commit/59b6899e01f9a7fd864be44ae159fdfb0160d9f2))
+
 ## [1.10.2](https://github.com/podium-lib/podlet-server/compare/v1.10.1...v1.10.2) (2023-09-14)
 
 
