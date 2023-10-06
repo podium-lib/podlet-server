@@ -1,3 +1,11 @@
+## [1.10.4](https://github.com/podium-lib/podlet-server/compare/v1.10.3...v1.10.4) (2023-10-06)
+
+
+### Bug Fixes
+
+* make sure ESBuild plugins run in dev-command ([b33a76c](https://github.com/podium-lib/podlet-server/commit/b33a76c6642134b3ca724346a4d042355df8f0fb))
+* run esbuild with plugins on all project files ([6295bd1](https://github.com/podium-lib/podlet-server/commit/6295bd176bdc252b9fb6bb1a244394dc1faec1ea))
+
 ## [1.10.3](https://github.com/podium-lib/podlet-server/compare/v1.10.2...v1.10.3) (2023-10-06)
 
 
