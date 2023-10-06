@@ -8,13 +8,13 @@ import httpError from 'http-errors';
 
 const require = createRequire(import.meta.url);
 
-const build = async ({ entryPoints = [] } = {}) => {
+const build = async ({ entryPoints = [], plugins = [] } = {}) => {
   const result = await esbuild.build({
     resolveExtensions: ['.js', '.ts'],
     legalComments: 'none',
     entryPoints,
     charset: 'utf8',
-    plugins: [],
+    plugins,
     target: 'esnext',
     bundle: true,
     format: 'esm',
@@ -32,7 +32,7 @@ const build = async ({ entryPoints = [] } = {}) => {
  */
 
 export default fp(
-  async (fastify, { cwd = process.cwd(), development = false }) => {
+  async (fastify, { cwd = process.cwd(), development = false, plugins }) => {
     if (!development) return;
 
     await fastify.register(etag, { algorithm: 'fnv1a' });
@@ -46,7 +46,7 @@ export default fp(
           const filepath = require.resolve(depname, {
             paths: [cwd, new URL('../', import.meta.url).pathname],
           });
-          const body = await build({ entryPoints: [filepath] });
+          const body = await build({ entryPoints: [filepath], plugins });
 
           reply.type('application/javascript');
           reply.send(body);
@@ -67,7 +67,10 @@ export default fp(
         const filename = request.params.file;
 
         try {
-          const body = await build({ entryPoints: [join(cwd, filename)] });
+          const body = await build({
+            entryPoints: [join(cwd, filename)],
+            plugins,
+          });
           reply.type('application/javascript');
           reply.send(body);
           return reply;
