@@ -186,6 +186,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       ],
       entryPoints,
       bundle: true,
+      format: 'esm', // default format when bundling is IIFE
       write: false,
       outdir: ESBUILD_OUTDIR,
     });
