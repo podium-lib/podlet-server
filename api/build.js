@@ -147,11 +147,16 @@ export async function build({ state, config, cwd = process.cwd() }) {
           setup(buildInstance) {
             buildInstance.onResolve(
               {
-                filter: /(content|fallback|lazy|scripts|src).*.(ts|js)$/,
+                filter: /(content|fallback|lazy|scripts|src|server).*.(ts|js)$/,
                 namespace: 'file',
               },
               async (args) => {
-                if (args.path.includes('node_modules')) return;
+                if (
+                  args.path.includes('node_modules') ||
+                  args.resolveDir.includes('node_modules')
+                ) {
+                  return;
+                }
 
                 let file = args.path;
                 if (!isAbsolute(args.path)) {
@@ -167,10 +172,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
                   outfile = LAZY_INTERMEDIATE;
                 } else if (file === SCRIPTS_ENTRY) {
                   outfile = SCRIPTS_INTERMEDIATE;
-                }
-
-                if (!outfile) {
-                  return;
+                } else {
+                  outfile = join(ESBUILD_OUTDIR, file.replace(cwd, ''));
                 }
 
                 await esbuild.build({
