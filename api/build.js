@@ -146,9 +146,11 @@ export async function build({ state, config, cwd = process.cwd() }) {
           name: 'esbuild-apply-plugins',
           setup(buildInstance) {
             buildInstance.onResolve(
-              { filter: /(content|fallback|lazy|scripts|src).*.(ts|js)$/ },
+              {
+                filter: /(content|fallback|lazy|scripts|src).*.(ts|js)$/,
+                namespace: 'file',
+              },
               async (args) => {
-                if (args.namespace !== 'file') return;
                 if (args.path.includes('node_modules')) return;
 
                 let file = args.path;
