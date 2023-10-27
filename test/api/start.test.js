@@ -64,12 +64,20 @@ test('Starting with package.json file in directory', async (t) => {
 });
 
 test('Starting with content file in directory', async (t) => {
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
+
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*', '@lit-labs/ssr-client': '*' },
+      dependencies: {
+        lit: packageJson.dependencies.lit,
+        '@lit-labs/ssr-client':
+          packageJson.dependencies['@lit-labs/ssr-client'],
+      },
     }),
   );
   await writeFile(
@@ -77,7 +85,7 @@ test('Starting with content file in directory', async (t) => {
     `
     import { html, LitElement } from "lit";
     export default class Content extends LitElement {
-        render() { 
+        render() {
             return html\`<div>hello world</div>\`;
         }
     }
@@ -123,12 +131,19 @@ test('Using validated query parameters in server.js', async (t) => {
     }
   `.trim(),
   );
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*', '@lit-labs/ssr-client': '*' },
+      dependencies: {
+        lit: packageJson.dependencies.lit,
+        '@lit-labs/ssr-client':
+          packageJson.dependencies['@lit-labs/ssr-client'],
+      },
     }),
   );
   await writeFile(
@@ -136,7 +151,7 @@ test('Using validated query parameters in server.js', async (t) => {
     `
     import { html, LitElement } from "lit";
     export default class Content extends LitElement {
-        render() { 
+        render() {
             return html\`<div>hello world</div>\`;
         }
     }
@@ -170,18 +185,25 @@ test('Fallback route', async (t) => {
     `
   import { html, LitElement } from "lit";
   export default class Content extends LitElement {
-      render() { 
+      render() {
           return html\`<div>Fallback content</div>\`;
       }
   }
   `.trim(),
   );
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*', '@lit-labs/ssr-client': '*' },
+      dependencies: {
+        lit: packageJson.dependencies.lit,
+        '@lit-labs/ssr-client':
+          packageJson.dependencies['@lit-labs/ssr-client'],
+      },
     }),
   );
   execSync('npm install', { cwd: tmp });
@@ -209,12 +231,15 @@ test('scripts.js loading', async (t) => {
     console.log("This script will be loaded after the main podlet scripts.");
   `.trim(),
   );
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*' },
+      dependencies: { lit: packageJson.dependencies.lit },
     }),
   );
   await writeFile(
@@ -222,7 +247,7 @@ test('scripts.js loading', async (t) => {
     `
     import { html, LitElement } from "lit";
     export default class Content extends LitElement {
-        render() { 
+        render() {
             return html\`<div>hello world</div>\`;
         }
     }
@@ -261,18 +286,21 @@ test('lazy.js loading', async (t) => {
     `
     import { html, LitElement } from "lit";
     export default class Content extends LitElement {
-        render() { 
+        render() {
             return html\`<div>hello world</div>\`;
         }
     }
     `.trim(),
   );
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*' },
+      dependencies: { lit: packageJson.dependencies.lit },
     }),
   );
   execSync('npm install', { cwd: tmp });

@@ -64,12 +64,15 @@ beforeEach(async () => {
   await mkdir(tmp);
   await mkdir(join(tmp, 'schemas'));
   await mkdir(join(tmp, 'locale'));
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*' },
+      dependencies: { lit: packageJson.dependencies.lit },
     }),
   );
   await mkdir(join(tmp, 'dist'));
