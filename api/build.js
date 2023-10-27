@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { isAbsolute, join } from 'node:path';
 import esbuild from 'esbuild';
 import rollupPluginTerser from '@rollup/plugin-terser';
+import rollupPluginReplace from '@rollup/plugin-replace';
 import { rollup } from 'rollup';
 import rollupPluginResolve from '@rollup/plugin-node-resolve';
 import rollupPluginCommonjs from '@rollup/plugin-commonjs';
@@ -219,6 +220,15 @@ export async function build({ state, config, cwd = process.cwd() }) {
           rollupPluginCommonjs({ include: /node_modules/ }),
           rollupPluginTerser({ format: { comments: false } }),
         ];
+
+        if (outfile) {
+          rollupPlugins.push(
+            rollupPluginReplace({
+              'process.env.NODE_ENV': JSON.stringify('production'),
+              preventAssignment: true,
+            }),
+          );
+        }
 
         if (existsSync(join(cwd, 'tsconfig.json'))) {
           rollupPlugins.unshift(
