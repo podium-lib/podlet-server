@@ -260,6 +260,8 @@ This can be configured using the config setting `app.mode`. (see the config sect
 
 ### Server Side Rendered (hydrate)
 
+Use this mode if you're writing podlets that will be included in layouts you don't control, or that include client side rendering/hydration.
+
 When `app.mode` is set to `hydrate`, the content and fallback routes will be server rendered and then client side hydrated afterward.
 No additional setup is required but see guidelines for writing SSR custom elements on the Lit docs site. [https://lit.dev/docs/ssr/authoring/](https://lit.dev/docs/ssr/authoring/).
 
@@ -267,7 +269,10 @@ No additional setup is required but see guidelines for writing SSR custom elemen
 
 When `app.mode` is set to `ssr-only`, the content and fallback routes will be server rendered but will not be hydrated on the client side afterward.
 This is good if you want to use components from a shared library or design system but don't actually need interactivity on the client side.
-It is recommended you use this option whenever possible since it will save many KBs of JavaScript being sent to the users browser.
+
+If you control the layout(s) where the podlet will be rendered, it is recommended you use this option, as it will prevent sending KBs of JavaScript to the users browser.
+The downside compared to `hydrate` is, if another part of a layout does client-side render a shared component (such as an icon), Lit won't be able to properly replace the server-side rendered markup, and you end up with duplicates.
+
 No additional setup is required but see guidelines for writing SSR custom elements on the Lit docs site. [https://lit.dev/docs/ssr/authoring/](https://lit.dev/docs/ssr/authoring/).
 
 ### Client Side Rendered (csr-only)
