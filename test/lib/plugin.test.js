@@ -17,7 +17,7 @@ const tmp = join(tmpdir(), './plugin.test.js');
 const contentFile = `
 import { html, LitElement } from "lit";
 export default class Element extends LitElement {
-  render() { 
+  render() {
     return html\`<div>hello world</div>\`;
   }
 }
@@ -39,6 +39,7 @@ async function setupConfig() {
   const config = convict({});
   // @ts-ignore
   config.set('app.name', 'test-app');
+  config.set('app.base', '/');
   config.set('app.port', 0);
   config.set('assets.base', '/static');
   config.set('podlet.version', '1.0.0');
@@ -63,12 +64,15 @@ beforeEach(async () => {
   await mkdir(tmp);
   await mkdir(join(tmp, 'schemas'));
   await mkdir(join(tmp, 'locale'));
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*' },
+      dependencies: { lit: packageJson.dependencies.lit },
     }),
   );
   await mkdir(join(tmp, 'dist'));
@@ -331,6 +335,52 @@ test('schemas: fallback.json', async (t) => {
   const queryParam = await fetch(`${address}/fallback?test=1`);
   t.equal(noQueryParm.status, 400);
   t.equal(queryParam.status, 200);
+  await app.close();
+});
+
+test('hydrate: dev mode includes lit-element-hydrate-support as a script tag', async (t) => {
+  const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set('app.mode', 'hydrate');
+  config.set('app.development', true);
+
+  await app.register(plugin, {
+    cwd: tmp,
+    config,
+  });
+
+  const address = await app.listen({ port: 0 });
+  const content = await fetch(`${address}/`);
+  const markup = await content.text();
+  t.equal(content.status, 200, 'content file should be sucessfully served');
+  t.match(
+    markup,
+    '/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
+    'should contain lit-element-hydrate-support script',
+  );
+  await app.close();
+});
+
+test('hydrate: production mode does not include lit-element-hydrate-support as a script tag', async (t) => {
+  const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set('app.mode', 'hydrate');
+  config.set('app.development', false);
+
+  await app.register(plugin, {
+    cwd: tmp,
+    config,
+  });
+
+  const address = await app.listen({ port: 0 });
+  const content = await fetch(`${address}/`);
+  const markup = await content.text();
+  t.equal(content.status, 200, 'content file should be sucessfully served');
+  t.notMatch(
+    markup,
+    '/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
+    'should not contain lit-element-hydrate-support script tag when development: false',
+  );
   await app.close();
 });
 
