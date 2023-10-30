@@ -1,3 +1,10 @@
+## [1.10.5](https://github.com/podium-lib/podlet-server/compare/v1.10.4...v1.10.5) (2023-10-30)
+
+
+### Bug Fixes
+
+* don't render dev scripts in prod mode ([813daa9](https://github.com/podium-lib/podlet-server/commit/813daa95ac03f1f158548f71c57b15dacdcd98e8))
+
 ## [1.10.4](https://github.com/podium-lib/podlet-server/compare/v1.10.3...v1.10.4) (2023-10-06)
 
 
