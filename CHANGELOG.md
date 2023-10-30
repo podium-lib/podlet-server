@@ -1,3 +1,10 @@
+## [1.10.6](https://github.com/podium-lib/podlet-server/compare/v1.10.5...v1.10.6) (2023-10-30)
+
+
+### Bug Fixes
+
+* run replacement of process.env.NODE_ENV for client-side ([#126](https://github.com/podium-lib/podlet-server/issues/126)) ([8100fba](https://github.com/podium-lib/podlet-server/commit/8100fba68038932d7713d1f827d653c80644155a))
+
 ## [1.10.5](https://github.com/podium-lib/podlet-server/compare/v1.10.4...v1.10.5) (2023-10-30)
 
 
