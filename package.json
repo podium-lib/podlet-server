@@ -1,6 +1,6 @@
 {
   "name": "@podium/podlet-server",
-  "version": "1.10.4",
+  "version": "1.10.5",
   "type": "module",
   "bin": {
     "podlet": "./cli.js"
@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
+    "test": "NODE_OPTIONS=--conditions=development tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
     "prepublish": "tsc"
   },
   "keywords": [],

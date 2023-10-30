@@ -14,12 +14,15 @@ const tmp = join(tmpdir(), './plugins-ssr.test.js');
 
 beforeEach(async () => {
   await mkdir(tmp);
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
   await writeFile(
     join(tmp, 'package.json'),
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: '*' },
+      dependencies: { lit: packageJson.dependencies.lit },
     }),
   );
   await mkdir(join(tmp, 'dist'));
@@ -28,7 +31,7 @@ beforeEach(async () => {
     `
     import { html, LitElement } from "lit";
     export default class Element extends LitElement {
-        render() { 
+        render() {
             return html\`<div>hello world</div>\`;
         }
     }
