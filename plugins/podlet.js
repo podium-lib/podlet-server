@@ -78,5 +78,20 @@ export default fp(
         },
       );
     }
+
+    // set up scriptsList for other plugins to add scripts to
+    // @ts-ignore
+    if (!fastify.scriptsList) {
+      fastify.decorate('scriptsList', []);
+    }
+
+    // process metrics streams at the end
+    fastify.addHook('onReady', async () => {
+      // @ts-ignore
+      if (!fastify.scriptsList) return;
+
+      // @ts-ignore
+      podlet.js(fastify.scriptsList);
+    });
   },
 );

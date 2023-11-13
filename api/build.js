@@ -63,13 +63,13 @@ export async function build({ state, config, cwd = process.cwd() }) {
     if (existsSync(CONTENT_SRC_FILEPATH)) {
       writeFileSync(
         CONTENT_ENTRY,
-        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
+        `import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
       );
     }
     if (existsSync(FALLBACK_SRC_FILEPATH)) {
       writeFileSync(
         FALLBACK_ENTRY,
-        `import "@lit-labs/ssr-client/lit-element-hydrate-support.js";import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
+        `import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
       );
     }
 
@@ -134,6 +134,29 @@ export async function build({ state, config, cwd = process.cwd() }) {
       legalComments: `none`,
       sourcemap: false,
     });
+
+    // build hydration support script
+    await esbuild.build({
+      entryPoints: [
+
+        // TODO: can't use require.resolve here as it will resolve in a Node context and get the wrong script
+        // probably need to create a file that does import "@lit-labs/ssr-client/lit-element-hydrate-support.js";
+        // and use that as input to entryPoints
+        require.resolve(
+          '@lit-labs/ssr-client/lit-element-hydrate-support.js',
+        ),
+      ],
+      bundle: true,
+      format: 'esm',
+      outfile: join(CLIENT_OUTDIR, 'lit-element-hydrate-support.js'),
+      minify: true,
+      target: ['es2017'],
+      legalComments: `none`,
+      sourcemap: false,
+    });
+
+    // TODO: Properly build lazy loaded scripts for production mode
+    // with a lazy load wrapper addEventListener('load',()=>import('${url}'))
 
     // Run code through esbuild first (to apply plugins and strip types) but don't bundle or minify
     // use esbuild to resolve imports and then run a build with plugins

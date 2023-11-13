@@ -60,6 +60,26 @@ export default fp(
       },
     );
 
+    // TODO: add a lazy load wrapper endpoint that wraps the requested file in
+    // addEventListener('load',()=>import('${url}'))
+    // fastify.get(
+    // '/_/dynamic/files/lazyload/:file.js',
+
+    // TODO: add a custom element endpoint that takes the path to a custom element and wraps it in a definiton
+    fastify.get(
+      '/_/dynamic/element/:type/:name',
+      async (/** @type {Request} */ request, reply) => {
+        // @ts-ignore
+        const { type, name } = request.params;
+
+        reply.type('application/javascript').send(`
+          import El from '/_/dynamic/files/${type}.js';
+          customElements.define("${name}-${type}",El);
+        `);
+        return reply;
+      },
+    );
+
     fastify.get(
       '/_/dynamic/files/:file.js',
       async (/** @type {Request} */ request, reply) => {
