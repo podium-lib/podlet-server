@@ -90,27 +90,6 @@ export default fp(
     );
 
     /**
-     * Endpoint that wraps lazy.js in a lazy load event listener
-     * This endpoint is not used in production as lazy will be included in a production build when running "podlet build".
-     *
-     * :file.js is expected to be lazy.js
-     */
-    fastify.get(
-      '/_/dynamic/files/lazyload/:file.js',
-      async (/** @type {Request} */ request, reply) => {
-        // @ts-ignore
-        const { file } = request.params;
-
-        reply
-          .type('application/javascript')
-          .send(
-            `addEventListener('load',()=>import('/_/dynamic/files/${file}.js'))`,
-          );
-        return reply;
-      },
-    );
-
-    /**
      * Endpoint that wraps content.js or fallback.js definitions in a customElement.define call for use during development.
      * This endpoint is not used in production as content and fallback elements will be included in a production build when running "podlet build".
      *

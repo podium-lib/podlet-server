@@ -59,17 +59,22 @@ export async function build({ state, config, cwd = process.cwd() }) {
     const LAZY_INTERMEDIATE = join(ESBUILD_OUTDIR, 'lazy.js');
     const LAZY_FINAL = join(CLIENT_OUTDIR, 'lazy.js');
 
+    const hydrateSupport =
+      MODE === 'hydrate'
+        ? 'import "@lit-labs/ssr-client/lit-element-hydrate-support.js";'
+        : '';
+
     // Create entrypoints for each file type
     if (existsSync(CONTENT_SRC_FILEPATH)) {
       writeFileSync(
         CONTENT_ENTRY,
-        `import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
+        `${hydrateSupport}import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
       );
     }
     if (existsSync(FALLBACK_SRC_FILEPATH)) {
       writeFileSync(
         FALLBACK_ENTRY,
-        `import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
+        `${hydrateSupport}import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
       );
     }
 
@@ -135,29 +140,6 @@ export async function build({ state, config, cwd = process.cwd() }) {
       sourcemap: false,
     });
 
-    // build hydration support script
-    await esbuild.build({
-      entryPoints: [
-
-        // TODO: can't use require.resolve here as it will resolve in a Node context and get the wrong script
-        // probably need to create a file that does import "@lit-labs/ssr-client/lit-element-hydrate-support.js";
-        // and use that as input to entryPoints
-        require.resolve(
-          '@lit-labs/ssr-client/lit-element-hydrate-support.js',
-        ),
-      ],
-      bundle: true,
-      format: 'esm',
-      outfile: join(CLIENT_OUTDIR, 'lit-element-hydrate-support.js'),
-      minify: true,
-      target: ['es2017'],
-      legalComments: `none`,
-      sourcemap: false,
-    });
-
-    // TODO: Properly build lazy loaded scripts for production mode
-    // with a lazy load wrapper addEventListener('load',()=>import('${url}'))
-
     // Run code through esbuild first (to apply plugins and strip types) but don't bundle or minify
     // use esbuild to resolve imports and then run a build with plugins
     await esbuild.build({
@@ -221,7 +203,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
-        const input = filepath
+        const input = filepath;
 
         let outfile;
         if (filepath === CONTENT_ENTRY) {

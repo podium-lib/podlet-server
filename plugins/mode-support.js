@@ -11,23 +11,33 @@ export default fp(
     fastify,
     { appName = '', base = '/', prefix = '', development = false, mode },
   ) => {
-    /**
-     * Constructs a script tag for a given type (content or fallback)
-     * Takes into account development mode vs production, app mode (ssr-only, csr-only or hydrate) and assets base
-     * @param {"content" | "fallback"} type
-     * @returns {string} - constructed script tag
-     */
-    function scriptTag(type) {
-      let script;
-      if (mode !== 'ssr-only') {
-        if (development) {
-          script = `<script src="/_/dynamic/element/${type}/${appName}" type="module" crossorigin defer></script>`;
-        } else {
-          script = `<script src="${base}/client/${type}.js" type="module" crossorigin defer></script>`;
-        }
-      }
-      return script;
+    // if mode is hydrate or csr-only then we need to include client side scripts for content and fallback
+    if (mode !== "ssr-only") {
+      // @ts-ignore
+      fastify.scriptsList.push({
+        value: development
+        // in development, we fetch from the development on the fly bundler endpoint
+        ? joinURLPathSegments(prefix, `/_/dynamic/files/content.js`)
+        // where as in production, we use the production build
+        : joinURLPathSegments(base, `/client/content.js`),
+        // add scope hint so the podlet or layout will only use this script for successful content requests
+        scope: "content",
+        type: "module",
+        // using this strategy hints to the document template that the script will be added to the page later than any beforeInteractive scripts
+        // hydration support is added in the beforeInteractive phase
+        strategy: "afterInteractive"
+      });
+      // @ts-ignore
+      fastify.scriptsList.push({
+        value: development
+          ? joinURLPathSegments(prefix, `/_/dynamic/files/fallback.js`)
+          : joinURLPathSegments(base, `/client/fallback.js`),
+        scope: 'fallback',
+        type: 'module',
+        strategy: 'afterInteractive',
+      });
     }
+
 
     /**
      * Renders a template for a given type (content or fallback)
@@ -83,20 +93,6 @@ export default fp(
     );
 
     fastify.decorate(
-      'serverRenderAndHydrate',
-      /**
-       * Fastify decorator method that creates server side only markup with additional client side hydration scripts using a type (content or fallback)
-       * and a template
-       * @param {"content" | "fallback"} type
-       * @param {import("lit").HTMLTemplateResult} template
-       * @returns {string}
-       */
-      (type, template) => {
-        return `${serverRender(type, template)}${scriptTag(type)}`;
-      },
-    );
-
-    fastify.decorate(
       'clientRender',
       /**
        * Fastify decorator method that creates server side tag markup for a content or fallback route and adds additional client side scripts to define the component
@@ -105,10 +101,9 @@ export default fp(
        * @param {import("lit").HTMLTemplateResult} template
        * @returns {string}
        */
+      // @ts-ignore
       (type, template) => {
-        return `${String.raw(template.strings, ...template.values)}${scriptTag(
-          type,
-        )}`.replace('null', '');
+        return `${String.raw(template.strings, ...template.values)}`.replace('null', '');
       },
     );
   },
