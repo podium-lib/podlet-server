@@ -384,8 +384,8 @@ test('hydrate: production mode does not include lit-element-hydrate-support as a
   await app.close();
 });
 
-// // // test("build plugin", async (t) => {})
-// // // test("locale", async (t) => {})
-// // // test("metrics", async (t) => {})
-// // // test("typescript", async (t) => {})
-// // // test("errors", async (t) => {})
+// // test("build plugin", async (t) => {})
+// // test("locale", async (t) => {})
+// // test("metrics", async (t) => {})
+// // test("typescript", async (t) => {})
+// // test("errors", async (t) => {})
