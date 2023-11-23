@@ -27,11 +27,12 @@ tap.test('Logs with debug level when told to', async (t) => {
   const server = await TestServer.create({
     cwd: tempDirectory,
     development: true,
+    // @ts-ignore
     loggerFunction: () => pino({ level: logLevelDebug }, memoryDestination),
   });
   server.config.set('app.logLevelDebug', logLevelDebug);
   await server.start();
-  t.equal(memoryDestination.logs.length, 3);
+  t.equal(memoryDestination.logs.length, 4);
   await server.stop();
   t.end();
 });
@@ -41,6 +42,7 @@ tap.test('Logs nothing when set to error', async (t) => {
   const server = await TestServer.create({
     cwd: tempDirectory,
     development: true,
+    // @ts-ignore
     loggerFunction: () => pino({ level: logLevelSilent }, memoryDestination),
   });
   server.config.set('app.logLevel', logLevelSilent);

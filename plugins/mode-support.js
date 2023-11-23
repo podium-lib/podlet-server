@@ -12,20 +12,22 @@ export default fp(
     { appName = '', base = '/', prefix = '', development = false, mode },
   ) => {
     // if mode is hydrate or csr-only then we need to include client side scripts for content and fallback
-    if (mode !== "ssr-only") {
+    if (mode !== 'ssr-only') {
+      // @ts-ignore
+      if (!fastify.scriptsList) fastify.decorate('scriptsList', []);
       // @ts-ignore
       fastify.scriptsList.push({
         value: development
-        // in development, we fetch from the development on the fly bundler endpoint
-        ? joinURLPathSegments(prefix, `/_/dynamic/files/content.js`)
-        // where as in production, we use the production build
-        : joinURLPathSegments(base, `/client/content.js`),
+          ? // in development, we fetch from the development on the fly bundler endpoint
+            joinURLPathSegments(prefix, `/_/dynamic/files/content.js`)
+          : // where as in production, we use the production build
+            joinURLPathSegments(base, `/client/content.js`),
         // add scope hint so the podlet or layout will only use this script for successful content requests
-        scope: "content",
-        type: "module",
+        scope: 'content',
+        type: 'module',
         // using this strategy hints to the document template that the script will be added to the page later than any beforeInteractive scripts
         // hydration support is added in the beforeInteractive phase
-        strategy: "afterInteractive"
+        strategy: 'afterInteractive',
       });
       // @ts-ignore
       fastify.scriptsList.push({
@@ -37,7 +39,6 @@ export default fp(
         strategy: 'afterInteractive',
       });
     }
-
 
     /**
      * Renders a template for a given type (content or fallback)
@@ -103,7 +104,10 @@ export default fp(
        */
       // @ts-ignore
       (type, template) => {
-        return `${String.raw(template.strings, ...template.values)}`.replace('null', '');
+        return `${String.raw(template.strings, ...template.values)}`.replace(
+          'null',
+          '',
+        );
       },
     );
   },

@@ -2,6 +2,9 @@ import fp from 'fastify-plugin';
 import { joinURLPathSegments } from '../lib/utils.js';
 
 export default fp(async (fastify, { enabled, development, prefix }) => {
+  // @ts-ignore
+  if (!fastify.scriptsList) fastify.decorate('scriptsList', []);
+
   // Only add in development mode since this will be bundled into content and fallback bundles in production.
   if (enabled && development) {
     fastify.log.debug('Lit hydrate support enabled');

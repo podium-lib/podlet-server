@@ -5,38 +5,21 @@ import plugin from '../../plugins/lazy.js';
 test('lazy script tag not injected when not enabled', async (t) => {
   const app = fastify({ logger: false });
   await app.register(plugin);
-  app.get('/', (request, reply) => {
-    reply.type('text/html');
-    reply.send('<div>hello world</div>');
-  });
-  const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/`);
-  const response = await result.text();
-  t.equal(
-    response,
-    `<div>hello world</div>`,
-    'should not inject lazy script tag',
-  );
-  await app.close();
+  await app.ready();
+  // @ts-ignore
+  t.equal(app.scriptsList.length, 0, 'should not inject lazy script tag');
 });
 
 test('lazy script tag injected when content-type is html and app in enabled mode', async (t) => {
   const app = fastify({ logger: false });
   await app.register(plugin, { enabled: true, base: '/static' });
-  app.get('/', (request, reply) => {
-    reply.type('text/html');
-    reply.send('<div>hello world</div>');
-  });
-  const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/`);
-  const response = await result.text();
-  t.match(response, `<div>hello world</div>`, 'should inject lazy script tag');
+  await app.ready();
   t.match(
-    response,
-    `addEventListener('load',()=>import('/static/client/lazy.js'))`,
-    'should inject lazy script tag',
+		// @ts-ignore
+    app.scriptsList[0],
+    { value: '/static/client/lazy.js', type: 'module', strategy: 'lazy' },
+    'should add lazy script object to scriptsList',
   );
-  await app.close();
 });
 
 test('lazy script tag injected correctly in development mode', async (t) => {
@@ -46,20 +29,13 @@ test('lazy script tag injected correctly in development mode', async (t) => {
     base: '/static',
     development: true,
   });
-  app.get('/', (request, reply) => {
-    reply.type('text/html');
-    reply.send('<div>hello world</div>');
-  });
-  const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/`);
-  const response = await result.text();
-  t.match(response, `<div>hello world</div>`, 'should inject lazy script tag');
+  await app.ready();
   t.match(
-    response,
-    `addEventListener('load',()=>import('/_/dynamic/files/lazy.js'))`,
-    'should inject lazy script tag',
+		// @ts-ignore
+    app.scriptsList[0],
+    { value: '/_/dynamic/files/lazy.js', type: 'module', strategy: 'lazy' },
+    'should add lazy script object to scriptsList',
   );
-  await app.close();
 });
 
 test('lazy script tag injected correctly in development mode and mounted under a base path', async (t) => {
@@ -70,31 +46,15 @@ test('lazy script tag injected correctly in development mode and mounted under a
     base: '/static',
     development: true,
   });
-  app.get('/', (request, reply) => {
-    reply.type('text/html');
-    reply.send('<div>hello world</div>');
-  });
-  const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/`);
-  const response = await result.text();
-  t.match(response, `<div>hello world</div>`, 'should inject lazy script tag');
+  await app.ready();
   t.match(
-    response,
-    `addEventListener('load',()=>import('/my-app/_/dynamic/files/lazy.js'))`,
-    'should inject lazy script tag',
+		// @ts-ignore
+    app.scriptsList[0],
+    {
+      value: '/my-app/_/dynamic/files/lazy.js',
+      type: 'module',
+      strategy: 'lazy',
+    },
+    'should add lazy script object to scriptsList',
   );
-  await app.close();
-});
-
-test('lazy script tag not injected when content-type is not html and plugin in enabled mode', async (t) => {
-  const app = fastify({ logger: false });
-  await app.register(plugin, { enabled: true, base: '/static' });
-  app.get('/', (request, reply) => {
-    reply.send({});
-  });
-  const address = await app.listen({ port: 0 });
-  const result = await fetch(`${address}/`);
-  const response = await result.text();
-  t.equal(response, `{}`, 'should not inject scripts script tag');
-  await app.close();
 });

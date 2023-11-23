@@ -152,6 +152,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
                 filter: /(content|fallback|lazy|scripts|src|server).*.(ts|js)$/,
                 namespace: 'file',
               },
+              // @ts-ignore
               async (args) => {
                 if (
                   args.path.includes('node_modules') ||

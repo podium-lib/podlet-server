@@ -1,3 +1,4 @@
+import { execSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import * as os from 'node:os';
 import { join } from 'node:path';
@@ -59,8 +60,28 @@ async function createFakeBuildPluginFiles(pluginName = 'fake-extension') {
   );
 }
 
+async function scaffoldAppInTempDir() {
+  const { default: packageJson } = await import('../../package.json', {
+    assert: { type: 'json' },
+  });
+  await writeFile(
+    join(tmp, 'package.json'),
+    JSON.stringify({
+      name: 'test-app',
+      type: 'module',
+      dependencies: {
+        lit: packageJson.dependencies.lit,
+        '@lit-labs/ssr-client':
+          packageJson.dependencies['@lit-labs/ssr-client'],
+      },
+    }),
+  );
+  execSync('npm install', { cwd: tmp });
+}
+
 test('All possible supported JavaScript files defined and built', async (t) => {
   const { state, config } = await setupConfig({ cwd: tmp });
+  await scaffoldAppInTempDir();
   await writeFile(join(tmp, 'content.js'), 'export default {}');
   await writeFile(join(tmp, 'fallback.js'), 'export default {}');
   await writeFile(join(tmp, 'scripts.js'), 'export default {}');
@@ -93,6 +114,7 @@ test('All possible supported JavaScript files defined and built', async (t) => {
 
 test('All possible supported Typescript files defined and built', async (t) => {
   const { state, config } = await setupConfig({ cwd: tmp });
+  await scaffoldAppInTempDir();
   await writeFile(join(tmp, 'content.ts'), 'export default {}');
   await writeFile(join(tmp, 'fallback.ts'), 'export default {}');
   await writeFile(join(tmp, 'scripts.ts'), 'export default {}');
