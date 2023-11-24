@@ -237,9 +237,9 @@ export async function build({ state, config, cwd = process.cwd() }) {
         }
 
         rollupConfig.push({
-          inlineDynamicImports: true,
           input,
           output: {
+            inlineDynamicImports: true,
             file: outfile,
             format: 'es',
             sourcemap: true,
