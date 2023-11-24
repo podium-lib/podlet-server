@@ -1,3 +1,10 @@
+## [1.10.7](https://github.com/podium-lib/podlet-server/compare/v1.10.6...v1.10.7) (2023-11-24)
+
+
+### Bug Fixes
+
+* set inlineDynamicImports in the right spot ([e65f623](https://github.com/podium-lib/podlet-server/commit/e65f62302665393613bff63316f91f8b40c244c7))
+
 ## [1.10.6](https://github.com/podium-lib/podlet-server/compare/v1.10.5...v1.10.6) (2023-10-30)
 
 
