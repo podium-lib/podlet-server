@@ -1,3 +1,10 @@
+## [1.10.8-next.1](https://github.com/podium-lib/podlet-server/compare/v1.10.7...v1.10.8-next.1) (2023-12-10)
+
+
+### Bug Fixes
+
+* remove incorrect module path resolution, set correct rollup bundle input ([#129](https://github.com/podium-lib/podlet-server/issues/129)) ([fccdb4d](https://github.com/podium-lib/podlet-server/commit/fccdb4dd72c89553cd8c27aea3b3f00f75886ba7))
+
 ## [1.10.7](https://github.com/podium-lib/podlet-server/compare/v1.10.6...v1.10.7) (2023-11-24)
 
 
