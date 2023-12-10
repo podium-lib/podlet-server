@@ -59,21 +59,22 @@ export async function build({ state, config, cwd = process.cwd() }) {
     const LAZY_INTERMEDIATE = join(ESBUILD_OUTDIR, 'lazy.js');
     const LAZY_FINAL = join(CLIENT_OUTDIR, 'lazy.js');
 
+    const hydrateSupport =
+      MODE === 'hydrate'
+        ? 'import "@lit-labs/ssr-client/lit-element-hydrate-support.js";'
+        : '';
+
     // Create entrypoints for each file type
     if (existsSync(CONTENT_SRC_FILEPATH)) {
       writeFileSync(
         CONTENT_ENTRY,
-        `import "${require.resolve(
-          '@lit-labs/ssr-client/lit-element-hydrate-support.js',
-        )}";import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
+        `${hydrateSupport}import Component from "${CONTENT_SRC_FILEPATH}";customElements.define("${NAME}-content",Component);`,
       );
     }
     if (existsSync(FALLBACK_SRC_FILEPATH)) {
       writeFileSync(
         FALLBACK_ENTRY,
-        `import "${require.resolve(
-          '@lit-labs/ssr-client/lit-element-hydrate-support.js',
-        )}";import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
+        `${hydrateSupport}import Component from "${FALLBACK_SRC_FILEPATH}";customElements.define("${NAME}-fallback",Component);`,
       );
     }
 
@@ -151,6 +152,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
                 filter: /(content|fallback|lazy|scripts|src|server).*.(ts|js)$/,
                 namespace: 'file',
               },
+              // @ts-ignore
               async (args) => {
                 if (
                   args.path.includes('node_modules') ||
@@ -202,7 +204,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
-        const input = filepath.replace('-entrypoint', '');
+        const input = filepath;
 
         let outfile;
         if (filepath === CONTENT_ENTRY) {

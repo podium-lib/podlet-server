@@ -6,11 +6,11 @@ import fastify from 'fastify';
 import { html } from 'lit';
 import { execSync } from 'node:child_process';
 import importElementPn from '../../plugins/import-element.js';
-import plugin from '../../plugins/hydrate.js';
+import plugin from '../../plugins/mode-support.js';
 
-/** @typedef {import("fastify").FastifyInstance & { hydrate: function, importElement: function }} FastifyInstance */
+/** @typedef {import("fastify").FastifyInstance & { serverRender: function, clientRender: function, importElement: function }} FastifyInstance */
 
-const tmp = join(tmpdir(), './plugins-hydrate.test.js');
+const tmp = join(tmpdir(), './plugins-mode-support-test-js');
 
 beforeEach(async () => {
   await mkdir(tmp);
@@ -44,7 +44,7 @@ afterEach(async () => {
   await rm(tmp, { recursive: true, force: true });
 });
 
-test('server rendering of a lit element with hydration support', async (t) => {
+test('Mode Support - app.serverRender() - Server rendering of a lit element', async (t) => {
   const app = /** @type {FastifyInstance} */ (
     /** @type {unknown} */ (fastify({ logger: false }))
   );
@@ -55,11 +55,9 @@ test('server rendering of a lit element with hydration support', async (t) => {
     development: true,
   });
   await app.importElement(join(tmp, 'element.js'));
-  const result = app.hydrate(
+  const result = app.serverRender(
     'element',
-    html` <custom-element>
-      <custom-element></custom-element>
-    </custom-element>`,
+    html`<custom-element></custom-element>`,
   );
   t.match(result, '<!--lit-part', 'should contain lit comment tags');
   t.match(result, '<custom-element>', 'should contain the correct html tag');
@@ -78,14 +76,36 @@ test('server rendering of a lit element with hydration support', async (t) => {
     `hasOwnProperty("shadowRoot")`,
     'should contain evidence of dsd polyfill',
   );
-  t.match(
-    result,
-    `import El from "/_/dynamic/files/element.js";`,
-    'should contain client side element import',
+});
+
+test('Mode Support - app.clientRender() - Client side rendering of a lit element', async (t) => {
+  const app = /** @type {FastifyInstance} */ (
+    /** @type {unknown} */ (fastify({ logger: false }))
   );
-  t.match(
+  await app.register(plugin, {
+    appName: 'custom',
+    base: '/static',
+    development: true,
+  });
+  const result = app.clientRender(
+    'element',
+    html`<custom-element></custom-element>`,
+  );
+  t.notMatch(result, '<!--lit-part', 'should not contain lit comment tags');
+  t.match(result, '<custom-element>', 'should contain the correct html tag');
+  t.notMatch(
     result,
-    `customElements.define("custom-element",El);`,
-    'should contain client side element registration',
+    `<template shadowroot="open"`,
+    'should not contain evidence of shadow dom',
+  );
+  t.notMatch(
+    result,
+    `<div>hello world</div>`,
+    'should not contain component rendered markup',
+  );
+  t.notMatch(
+    result,
+    `hasOwnProperty("shadowRoot")`,
+    'should not contain evidence of dsd polyfill',
   );
 });

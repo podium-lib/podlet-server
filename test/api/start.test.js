@@ -11,7 +11,7 @@ import { Local } from '../../lib/resolvers/local.js';
 import { Core } from '../../lib/resolvers/core.js';
 import { State } from '../../lib/state.js';
 
-const tmp = join(tmpdir(), './api.test.js');
+const tmp = join(tmpdir(), './api-test-js');
 
 async function setupConfig({ cwd }) {
   const state = new State({ cwd });
@@ -300,7 +300,11 @@ test('lazy.js loading', async (t) => {
     JSON.stringify({
       name: 'test-app',
       type: 'module',
-      dependencies: { lit: packageJson.dependencies.lit },
+      dependencies: {
+        lit: packageJson.dependencies.lit,
+        '@lit-labs/ssr-client':
+          packageJson.dependencies['@lit-labs/ssr-client'],
+      },
     }),
   );
   execSync('npm install', { cwd: tmp });

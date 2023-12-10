@@ -12,7 +12,7 @@ import plugin from '../../lib/plugin.js';
 // import configuration from "../../lib/config.js";
 // import { State } from "../../lib/state.js";
 
-const tmp = join(tmpdir(), './plugin.test.js');
+const tmp = join(tmpdir(), './plugin-test-js');
 
 const contentFile = `
 import { html, LitElement } from "lit";
@@ -88,10 +88,7 @@ test('simple app with content route', async (t) => {
   const app = fastify({ logger: false });
   const config = await setupConfig();
 
-  await app.register(plugin, {
-    cwd: tmp,
-    config,
-  });
+  await app.register(plugin, { cwd: tmp, config });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
   const content = await fetch(`${address}/`);
@@ -182,7 +179,7 @@ test('serialising state between server and client', async (t) => {
   await app.close();
 });
 
-test('scripts', async (t) => {
+test('scripts in manfest file', async (t) => {
   await writeFile(join(tmp, 'fallback.js'), contentFile);
   const app = fastify({ logger: false });
   const config = await setupConfig();
@@ -195,14 +192,12 @@ test('scripts', async (t) => {
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
-  const content = await fetch(`${address}/`);
-  const fallback = await fetch(`${address}/fallback`);
-  const mMarkup = await manifest.text();
-  const cMarkup = await content.text();
-  const fMarkup = await fallback.text();
-  t.notMatch(mMarkup, `scripts.js`);
-  t.match(cMarkup, `/assets/client/scripts.js`);
-  t.match(fMarkup, `/assets/client/scripts.js`);
+  const mJson = await manifest.json();
+  t.equal(mJson.js[0].value, '/assets/client/scripts.js');
+  t.equal(mJson.js[1].value, '/assets/client/content.js');
+  t.equal(mJson.js[1].scope, 'content');
+  t.equal(mJson.js[2].value, '/assets/client/fallback.js');
+  t.equal(mJson.js[2].scope, 'fallback');
   await app.close();
 });
 
@@ -221,14 +216,16 @@ test('scripts: plugin mounted under /app, development mode urls', async (t) => {
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/app/manifest.json`);
-  const content = await fetch(`${address}/app`);
-  const fallback = await fetch(`${address}/app/fallback`);
-  const mMarkup = await manifest.text();
-  const cMarkup = await content.text();
-  const fMarkup = await fallback.text();
-  t.notMatch(mMarkup, `scripts.js`);
-  t.match(cMarkup, `/app/_/dynamic/files/scripts.js`);
-  t.match(fMarkup, `/app/_/dynamic/files/scripts.js`);
+  const mJson = await manifest.json();
+  t.equal(
+    mJson.js[0].value,
+    '/app/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
+  );
+  t.equal(mJson.js[1].value, '/app/_/dynamic/files/scripts.js');
+  t.equal(mJson.js[2].value, '/app/_/dynamic/files/content.js');
+  t.equal(mJson.js[2].scope, 'content');
+  t.equal(mJson.js[3].value, '/app/_/dynamic/files/fallback.js');
+  t.equal(mJson.js[3].scope, 'fallback');
   await app.close();
 });
 
@@ -245,14 +242,13 @@ test('lazy', async (t) => {
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/manifest.json`);
-  const content = await fetch(`${address}/`);
-  const fallback = await fetch(`${address}/fallback`);
-  const mMarkup = await manifest.text();
-  const cMarkup = await content.text();
-  const fMarkup = await fallback.text();
-  t.notMatch(mMarkup, `lazy.js`);
-  t.match(cMarkup, `/assets/client/lazy.js`);
-  t.match(fMarkup, `/assets/client/lazy.js`);
+  const mJson = await manifest.json();
+  t.equal(mJson.js[0].value, '/assets/client/lazy.js');
+  t.equal(mJson.js[0].strategy, 'lazy');
+  t.equal(mJson.js[1].value, '/assets/client/content.js');
+  t.equal(mJson.js[1].scope, 'content');
+  t.equal(mJson.js[2].value, '/assets/client/fallback.js');
+  t.equal(mJson.js[2].scope, 'fallback');
   await app.close();
 });
 
@@ -271,14 +267,18 @@ test('lazy: plugin mounted under /app, development mode urls', async (t) => {
   });
   const address = await app.listen({ port: 0 });
   const manifest = await fetch(`${address}/app/manifest.json`);
-  const content = await fetch(`${address}/app`);
-  const fallback = await fetch(`${address}/app/fallback`);
-  const mMarkup = await manifest.text();
-  const cMarkup = await content.text();
-  const fMarkup = await fallback.text();
-  t.notMatch(mMarkup, `lazy.js`);
-  t.match(cMarkup, `/app/_/dynamic/files/lazy.js`);
-  t.match(fMarkup, `/app/_/dynamic/files/lazy.js`);
+  const mJson = await manifest.json();
+  t.equal(
+    mJson.js[0].value,
+    '/app/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
+  );
+  t.equal(mJson.js[0].strategy, 'beforeInteractive');
+  t.equal(mJson.js[1].value, '/app/_/dynamic/files/lazy.js');
+  t.equal(mJson.js[1].strategy, 'lazy');
+  t.equal(mJson.js[2].value, '/app/_/dynamic/files/content.js');
+  t.equal(mJson.js[2].scope, 'content');
+  t.equal(mJson.js[3].value, '/app/_/dynamic/files/fallback.js');
+  t.equal(mJson.js[3].scope, 'fallback');
   await app.close();
 });
 
