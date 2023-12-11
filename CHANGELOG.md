@@ -1,3 +1,10 @@
+## [1.10.8-next.2](https://github.com/podium-lib/podlet-server/compare/v1.10.8-next.1...v1.10.8-next.2) (2023-12-11)
+
+
+### Bug Fixes
+
+* add back in accidentally removed file ([#135](https://github.com/podium-lib/podlet-server/issues/135)) ([957ac3e](https://github.com/podium-lib/podlet-server/commit/957ac3ed9dd9ebb4290ab0a475e9dcbc92593193))
+
 ## [1.10.8-next.1](https://github.com/podium-lib/podlet-server/compare/v1.10.7...v1.10.8-next.1) (2023-12-10)
 
 
