@@ -19,7 +19,7 @@ export default fp(
       fastify.scriptsList.push({
         value: development
           ? // in development, we fetch from the development on the fly bundler endpoint
-            joinURLPathSegments(prefix, `/_/dynamic/files/content.js`)
+            joinURLPathSegments(prefix, `/_/dynamic/element/content/${appName}`)
           : // where as in production, we use the production build
             joinURLPathSegments(base, `/client/content.js`),
         // add scope hint so the podlet or layout will only use this script for successful content requests
@@ -32,7 +32,7 @@ export default fp(
       // @ts-ignore
       fastify.scriptsList.push({
         value: development
-          ? joinURLPathSegments(prefix, `/_/dynamic/files/fallback.js`)
+          ? joinURLPathSegments(prefix, `/_/dynamic/element/fallback/${appName}`)
           : joinURLPathSegments(base, `/client/fallback.js`),
         scope: 'fallback',
         type: 'module',
