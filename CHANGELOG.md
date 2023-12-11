@@ -1,3 +1,10 @@
+## [1.10.8-next.3](https://github.com/podium-lib/podlet-server/compare/v1.10.8-next.2...v1.10.8-next.3) (2023-12-11)
+
+
+### Bug Fixes
+
+* use correct dev bundling endpoint for content and fallback ([#136](https://github.com/podium-lib/podlet-server/issues/136)) ([680cff1](https://github.com/podium-lib/podlet-server/commit/680cff179a9df7e41915f2204fac76573a7ba085))
+
 ## [1.10.8-next.2](https://github.com/podium-lib/podlet-server/compare/v1.10.8-next.1...v1.10.8-next.2) (2023-12-11)
 
 
