@@ -222,9 +222,9 @@ test('scripts: plugin mounted under /app, development mode urls', async (t) => {
     '/app/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
   );
   t.equal(mJson.js[1].value, '/app/_/dynamic/files/scripts.js');
-  t.equal(mJson.js[2].value, '/app/_/dynamic/files/content.js');
+  t.equal(mJson.js[2].value, '/app/_/dynamic/element/content/test-app');
   t.equal(mJson.js[2].scope, 'content');
-  t.equal(mJson.js[3].value, '/app/_/dynamic/files/fallback.js');
+  t.equal(mJson.js[3].value, '/app/_/dynamic/element/fallback/test-app');
   t.equal(mJson.js[3].scope, 'fallback');
   await app.close();
 });
@@ -275,9 +275,9 @@ test('lazy: plugin mounted under /app, development mode urls', async (t) => {
   t.equal(mJson.js[0].strategy, 'beforeInteractive');
   t.equal(mJson.js[1].value, '/app/_/dynamic/files/lazy.js');
   t.equal(mJson.js[1].strategy, 'lazy');
-  t.equal(mJson.js[2].value, '/app/_/dynamic/files/content.js');
+  t.equal(mJson.js[2].value, '/app/_/dynamic/element/content/test-app');
   t.equal(mJson.js[2].scope, 'content');
-  t.equal(mJson.js[3].value, '/app/_/dynamic/files/fallback.js');
+  t.equal(mJson.js[3].value, '/app/_/dynamic/element/fallback/test-app');
   t.equal(mJson.js[3].scope, 'fallback');
   await app.close();
 });
