@@ -148,7 +148,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
           setup(buildInstance) {
             buildInstance.onResolve(
               {
-                filter: /(content|fallback|lazy|scripts|src|server).*.(ts|js)$/,
+                filter:
+                  /(content|fallback|content-entrypoint|fallback-entrypoint|lazy|scripts|src|server).*.(ts|js)$/,
                 namespace: 'file',
               },
               async (args) => {
@@ -202,7 +203,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     async function buildRollupConfig(options) {
       const rollupConfig = [];
       for (const filepath of options) {
-        const input = filepath.replace('-entrypoint', '');
+        const input = filepath;
 
         let outfile;
         if (filepath === CONTENT_ENTRY) {
