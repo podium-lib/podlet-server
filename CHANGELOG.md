@@ -1,3 +1,10 @@
+## [1.10.8](https://github.com/podium-lib/podlet-server/compare/v1.10.7...v1.10.8) (2023-12-15)
+
+
+### Bug Fixes
+
+* include defineElement in client bundle ([8ac19c7](https://github.com/podium-lib/podlet-server/commit/8ac19c7060ac4ae1e0a8cccda302c5082959066c))
+
 ## [1.10.7](https://github.com/podium-lib/podlet-server/compare/v1.10.6...v1.10.7) (2023-11-24)
 
 
