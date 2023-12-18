@@ -384,6 +384,30 @@ test('hydrate: production mode does not include lit-element-hydrate-support as a
   await app.close();
 });
 
+test('ssr: production mode does not include content script in page', async (t) => {
+  const app = fastify({ logger: false });
+  const config = await setupConfig();
+  config.set('app.mode', 'ssr-only');
+  config.set('app.development', false);
+
+  await app.register(plugin, {
+    cwd: tmp,
+    config,
+  });
+
+  const address = await app.listen({ port: 0 });
+  const manifest = await fetch(`${address}/manifest.json`);
+  const text = await manifest.text();
+	console.log(text)
+  t.equal(manifest.status, 200, 'manifest file should be sucessfully served');
+  t.notMatch(
+    text,
+    '/static/client/content.js',
+    'should not contain content script tag',
+  );
+  await app.close();
+});
+
 // // test("build plugin", async (t) => {})
 // // test("locale", async (t) => {})
 // // test("metrics", async (t) => {})
