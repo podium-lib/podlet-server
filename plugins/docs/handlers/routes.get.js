@@ -110,15 +110,15 @@ export default class Routes {
     const fallbackSchema = this.#schemas.get(this.#data.routes.content.path);
 
     const contentQuerystringObject = this.buildObjects(
-      contentSchema.querystring,
+      contentSchema?.querystring,
     );
     const fallbackQuerystringObject = this.buildObjects(
-      fallbackSchema.querystring,
+      fallbackSchema?.querystring,
     );
-    const contentHeadersObject = this.buildObjects(contentSchema.headers);
-    const fallbackHeadersObject = this.buildObjects(fallbackSchema.headers);
-    const contentParamsObject = this.buildObjects(contentSchema.params);
-    const fallbackParamsObject = this.buildObjects(fallbackSchema.params);
+    const contentHeadersObject = this.buildObjects(contentSchema?.headers);
+    const fallbackHeadersObject = this.buildObjects(fallbackSchema?.headers);
+    const contentParamsObject = this.buildObjects(contentSchema?.params);
+    const fallbackParamsObject = this.buildObjects(fallbackSchema?.params);
 
     reply.type('text/html').send(`
       <!DOCTYPE html>
