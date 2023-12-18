@@ -1,3 +1,10 @@
+## [1.10.8-next.4](https://github.com/podium-lib/podlet-server/compare/v1.10.8-next.3...v1.10.8-next.4) (2023-12-18)
+
+
+### Bug Fixes
+
+* prevent loading client side scripts when in ssr-only mode ([#139](https://github.com/podium-lib/podlet-server/issues/139)) ([7b70ade](https://github.com/podium-lib/podlet-server/commit/7b70ade98fbd2bbc90a60d424e0b332bf71d171c))
+
 ## [1.10.8-next.3](https://github.com/podium-lib/podlet-server/compare/v1.10.8-next.2...v1.10.8-next.3) (2023-12-11)
 
 
