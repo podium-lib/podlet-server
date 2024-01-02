@@ -2,6 +2,14 @@ import fp from 'fastify-plugin';
 import { joinURLPathSegments } from '../lib/utils.js';
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.appName]
+   * @param {string} [options.base]
+   * @param {string} [options.prefix]
+   * @param {boolean} [options.development]
+   */
   async (
     fastify,
     { appName = '', base = '/', development = false, prefix = '' },

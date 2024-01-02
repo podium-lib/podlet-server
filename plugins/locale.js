@@ -3,32 +3,40 @@ import fs from 'node:fs';
 import fp from 'fastify-plugin';
 import chalk from 'chalk';
 
-export default fp(async (fastify, { cwd = process.cwd(), locale = 'en' }) => {
-  const compiledFileExtension = '.mjs';
+export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.locale]
+   * @param {string} [options.cwd]
+   */
+  async (fastify, { cwd = process.cwd(), locale = 'en' }) => {
+    const compiledFileExtension = '.mjs';
 
-  const localeFilePath = join(cwd, 'locales', locale) + compiledFileExtension;
+    const localeFilePath = join(cwd, 'locales', locale) + compiledFileExtension;
 
-  let msgs = {};
+    let msgs = {};
 
-  try {
-    const { messages } = await import(`${localeFilePath}?s=${Date.now()}`);
-    fastify.log.debug(
-      `🌏 ${chalk.magenta(
-        'translations',
-      )}: loaded file "${localeFilePath}" for locale "${locale}"`,
-    );
-    msgs = messages;
-  } catch (err) {
     try {
-      await fs.promises.access(localeFilePath, fs.constants.F_OK);
-      fastify.log.error(
-        `Error reading translation file: ${localeFilePath}`,
-        err,
+      const { messages } = await import(`${localeFilePath}?s=${Date.now()}`);
+      fastify.log.debug(
+        `🌏 ${chalk.magenta(
+          'translations',
+        )}: loaded file "${localeFilePath}" for locale "${locale}"`,
       );
-    } catch {
-      // eat error
+      msgs = messages;
+    } catch (err) {
+      try {
+        await fs.promises.access(localeFilePath, fs.constants.F_OK);
+        fastify.log.error(
+          `Error reading translation file: ${localeFilePath}`,
+          err,
+        );
+      } catch {
+        // eat error
+      }
     }
-  }
 
-  fastify.decorate('readTranslations', async () => msgs);
-});
+    fastify.decorate('readTranslations', async () => msgs);
+  },
+);

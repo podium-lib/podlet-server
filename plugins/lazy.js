@@ -2,6 +2,14 @@ import fp from 'fastify-plugin';
 import { joinURLPathSegments } from '../lib/utils.js';
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {boolean} [options.enabled]
+   * @param {string} [options.prefix]
+   * @param {string} [options.base]
+   * @param {boolean} [options.development]
+   */
   async (fastify, { enabled, prefix = '/', base, development = false }) => {
     // inject live reload when in dev mode
     if (enabled) {
