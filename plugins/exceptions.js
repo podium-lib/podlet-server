@@ -462,7 +462,8 @@ export default fp(
 
       // @ts-ignore
       fastify.metricStreams.push(procExp.metrics);
-      next();
+      return next();
     }
+    next();
   },
 );
