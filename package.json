@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "NODE_OPTIONS=--conditions=development tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
+    "test": "tap --timeout=60000 --disable-coverage --allow-empty-coverage test/**/*.test.js",
     "prepublish": "tsc"
   },
   "keywords": [],
