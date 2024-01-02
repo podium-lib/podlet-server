@@ -31,6 +31,16 @@ const clideSideScript = (port) => `(() => {
 })()`;
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {number} [options.port]
+   * @param {string} [options.prefix]
+   * @param {boolean} [options.development]
+   * @param {any} [options.clientWatcher]
+   * @param {any} [options.webSocketServer]
+   * @param {any} [options.webSocketServerPort]
+   */
   async (
     fastify,
     {

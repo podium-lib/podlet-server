@@ -32,6 +32,13 @@ const build = async ({ entryPoints = [], plugins = [] } = {}) => {
  */
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.cwd]
+   * @param {boolean} [options.development]
+   * @param {any[]} [options.plugins] ESBuild plugins
+   */
   async (fastify, { cwd = process.cwd(), development = false, plugins }) => {
     if (!development) return;
 

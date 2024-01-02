@@ -14,6 +14,13 @@ import merge from 'lodash.merge';
  *   mappings: object mapping a route path to a schema file name that should be in the schemas folder. eg. { "/": "content.json" }
  */
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.cwd]
+   * @param {any} [options.defaults]
+   * @param {any} [options.mappings]
+   */
   async (fastify, { cwd = process.cwd(), defaults = {}, mappings = {} }) => {
     // overwrite built in compilers to ensure that values that aren't in a schema are stripped from their respective
     // locations.
