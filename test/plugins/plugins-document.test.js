@@ -30,8 +30,8 @@ test('Basic document template is read and loaded', async (t) => {
   await app.register(plugin, { cwd: tmp, development: true, podlet });
   await app.register(fastifyPodlet, podlet);
   app.get('/', async (request, reply) => {
-    // @ts-ignore
-    return reply.podiumSend('');
+    reply.app.podium.development = true;
+    return podlet.render(reply.app.podium, '');
   });
   const response = await app.inject({
     method: 'GET',
@@ -58,8 +58,8 @@ test('Basic typescript document template is read and loaded', async (t) => {
   await app.register(plugin, { cwd: tmp, development: true, podlet });
   await app.register(fastifyPodlet, podlet);
   app.get('/', async (request, reply) => {
-    // @ts-ignore
-    return reply.podiumSend('');
+    reply.app.podium.development = true;
+    return podlet.render(reply.app.podium, '');
   });
   const response = await app.inject({
     method: 'GET',
