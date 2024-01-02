@@ -1,10 +1,4 @@
-import {
-  existsSync,
-  mkdirSync,
-  writeFileSync,
-  renameSync,
-  rename,
-} from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
 import { join } from 'node:path';
 import esbuild from 'esbuild';
 import { createRequire } from 'node:module';
