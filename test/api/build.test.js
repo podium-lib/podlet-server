@@ -92,24 +92,30 @@ test('All possible supported JavaScript files defined and built', async (t) => {
   config.set('app.name', 'test-app');
   await build({ state, config, cwd: tmp });
 
-  // server versions built into server directory
-  t.ok(existsSync(join(tmp, 'dist', 'server', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'server', 'fallback.js')));
-  // entrypoints created via writeFile
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'content-entrypoint.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'lazy.js')));
-  // esbuild versions created to apply plugins
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'fallback-entrypoint.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'fallback.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'lazy.js')));
-  // final rollup versions built into client directory
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'fallback.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'lazy.js')));
+  t.ok(
+    existsSync(join(tmp, 'dist', 'server', 'content.js')),
+    'expected server/content.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'server', 'fallback.js')),
+    'expected server/fallback.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'content.js')),
+    'expected client/content.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'fallback.js')),
+    'expected client/fallback.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'scripts.js')),
+    'expected client/scripts.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'lazy.js')),
+    'expected client/lazy.js to exist',
+  );
 });
 
 test('All possible supported Typescript files defined and built', async (t) => {
@@ -125,24 +131,30 @@ test('All possible supported Typescript files defined and built', async (t) => {
   config.set('app.name', 'test-app');
   await build({ state, config, cwd: tmp });
 
-  // server versions built into server directory
-  t.ok(existsSync(join(tmp, 'dist', 'server', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'server', 'fallback.js')));
-  // entrypoints created via writeFile
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'content-entrypoint.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'lazy.js')));
-  // esbuild versions created to apply plugins
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'fallback-entrypoint.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'fallback.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', '.build', 'lazy.js')));
-  // final rollup versions built into client directory
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'content.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'fallback.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'scripts.js')));
-  t.ok(existsSync(join(tmp, 'dist', 'client', 'lazy.js')));
+  t.ok(
+    existsSync(join(tmp, 'dist', 'server', 'content.js')),
+    'expected server/content.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'server', 'fallback.js')),
+    'expected server/fallback.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'content.js')),
+    'expected client/content.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'fallback.js')),
+    'expected client/fallback.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'scripts.js')),
+    'expected client/scripts.js to exist',
+  );
+  t.ok(
+    existsSync(join(tmp, 'dist', 'client', 'lazy.js')),
+    'expected client/lazy.js to exist',
+  );
 });
 
 test('Supports a plugin returning one build plugin', async () => {

@@ -41,6 +41,14 @@ class CustomElementRegistry {
 }
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.appName]
+   * @param {string} [options.cwd]
+   * @param {boolean} [options.development]
+   * @param {any[]} [options.plugins] ESBuild plugins
+   */
   async (
     fastify,
     { appName = '', development = false, plugins = [], cwd = process.cwd() },

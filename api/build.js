@@ -1,12 +1,6 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { isAbsolute, join } from 'node:path';
+import { existsSync, mkdirSync, writeFileSync, renameSync } from 'node:fs';
+import { join } from 'node:path';
 import esbuild from 'esbuild';
-import rollupPluginTerser from '@rollup/plugin-terser';
-import rollupPluginReplace from '@rollup/plugin-replace';
-import { rollup } from 'rollup';
-import rollupPluginResolve from '@rollup/plugin-node-resolve';
-import rollupPluginCommonjs from '@rollup/plugin-commonjs';
-import typescriptPlugin from '@rollup/plugin-typescript';
 import { createRequire } from 'node:module';
 import resolve from '../lib/resolve.js';
 import { getLinguiConfig, linguiCompile } from '../lib/lingui.js';
@@ -43,21 +37,17 @@ export async function build({ state, config, cwd = process.cwd() }) {
 
     const CONTENT_SRC_FILEPATH = await resolve(join(cwd, 'content.js'));
     const CONTENT_ENTRY = join(ESBUILD_OUTDIR, 'content-entrypoint.js');
-    const CONTENT_INTERMEDIATE = join(ESBUILD_OUTDIR, 'content.js');
+    const CONTENT_INTERMEDIATE = join(CLIENT_OUTDIR, 'content-entrypoint.js');
     const CONTENT_FINAL = join(CLIENT_OUTDIR, 'content.js');
 
     const FALLBACK_SRC_FILEPATH = await resolve(join(cwd, 'fallback.js'));
     const FALLBACK_ENTRY = join(ESBUILD_OUTDIR, 'fallback-entrypoint.js');
-    const FALLBACK_INTERMEDIATE = join(ESBUILD_OUTDIR, 'fallback.js');
+    const FALLBACK_INTERMEDIATE = join(CLIENT_OUTDIR, 'fallback-entrypoint.js');
     const FALLBACK_FINAL = join(CLIENT_OUTDIR, 'fallback.js');
 
     const SCRIPTS_ENTRY = await resolve(join(cwd, 'scripts.js'));
-    const SCRIPTS_INTERMEDIATE = join(ESBUILD_OUTDIR, 'scripts.js');
-    const SCRIPTS_FINAL = join(CLIENT_OUTDIR, 'scripts.js');
 
     const LAZY_ENTRY = await resolve(join(cwd, 'lazy.js'));
-    const LAZY_INTERMEDIATE = join(ESBUILD_OUTDIR, 'lazy.js');
-    const LAZY_FINAL = join(CLIENT_OUTDIR, 'lazy.js');
 
     const hydrateSupport =
       MODE === 'hydrate'
@@ -102,9 +92,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
       entryPoints.push(LAZY_ENTRY);
     }
 
-    const plugins = await state.build(config);
-
     // build server side files
+    const serverPlugins = await state.build(config, { isServer: true });
     try {
       await esbuild.build({
         entryPoints: [
@@ -115,7 +104,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
         format: 'esm',
         outdir: SERVER_OUTDIR,
         minify: true,
-        plugins,
+        plugins: serverPlugins,
         legalComments: `none`,
         sourcemap: false,
         external: ['lit'],
@@ -123,6 +112,8 @@ export async function build({ state, config, cwd = process.cwd() }) {
     } catch (err) {
       // eslint
     }
+
+    const clientPlugins = await state.build(config, { isClient: true });
 
     // build dsd ponyfill
     await esbuild.build({
@@ -138,131 +129,45 @@ export async function build({ state, config, cwd = process.cwd() }) {
       target: ['es2017'],
       legalComments: `none`,
       sourcemap: false,
+      plugins: clientPlugins,
     });
 
-    // Run code through esbuild first (to apply plugins and strip types) but don't bundle or minify
-    // use esbuild to resolve imports and then run a build with plugins
+    // build client-side files from generated entry files
     await esbuild.build({
-      plugins: [
-        {
-          name: 'esbuild-apply-plugins',
-          setup(buildInstance) {
-            buildInstance.onResolve(
-              {
-                filter: /(content|fallback|lazy|scripts|src|server).*.(ts|js)$/,
-                namespace: 'file',
-              },
-              // @ts-ignore
-              async (args) => {
-                if (
-                  args.path.includes('node_modules') ||
-                  args.resolveDir.includes('node_modules')
-                ) {
-                  return;
-                }
-
-                let file = args.path;
-                if (!isAbsolute(args.path)) {
-                  file = join(args.resolveDir, args.path);
-                }
-
-                let outfile;
-                if (file === CONTENT_ENTRY) {
-                  outfile = CONTENT_INTERMEDIATE;
-                } else if (file === FALLBACK_ENTRY) {
-                  outfile = FALLBACK_INTERMEDIATE;
-                } else if (file === LAZY_ENTRY) {
-                  outfile = LAZY_INTERMEDIATE;
-                } else if (file === SCRIPTS_ENTRY) {
-                  outfile = SCRIPTS_INTERMEDIATE;
-                } else {
-                  outfile = join(ESBUILD_OUTDIR, file.replace(cwd, ''));
-                }
-
-                await esbuild.build({
-                  entryPoints: [file],
-                  plugins,
-                  sourcemap: false,
-                  minify: false,
-                  bundle: false,
-                  outfile,
-                });
-              },
-            );
-          },
-        },
-      ],
-      entryPoints,
+      // @ts-ignore
+      entryPoints: [
+        existsSync(CONTENT_ENTRY) ? CONTENT_ENTRY : null,
+        existsSync(FALLBACK_ENTRY) ? FALLBACK_ENTRY : null,
+      ].filter(Boolean),
       bundle: true,
-      format: 'esm', // default format when bundling is IIFE
-      write: false,
-      outdir: ESBUILD_OUTDIR,
+      minify: true,
+      format: 'esm',
+      outdir: CLIENT_OUTDIR,
+      plugins: clientPlugins,
+      sourcemap: false,
     });
 
-    // Run output of esbuild through rollup to take advantage of treeshaking etc.
-    // eslint-disable-next-line
-    async function buildRollupConfig(options) {
-      const rollupConfig = [];
-      for (const filepath of options) {
-        const input = filepath;
+    // build client-side files from source
+    // these two are separate steps to avoid esbuild recreating an unwanted directory structure in dist/client/
+    await esbuild.build({
+      // @ts-ignore
+      entryPoints: [
+        existsSync(SCRIPTS_ENTRY) ? SCRIPTS_ENTRY : null,
+        existsSync(LAZY_ENTRY) ? LAZY_ENTRY : null,
+      ].filter(Boolean),
+      bundle: true,
+      minify: true,
+      format: 'esm',
+      outdir: CLIENT_OUTDIR,
+      plugins: clientPlugins,
+      sourcemap: false,
+    });
 
-        let outfile;
-        if (filepath === CONTENT_ENTRY) {
-          outfile = CONTENT_FINAL;
-        } else if (filepath === FALLBACK_ENTRY) {
-          outfile = FALLBACK_FINAL;
-        } else if (filepath === LAZY_ENTRY) {
-          outfile = LAZY_FINAL;
-        } else if (filepath === SCRIPTS_ENTRY) {
-          outfile = SCRIPTS_FINAL;
-        }
-
-        const rollupPlugins = [
-          rollupPluginResolve({ preferBuiltins: true }),
-          rollupPluginCommonjs({ include: /node_modules/ }),
-          rollupPluginTerser({ format: { comments: false } }),
-        ];
-
-        if (outfile) {
-          rollupPlugins.push(
-            rollupPluginReplace({
-              'process.env.NODE_ENV': JSON.stringify('production'),
-              preventAssignment: true,
-            }),
-          );
-        }
-
-        if (existsSync(join(cwd, 'tsconfig.json'))) {
-          rollupPlugins.unshift(
-            typescriptPlugin({ tsconfig: join(cwd, 'tsconfig.json') }),
-          );
-        }
-
-        rollupConfig.push({
-          input,
-          output: {
-            inlineDynamicImports: true,
-            file: outfile,
-            format: 'es',
-            sourcemap: true,
-          },
-          plugins: rollupPlugins,
-        });
-      }
-      return rollupConfig;
+    if (existsSync(CONTENT_INTERMEDIATE)) {
+      renameSync(CONTENT_INTERMEDIATE, CONTENT_FINAL);
     }
-
-    for (const options of await buildRollupConfig(entryPoints)) {
-      const bundle = await rollup({
-        input: options.input,
-        plugins: options.plugins,
-      });
-      // appease TS being difficult by casting the format string to type ModuleFormat.
-      // eslint-disable-next-line
-      const format = /** @type {import("rollup").ModuleFormat} */ (
-        options.output.format
-      );
-      await bundle.write({ ...options.output, format });
+    if (existsSync(FALLBACK_INTERMEDIATE)) {
+      renameSync(FALLBACK_INTERMEDIATE, FALLBACK_FINAL);
     }
   } catch (error) {
     // eslint-disable-next-line

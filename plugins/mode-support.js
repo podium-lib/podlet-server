@@ -7,6 +7,15 @@ import { joinURLPathSegments } from '../lib/utils.js';
  * server render, client side render or server render and hydrate a template
  */
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.appName]
+   * @param {string} [options.base]
+   * @param {string} [options.prefix]
+   * @param {string} [options.mode]
+   * @param {boolean} [options.development]
+   */
   async (
     fastify,
     { appName = '', base = '/', prefix = '', development = false, mode },
@@ -32,7 +41,10 @@ export default fp(
       // @ts-ignore
       fastify.scriptsList.push({
         value: development
-          ? joinURLPathSegments(prefix, `/_/dynamic/element/fallback/${appName}`)
+          ? joinURLPathSegments(
+              prefix,
+              `/_/dynamic/element/fallback/${appName}`,
+            )
           : joinURLPathSegments(base, `/client/fallback.js`),
         scope: 'fallback',
         type: 'module',

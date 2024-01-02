@@ -5,10 +5,22 @@ import fastifyPodletPlugin from '@podium/fastify-podlet';
 import fp from 'fastify-plugin';
 
 export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {string} [options.name]
+   * @param {string} [options.pathname]
+   * @param {string} [options.version]
+   * @param {string} [options.manifest]
+   * @param {string} [options.content]
+   * @param {string} [options.fallback]
+   * @param {any} [options.development]
+   */
   async (
     fastify,
     { name, version, pathname, manifest, content, fallback, development },
   ) => {
+    // @ts-ignore
     const podlet = new Podlet({
       name,
       version,

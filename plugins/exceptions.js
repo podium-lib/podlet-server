@@ -440,22 +440,30 @@ class ProcessExceptionHandlers {
 
 let handlersAdded = false;
 
-// eslint-disable-next-line
-export default fp(async (fastify, { grace, development }, next) => {
-  if (development) return next();
-  if (!handlersAdded) {
-    const procExp = new ProcessExceptionHandlers(fastify.log);
-    procExp.closeOnExit(fastify, { grace });
+export default fp(
+  /**
+   * @param {import('fastify').FastifyInstance} fastify
+   * @param {object} options
+   * @param {number} [options.grace]
+   * @param {boolean} [options.development]
+   */
+  (fastify, { grace, development }, next) => {
+    if (development) return next();
+    if (!handlersAdded) {
+      const procExp = new ProcessExceptionHandlers(fastify.log);
+      procExp.closeOnExit(fastify, { grace });
 
-    handlersAdded = true;
+      handlersAdded = true;
 
-    // @ts-ignore
-    if (!fastify.metricStreams) {
-      fastify.decorate('metricStreams', []);
+      // @ts-ignore
+      if (!fastify.metricStreams) {
+        fastify.decorate('metricStreams', []);
+      }
+
+      // @ts-ignore
+      fastify.metricStreams.push(procExp.metrics);
+      return next();
     }
-
-    // @ts-ignore
-    fastify.metricStreams.push(procExp.metrics);
     next();
-  }
-});
+  },
+);
