@@ -44,6 +44,35 @@ export default fp(
 
     await fastify.register(etag, { algorithm: 'fnv1a' });
 
+    /**
+     * Special case route.
+     * Lit SSR client supports Node and browser environments. When we try to use require.resolve we get the Node version
+     * when we want the browser version so we trick it by running a build on file containing only an import statement
+     */
+    fastify.get(
+      '/_/dynamic/modules/@lit-labs/ssr-client/lit-element-hydrate-support.js',
+      async (/** @type {Request} */ request, reply) => {
+        const filepath = join(new URL("..", import.meta.url).pathname, "lib", "lit-element-hydrate-support.js");
+
+        try {
+          const body = await build({ entryPoints: [filepath], plugins });
+
+          reply.type('application/javascript');
+          reply.send(body);
+          return reply;
+        } catch (err) {
+          fastify.log.error(err)
+          throw new httpError.NotFound();
+        }
+      },
+    );
+
+    /**
+     * Endpoint to dynamically bundle and serve Node modules for the frontend when in dev mode
+     * This endpoint is not used in production as dependencies will be included in a production build when running "podlet build"
+     *
+     * "*" is a Node package name including scope. Eg. lit or @lit-labs/ssr
+     */
     fastify.get(
       '/_/dynamic/modules/*',
       async (/** @type {Request} */ request, reply) => {
@@ -67,6 +96,35 @@ export default fp(
       },
     );
 
+    /**
+     * Endpoint that wraps content.js or fallback.js definitions in a customElement.define call for use during development.
+     * This endpoint is not used in production as content and fallback elements will be included in a production build when running "podlet build".
+     *
+     * :type is either "content" or "fallback"
+     * :name is the application name
+     */
+    fastify.get(
+      '/_/dynamic/element/:type/:name',
+      async (/** @type {Request} */ request, reply) => {
+        // @ts-ignore
+        const { type, name } = request.params;
+
+        reply
+          .type('application/javascript')
+          .send(
+            `import El from '/_/dynamic/files/${type}.js';customElements.define("${name}-${type}",El);`,
+          );
+        return reply;
+      },
+    );
+
+    /**
+     * Endpoint that accepts the name/path for a core project JavaScript file such as content.js or fallback.js
+     * which it then bundles and serves.
+     * This endpoint is not used in production as files will be included in a production build when running "podlet build"
+     *
+     * :file.js is either content.js, fallback.js, lazy.js or scripts.js
+     */
     fastify.get(
       '/_/dynamic/files/:file.js',
       async (/** @type {Request} */ request, reply) => {
