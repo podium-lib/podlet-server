@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "NODE_OPTIONS=--conditions=development tap --timeout 60000 --no-check-coverage --no-coverage-report test/**/*.test.js",
+    "test": "tap --timeout=60000 --disable-coverage --allow-empty-coverage test/**/*.test.js",
     "prepublish": "tsc"
   },
   "keywords": [],
@@ -92,7 +92,7 @@
     "eslint-plugin-import": "2.29.1",
     "eslint-plugin-prettier": "5.1.2",
     "semantic-release": "22.0.12",
-    "tap": "^16.3.4",
+    "tap": "^18.0.0",
     "typescript": "^5.1.6"
   }
 }

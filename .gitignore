@@ -4,3 +4,4 @@ yarn.lock
 yarn-error.log
 .nyc_output/
 index.d.ts
+.tap
