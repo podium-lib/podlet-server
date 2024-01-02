@@ -27,7 +27,7 @@ export async function start({ state, config, cwd = process.cwd() }) {
     )
   );
 
-  const plugins = await state.build(config, { type: 'SERVER' });
+  const plugins = await state.build(config, { isServer: true });
   const extensions = await state.get('extensions');
   for (const serverPlugin of await state.server()) {
     await app.register(serverPlugin, {

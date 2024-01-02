@@ -98,7 +98,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
     }
 
     // build server side files
-    const serverPlugins = await state.build(config, { type: 'SERVER' });
+    const serverPlugins = await state.build(config, { isServer: true });
     try {
       await esbuild.build({
         entryPoints: [
@@ -118,7 +118,7 @@ export async function build({ state, config, cwd = process.cwd() }) {
       // eslint
     }
 
-    const clientPlugins = await state.build(config, { type: 'CLIENT' });
+    const clientPlugins = await state.build(config, { isClient: true });
 
     // build dsd ponyfill
     await esbuild.build({
