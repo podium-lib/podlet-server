@@ -1,3 +1,18 @@
+# [1.11.0-next.1](https://github.com/podium-lib/podlet-server/compare/v1.10.9...v1.11.0-next.1) (2024-01-02)
+
+
+### Bug Fixes
+
+* add back in accidentally removed file ([#135](https://github.com/podium-lib/podlet-server/issues/135)) ([957ac3e](https://github.com/podium-lib/podlet-server/commit/957ac3ed9dd9ebb4290ab0a475e9dcbc92593193))
+* prevent loading client side scripts when in ssr-only mode ([#139](https://github.com/podium-lib/podlet-server/issues/139)) ([7b70ade](https://github.com/podium-lib/podlet-server/commit/7b70ade98fbd2bbc90a60d424e0b332bf71d171c))
+* remove incorrect module path resolution, set correct rollup bundle input ([#129](https://github.com/podium-lib/podlet-server/issues/129)) ([fccdb4d](https://github.com/podium-lib/podlet-server/commit/fccdb4dd72c89553cd8c27aea3b3f00f75886ba7))
+* use correct dev bundling endpoint for content and fallback ([#136](https://github.com/podium-lib/podlet-server/issues/136)) ([680cff1](https://github.com/podium-lib/podlet-server/commit/680cff179a9df7e41915f2204fac76573a7ba085))
+
+
+### Features
+
+* pass the build type as a value to build plugins ([bcec92a](https://github.com/podium-lib/podlet-server/commit/bcec92a1b046fcd984782187eef63fd4ce161cb4))
+
 ## [1.10.9](https://github.com/podium-lib/podlet-server/compare/v1.10.8...v1.10.9) (2024-01-02)
 
 ### Bug Fixes
