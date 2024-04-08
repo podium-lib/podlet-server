@@ -1,3 +1,10 @@
+## [1.10.13](https://github.com/podium-lib/podlet-server/compare/v1.10.12...v1.10.13) (2024-04-08)
+
+
+### Bug Fixes
+
+* **deps:** update dependency pino to v8.20.0 ([1ba03f1](https://github.com/podium-lib/podlet-server/commit/1ba03f1abfba797466620d7415dc7120b2c17fa5))
+
 ## [1.10.12](https://github.com/podium-lib/podlet-server/compare/v1.10.11...v1.10.12) (2024-04-03)
 
 
