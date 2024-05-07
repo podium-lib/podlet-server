@@ -37,7 +37,7 @@
     "@fastify/cors": "8.5.0",
     "@fastify/etag": "4.2.0",
     "@fastify/restartable": "2.3.0",
-    "@fastify/static": "6.12.0",
+    "@fastify/static": "7.0.4",
     "@lingui/cli": "4.8.0",
     "@lit-labs/ssr": "3.2.2",
     "@lit-labs/ssr-client": "1.1.7",
