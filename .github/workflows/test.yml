@@ -1,27 +1,29 @@
 name: Run Tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore:
+      - main
+      - alpha
+      - beta
+      - next
 
 jobs:
   build:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        node-version: [18.x]
+        node-version: [20]
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+      - uses: actions/checkout@v4
+
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - name: npm install
-        run: |
-          npm install
-        env:
-          CI: true
-      - name: npm test
-        run: |
-          npm test
-        env:
-          CI: true
+
+      - run: npm install
+
+      - run: npm test
