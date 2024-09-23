@@ -33,7 +33,7 @@
   "homepage": "https://podium-lib.io/",
   "description": "Server for building page fragment with web components in a micro frontend architecture.",
   "dependencies": {
-    "@fastify/compress": "6.5.0",
+    "@fastify/compress": "8.0.1",
     "@fastify/cors": "8.5.0",
     "@fastify/etag": "4.2.0",
     "@fastify/restartable": "2.3.0",
