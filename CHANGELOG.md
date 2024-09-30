@@ -1,3 +1,10 @@
+## [1.10.15](https://github.com/podium-lib/podlet-server/compare/v1.10.14...v1.10.15) (2024-09-30)
+
+
+### Bug Fixes
+
+* **deps:** update all dependencies (non-major) ([0d5f108](https://github.com/podium-lib/podlet-server/commit/0d5f108bdb394e44d1ec006fbcb554b8c8d7da55))
+
 ## [1.10.14](https://github.com/podium-lib/podlet-server/compare/v1.10.13...v1.10.14) (2024-09-23)
 
 
