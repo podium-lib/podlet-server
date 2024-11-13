@@ -20,7 +20,7 @@
   "scripts": {
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
-    "test": "NODE_OPTIONS=--conditions=development tap --timeout=60000 --disable-coverage --allow-empty-coverage test/**/*.test.js",
+    "test": "cross-env NODE_OPTIONS=--conditions=development tap --timeout=60000 --disable-coverage --allow-empty-coverage test/**/*.test.js",
     "prepublish": "tsc"
   },
   "keywords": [],
@@ -80,12 +80,13 @@
     "access": "public"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.11.0",
     "@fastify/cors": "^8.3.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "@types/http-errors": "^2.0.1",
     "@types/ws": "^8.5.5",
-    "@babel/eslint-parser": "^7.11.0",
+    "cross-env": "7.0.3",
     "eslint": "8.57.0",
     "eslint-config-airbnb-base": "15.0.0",
     "eslint-config-prettier": "9.1.0",
